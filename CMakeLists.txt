@@ -1,0 +1,6 @@
+cmake_minimum_required(VERSION 3.21)
+project(webserv)
+
+set(CMAKE_CXX_STANDARD 98)
+
+add_executable(webserv srcs/main.cpp srcs/Server.cpp srcs/Server.hpp)
