@@ -48,12 +48,12 @@ int main() {
 		} else if (res > 0) {
 			buf[res] = '\0';
 
-			response_body << "<title>Test C++ HTTP Server</title>\n"
+			response_body << "<title>Test C++ HTTP server</title>\n"
 						  << "<h1>Test page</h1>\n"
 						  << "<p>This is body of the test page...</p>\n"
 						  << "<h2>Request headers</h2>\n"
 						  << "<pre>" << buf << "</pre>\n"
-						  << "<em><small>Test C++ Http Server</small></em>\n";
+						  << "<em><small>Test C++ Http server</small></em>\n";
 			response << "HTTP/1.1 200 OK\r\n"
 					 << "Version: HTTP/1.1\r\n"
 					 << "Content-Type: text/html; charset=utf-8\r\n"
