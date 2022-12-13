@@ -13,6 +13,5 @@ namespace ft
 		const int 			bind_;
 		int 				opts_;
 		time_t				ses_;
-
 	};
 }

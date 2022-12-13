@@ -1,9 +1,11 @@
+/*
 #include <iostream>
 #include <netinet/in.h>
 #include <sys/fcntl.h>
 #include <cstdlib>
 #include <sstream>
 #include <unistd.h>
+#include <netdb.h>
 
 #define SERVER_PORT 8000
 #define BUF_SIZE 8192
@@ -17,7 +19,7 @@ int main() {
 	std::stringstream response;
 	std::stringstream response_body;
 
-    bzero(&channel, sizeof(channel));
+    bzero(&channel, sizeof (channel));
     channel.sin_family = AF_INET;
     channel.sin_addr.s_addr = htonl(INADDR_ANY);
     channel.sin_port = htons(SERVER_PORT);
@@ -73,3 +75,4 @@ int main() {
 	}
     return 0;
 }
+*/
