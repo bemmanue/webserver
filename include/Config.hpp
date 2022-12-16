@@ -34,7 +34,7 @@ private:
 	Locations		_locations;
 };
 
-Config* parseConfig(std::string filename);
+Config* parseConfig(const std::string& filename);
 
 
 #endif //CONFIG_HPP
