@@ -12,19 +12,19 @@ std::vector<char> readFile(const std::string& filename) {
 	return buffer;
 }
 
-std::string getDirective(const std::vector<char>& buffer, int i) {
-	std::string directive;
+std::string getDirectiveName(const std::vector<char>& buffer, int i) {
+	std::string name;
 
 	for ( ; i < buffer.size(); ++i) {
 		if (isspace(buffer[i]) || buffer[i] == ';') {
 			break;
 		}
-		directive.push_back(buffer[i]);
+		name.push_back(buffer[i]);
 	}
-	return directive;
+	return name;
 }
 
-int getServerBlock(const std::vector<char>& buffer, int i) {
+int getBlockDirective(const std::vector<char>& buffer, int i) {
 	for ( ; i < buffer.size(); ++i) {
 		if (isspace(buffer[i])) {
 			continue;
@@ -37,6 +37,7 @@ int getServerBlock(const std::vector<char>& buffer, int i) {
 
 Config*	parseConfig(const std::string& filename) {
 	std::vector<char>	buffer;
+	std::string			directiveName;
 	std::string			directive;
 
 	buffer = readFile(filename);
@@ -46,10 +47,11 @@ Config*	parseConfig(const std::string& filename) {
 			continue;
 		}
 
-		directive = getDirective(buffer, i);
+		directiveName = getDirectiveName(buffer, i);
+		i += directiveName.size();
 
-		if (directive == KW_SERVER) {
-			i = getServerBlock();
+		if (directiveName == KW_SERVER) {
+			directive = getBlockDirective(buffer, i);
 		} else {
 			throw std::exception();
 		}
