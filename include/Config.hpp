@@ -2,6 +2,7 @@
 #define CONFIG_HPP
 
 #include <iostream>
+#include <fstream>
 #include <map>
 
 #include "Location.hpp"
@@ -19,6 +20,17 @@
 #define KW_SERVER				"server"
 #define KW_SERVER_NAME			"server_name"
 
+class ConfigException : public std::exception {
+public:
+	explicit ConfigException(const std::string& message): _message(message) {}
+	virtual ~ConfigException() throw() {}
+
+	virtual const char* what() const throw() {
+		return _message.c_str();
+	}
+private:
+	std::string _message;
+};
 
 class Config {
 public:
@@ -26,15 +38,29 @@ public:
 	typedef std::map<std::string, Location>	Locations;
 
 private:
-	std::string		_host;
-	int				_port;
-	std::string		_server_name;
-	ErrorPages		_error_pages;
-	int				_client_max_body_size;
-	Locations		_locations;
+	std::string					_listen;
+	std::string					_server_name;
+	std::vector<std::string>	_error_pages;
+	std::string					_client_max_body_size;
+	std::string					_location;
+//	std::string		_host;
+//	int				_port;
+//	std::string		_server_name;
+//	ErrorPages		_error_pages;
+//	int				_client_max_body_size;
+//	Locations		_locations;
+
+public:
+	void setListen(const std::string& parameter);
+	void setServerName(const std::string& parameter);
+	void setErrorPages(const std::vector<std::string>& parameter);
+	void setClientMaxBodySize(const std::string& parameter);
+	void setLocation(const std::string& parameter);
+
+	void print(const std::vector<Config>& config);
 };
 
-Config* parseConfig(const std::string& filename);
+std::vector<Config> parseConfig(const std::string& filename);
 
 
 #endif //CONFIG_HPP

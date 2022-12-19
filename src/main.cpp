@@ -3,7 +3,7 @@
 #include "../include/Config.hpp"
 
 int main(int argc, char **argv) {
-	Config* config;
+	std::vector<Config> config;
 
 	if (argc != 2) {
 		std::cout << "wrong arguments" << std::endl;
