@@ -32,6 +32,19 @@ private:
 	std::string _message;
 };
 
+class UnknownDirectiveConfigException : public std::exception {
+public:
+	explicit UnknownDirectiveConfigException(const std::string& name):
+		_name("unknown directive \"" + name + "\"") {}
+	virtual ~UnknownDirectiveConfigException() throw() {}
+
+	virtual const char* what() const throw() {;
+		return _name.c_str();
+	}
+private:
+	std::string _name;
+};
+
 class Config {
 public:
 	typedef std::map<int, std::string>		ErrorPages;
@@ -42,7 +55,7 @@ private:
 	std::string					_server_name;
 	std::vector<std::string>	_error_pages;
 	std::string					_client_max_body_size;
-	std::string					_location;
+	std::vector<Location>		_location;
 //	std::string		_host;
 //	int				_port;
 //	std::string		_server_name;
@@ -57,7 +70,7 @@ public:
 	void setClientMaxBodySize(const std::string& parameter);
 	void setLocation(const std::string& parameter);
 
-	void print(const std::vector<Config>& config);
+	void print();
 };
 
 std::vector<Config> parseConfig(const std::string& filename);

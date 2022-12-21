@@ -13,12 +13,19 @@ public:
 
 private:
 	std::string		_path;
-	AcceptedMethods	_accepted_methods;
+	std::string		_autoindex;
+	std::string		_CGIs;
+	std::string 	_index;
+	std::string		_methods_allowed;
 	std::string		_redirect;
 	std::string		_root;
-	bool			_autoindex;
-	std::string 	_index;
-	CGIs			_CGIs;
+//	std::string		_path;
+//	AcceptedMethods	_accepted_methods;
+//	std::string		_redirect;
+//	std::string		_root;
+//	bool			_autoindex;
+//	std::string 	_index;
+//	CGIs			_CGIs;
 
 };
 

@@ -1,15 +1,19 @@
 #include "../include/Config.hpp"
 
-void Config::print(const std::vector<Config>& config) {
-	std::cout << "Config №" << config.size() + 1 << std::endl;
-	std::cout << "---------" << std::endl;
+void Config::print() {
 	std::cout << "listen: " <<  _listen << std::endl;
 	std::cout << "server_name: " << _server_name << std::endl << "error_pages: ";
+
 	for (int i = 0; i < _error_pages.size(); ++i) {
 		std::cout << _error_pages[i] << " ";
 	}
+
 	std::cout << std::endl << "client_max_body_size: " << _client_max_body_size << std::endl;
-	std::cout << "location: " << _location << std::endl;
+
+	for (int i = 0; i < _location.size(); ++i) {
+		std::cout << _location[i] << " ";
+	}
+	std::cout << std::endl;
 }
 
 void Config::setListen(const std::string &parameter) {
@@ -29,7 +33,7 @@ void Config::setClientMaxBodySize(const std::string &parameter) {
 }
 
 void Config::setLocation(const std::string &parameter) {
-	_location = parameter;
+	_location.push_back(parameter);
 }
 
 std::vector<char> readFile(const std::string& filename) {
@@ -58,7 +62,7 @@ void skipOpeningBrace(const std::vector<char>& buffer, size_t* i) {
 		}
 	}
 
-	if (buffer[*i++] != '{') {
+	if (buffer[(*i)++] != '{') {
 		throw ConfigException("expected \"{\"");
 	}
 }
@@ -136,18 +140,34 @@ void	getErrorPageDirective(const std::vector<char>& buffer, size_t* i, Config& c
 }
 
 void	getLocationDirective(const std::vector<char>& buffer, size_t* i, Config& config) {
-	std::string parameter;
-	bool		isBraceOpen;
+	Location	location;
+	std::string	directiveName;
+
+	skipOpeningBrace(buffer, i);
 
 	for ( ; *i < buffer.size(); ++*i) {
-		if (buffer[*i] == '{' && !isBraceOpen) {
-			isBraceOpen = true;
-		} else if (buffer[*i] == '}' && isBraceOpen) {
+		directiveName = getDirectiveName(buffer, i);
+
+		if (directiveName.empty()) {
 			break;
 		}
-		parameter.push_back(buffer[*i]);
+
+		if (directiveName == KW_AUTOINDEX) {
+			getClientMaxBodySizeDirective(buffer, i, config);
+		} else if (directiveName == KW_CGI_PASS) {
+			getErrorPageDirective(buffer, i, config);
+		} else if (directiveName == KW_INDEX) {
+			getListenDirective(buffer, i, config);
+		} else if (directiveName == KW_METHODS_ALLOWED) {
+			getLocationDirective(buffer, i, config);
+		} else if (directiveName == KW_REDIRECT) {
+			;
+		} else if (directiveName == KW_ROOT) {
+
+		} else {
+			throw UnknownDirectiveConfigException(directiveName);
+		}
 	}
-	config.setLocation(parameter);
 }
 
 void	getServerNameDirective(const std::vector<char>& buffer, size_t* i, Config& config) {
@@ -167,9 +187,13 @@ Config getServerDirective(const std::vector<char>& buffer, size_t* i) {
 	std::string	directiveName;
 
 	skipOpeningBrace(buffer, i);
+
 	for ( ; *i < buffer.size(); ++*i) {
 		directiveName = getDirectiveName(buffer, i);
-		std::cout << directiveName << std::endl;
+
+		if (directiveName.empty()) {
+			break;
+		}
 
 		if (directiveName == KW_CLIENT_MAX_BODY_SIZE) {
 			getClientMaxBodySizeDirective(buffer, i, config);
@@ -182,14 +206,9 @@ Config getServerDirective(const std::vector<char>& buffer, size_t* i) {
 		} else if (directiveName == KW_SERVER_NAME) {
 			getServerNameDirective(buffer, i, config);
 		} else {
-			throw ConfigException("2unknown directive \"" + directiveName + "\"");
-		}
-
-		if (buffer[*i] == '}') {
-			break;
+			throw UnknownDirectiveConfigException(directiveName);
 		}
 	}
-
 	return config;
 }
 
@@ -206,10 +225,9 @@ std::vector<Config>	parseConfig(const std::string& filename) {
 
 		if (directiveName == KW_SERVER) {
 			newConfig = getServerDirective(buffer, &i);
-			newConfig.print(config);
 			config.push_back(newConfig);
 		} else {
-			throw ConfigException("1unknown directive \"" + directiveName + "\"");
+			throw UnknownDirectiveConfigException(directiveName);
 		}
 	}
 
