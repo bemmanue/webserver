@@ -11,7 +11,7 @@ public:
 	typedef std::vector<std::string>			AcceptedMethods;
 	typedef std::map<std::string, std::string>	CGIs;
 
-private:
+//private:
 	std::string		_path;
 	std::string		_autoindex;
 	std::string		_CGIs;
@@ -26,6 +26,15 @@ private:
 //	bool			_autoindex;
 //	std::string 	_index;
 //	CGIs			_CGIs;
+
+public:
+	void setPath(const std::string& parameter);
+	void setAutoindex(const std::string& parameter);
+	void setCGIs(const std::string& parameter);
+	void setIndex(const std::string& parameter);
+	void setMethodsAllowed(const std::string& parameter);
+	void setRedirect(const std::string& parameter);
+	void setRoot(const std::string& parameter);
 
 };
 

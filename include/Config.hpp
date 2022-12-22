@@ -68,7 +68,7 @@ public:
 	void setServerName(const std::string& parameter);
 	void setErrorPages(const std::vector<std::string>& parameter);
 	void setClientMaxBodySize(const std::string& parameter);
-	void setLocation(const std::string& parameter);
+	void setLocation(const Location& parameter);
 
 	void print();
 };
