@@ -78,6 +78,7 @@ std::string	getNextToken(const std::vector<char>& buffer, size_t* i) {
 			if (token.empty()) {
 				token.push_back(buffer[*i]);
 			}
+			++*i;
 			break;
 		}
 		token.push_back(buffer[*i]);
@@ -216,7 +217,9 @@ void	getLocationBlock(const std::vector<char>& buffer, size_t* i, Config& config
 	Location	location;
 	std::string	directiveName;
 
-	skipOpeningBrace(buffer, i);
+	if (getNextToken(buffer, i) != "{") {
+		throw ConfigException("expecting \"{\"");
+	}
 
 	for ( ; *i < buffer.size(); ++*i) {
 		directiveName = getNextToken(buffer, i);
@@ -247,11 +250,13 @@ Config	getServerBlock(const std::vector<char>& buffer, size_t* i) {
 	std::string	directiveName;
 
 	if (getNextToken(buffer, i) != "{") {
-		throw ConfigException("expecting {");
+		throw ConfigException("expecting \"{\"");
 	}
+//	std::cout << getNextToken(buffer, i) << std::endl;
 
 	for ( ; *i < buffer.size(); ++*i) {
 		directiveName = getNextToken(buffer, i);
+		std::cout << directiveName << std::endl;
 
 		if (directiveName.empty()) {
 			throw ConfigException("expecting }");
@@ -281,10 +286,11 @@ std::vector<Config>	parseConfig(const std::string& filename) {
 
 	for (size_t i = 0; i < buffer.size(); ++i) {
 		directiveName = getNextToken(buffer, &i);
-//		std::cout << directiveName << std::endl;
+		std::cout << directiveName << std::endl;
 		if (directiveName == KW_SERVER) {
 			config.push_back(getServerBlock(buffer, &i));
-		} else {
+		}
+		else {
 			throw UnknownDirectiveConfigException(directiveName);
 		}
 	}
