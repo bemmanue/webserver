@@ -15,10 +15,26 @@ void Config::print() {
 	for (int i = 0; i < _location.size(); ++i) {
 		std::cout << "path: " << _location[i]._path << std::endl;
 		std::cout << "autoindex: " << _location[i]._autoindex << std::endl;
-		std::cout << "CGIs: " << _location[i]._CGIs << std::endl;
+
+		std::cout << "CGIs: " << std::endl;
+		for (int i = 0; i < _location[i]._CGIs.size(); ++i) {
+			std::cout << _location[i]._CGIs[i] << " ";
+		}
+		std::cout << std::endl;
+
 		std::cout << "index: " << _location[i]._index << std::endl;
-		std::cout << "methods_allowed: " << _location[i]._methods_allowed << std::endl;
-		std::cout << "redirect: " << _location[i]._redirect << std::endl;
+		std::cout << "methods_allowed: " << std::endl;
+		std::cout << "CGIs: " << std::endl;
+		for (int i = 0; i < _location[i]._methods_allowed.size(); ++i) {
+			std::cout << _location[i]._methods_allowed[i] << " ";
+		}
+		std::cout << std::endl;
+
+		std::cout << "redirect: " << std::endl;
+		for (int i = 0; i < _location[i]._redirect.size(); ++i) {
+			std::cout << _location[i]._redirect[i] << " ";
+		}
+		std::cout << std::endl;
 		std::cout << "root: " << _location[i]._root << std::endl;
 	}
 	std::cout << std::endl;
@@ -72,13 +88,12 @@ std::string	getNextToken(const std::vector<char>& buffer, size_t* i) {
 	skipSpace(buffer, i);
 	for ( ; *i < buffer.size(); ++*i) {
 		if (isspace(buffer[*i]) ||
-			buffer[*i] == ';' ||
-			buffer[*i] == '{' ||
-			buffer[*i] == '}') {
+		buffer[*i] == ';' ||
+		buffer[*i] == '{' ||
+		buffer[*i] == '}') {
 			if (token.empty()) {
-				token.push_back(buffer[*i]);
+				token.push_back(buffer[(*i)++]);
 			}
-			++*i;
 			break;
 		}
 		token.push_back(buffer[*i]);
@@ -89,11 +104,9 @@ std::string	getNextToken(const std::vector<char>& buffer, size_t* i) {
 void	getListenDirective(const std::vector<char>& buffer, size_t* i, Config& config) {
 	std::string parameter;
 
-	skipSpace(buffer, i);
 	parameter = getNextToken(buffer, i);
-	skipSpace(buffer, i);
-	if (buffer[*i] != ';') {
-		throw std::exception();
+	if (getNextToken(buffer, i) != ";") {
+		throw ConfigException("expected \";\"");
 	}
 	config.setListen(parameter);
 }
@@ -101,11 +114,9 @@ void	getListenDirective(const std::vector<char>& buffer, size_t* i, Config& conf
 void	getClientMaxBodySizeDirective(const std::vector<char>& buffer, size_t* i, Config& config) {
 	std::string parameter;
 
-	skipSpace(buffer, i);
 	parameter = getNextToken(buffer, i);
-	skipSpace(buffer, i);
-	if (buffer[*i] != ';') {
-		throw std::exception();
+	if (getNextToken(buffer, i) != ";") {
+		throw ConfigException("expected \";\"");
 	}
 	config.setClientMaxBodySize(parameter);
 }
@@ -114,17 +125,14 @@ void	getErrorPageDirective(const std::vector<char>& buffer, size_t* i, Config& c
 	std::string parameter;
 	std::vector<std::string> params;
 
-	for ( ; *i < buffer.size(); ++*i) {
-		skipSpace(buffer, i);
-
+	while (*i < buffer.size()) {
 		parameter = getNextToken(buffer, i);
-		params.push_back(parameter);
-
-		if (buffer[*i] == ';') {
+		if (parameter == ";") {
 			break;
-		} else if (buffer[*i] == '{' || buffer[*i] == '}') {
-			throw ConfigException("invalid error page");
+		} else if (parameter == "{" || parameter == "}") {
+			throw ConfigException("unexpected brace");
 		}
+		params.push_back(parameter);
 	}
 	config.setErrorPages(params);
 }
@@ -132,11 +140,9 @@ void	getErrorPageDirective(const std::vector<char>& buffer, size_t* i, Config& c
 void	getServerNameDirective(const std::vector<char>& buffer, size_t* i, Config& config) {
 	std::string parameter;
 
-	skipSpace(buffer, i);
 	parameter = getNextToken(buffer, i);
-	skipSpace(buffer, i);
-	if (buffer[*i] != ';') {
-		throw ConfigException("invalid parameter");
+	if (getNextToken(buffer, i) != ";") {
+		throw ConfigException("expecting \";\"");
 	}
 	config.setServerName(parameter);
 }
@@ -144,71 +150,77 @@ void	getServerNameDirective(const std::vector<char>& buffer, size_t* i, Config& 
 void	getAutoindexDirective(const std::vector<char>& buffer, size_t* i, Location& location) {
 	std::string parameter;
 
-	skipSpace(buffer, i);
 	parameter = getNextToken(buffer, i);
-	skipSpace(buffer, i);
-	if (buffer[*i] != ';') {
-		throw ConfigException("invalid parameter");
+	if (getNextToken(buffer, i) != ";") {
+		throw ConfigException("expected \";\"");
 	}
 	location.setAutoindex(parameter);
 }
 
 void	getCGIsDirective(const std::vector<char>& buffer, size_t* i, Location& location) {
 	std::string parameter;
+	std::vector<std::string> params;
 
-	skipSpace(buffer, i);
-	parameter = getNextToken(buffer, i);
-	skipSpace(buffer, i);
-	if (buffer[*i] != ';') {
-		throw ConfigException("invalid parameter");
+	while (*i < buffer.size()) {
+		parameter = getNextToken(buffer, i);
+		if (parameter == ";") {
+			break;
+		} else if (parameter == "{" || parameter == "}") {
+			throw ConfigException("unexpected brace");
+		}
+		params.push_back(parameter);
 	}
-	location.setCGIs(parameter);
+	location.setCGIs(params);
 }
 
 void	getIndexDirective(const std::vector<char>& buffer, size_t* i, Location& location) {
 	std::string parameter;
 
-	skipSpace(buffer, i);
 	parameter = getNextToken(buffer, i);
-	skipSpace(buffer, i);
-	if (buffer[*i] != ';') {
-		throw ConfigException("invalid parameter");
+	if (getNextToken(buffer, i) != ";") {
+		throw ConfigException("expected \";\"");
 	}
 	location.setIndex(parameter);
 }
 
 void	getMethodsAllowedDirective(const std::vector<char>& buffer, size_t* i, Location& location) {
 	std::string parameter;
+	std::vector<std::string> params;
 
-	skipSpace(buffer, i);
-	parameter = getNextToken(buffer, i);
-	skipSpace(buffer, i);
-	if (buffer[*i] != ';') {
-		throw ConfigException("invalid parameter");
+	while (*i < buffer.size()) {
+		parameter = getNextToken(buffer, i);
+		if (parameter == ";") {
+			break;
+		} else if (parameter == "{" || parameter == "}") {
+			throw ConfigException("unexpected brace");
+		}
+		params.push_back(parameter);
 	}
-	location.setMethodsAllowed(parameter);
+	location.setMethodsAllowed(params);
 }
 
 void	getRedirectDirective(const std::vector<char>& buffer, size_t* i, Location& location) {
 	std::string parameter;
+	std::vector<std::string> params;
 
-	skipSpace(buffer, i);
-	parameter = getNextToken(buffer, i);
-	skipSpace(buffer, i);
-	if (buffer[*i] != ';') {
-		throw ConfigException("invalid parameter");
+	while (*i < buffer.size()) {
+		parameter = getNextToken(buffer, i);
+		if (parameter == ";") {
+			break;
+		} else if (parameter == "{" || parameter == "}") {
+			throw ConfigException("unexpected brace");
+		}
+		params.push_back(parameter);
 	}
-	location.setRedirect(parameter);
+	location.setRedirect(params);
 }
 
 void	getRootDirective(const std::vector<char>& buffer, size_t* i, Location& location) {
 	std::string parameter;
 
-	skipSpace(buffer, i);
 	parameter = getNextToken(buffer, i);
-	skipSpace(buffer, i);
-	if (buffer[*i] != ';') {
-		throw ConfigException("invalid parameter");
+	if (getNextToken(buffer, i) != ";") {
+		throw ConfigException("expected \";\"");
 	}
 	location.setRoot(parameter);
 }
@@ -217,11 +229,13 @@ void	getLocationBlock(const std::vector<char>& buffer, size_t* i, Config& config
 	Location	location;
 	std::string	directiveName;
 
+	location.setPath(getNextToken(buffer, i));
+
 	if (getNextToken(buffer, i) != "{") {
 		throw ConfigException("expecting \"{\"");
 	}
 
-	for ( ; *i < buffer.size(); ++*i) {
+	while (*i < buffer.size()) {
 		directiveName = getNextToken(buffer, i);
 
 		if (directiveName.empty()) {
@@ -284,13 +298,13 @@ std::vector<Config>	parseConfig(const std::string& filename) {
 
 	buffer = readFile(filename);
 
-	for (size_t i = 0; i < buffer.size(); ++i) {
+	for (size_t i = 0; i < buffer.size(); ) {
 		directiveName = getNextToken(buffer, &i);
-		std::cout << directiveName << std::endl;
+//		std::cout << directiveName << std::endl;
+
 		if (directiveName == KW_SERVER) {
 			config.push_back(getServerBlock(buffer, &i));
-		}
-		else {
+		} else {
 			throw UnknownDirectiveConfigException(directiveName);
 		}
 	}
