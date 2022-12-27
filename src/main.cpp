@@ -3,7 +3,7 @@
 #include "../include/Config.hpp"
 
 int main(int argc, char **argv) {
-	std::vector<Config> config;
+	Config config;
 
 	if (argc != 2) {
 		std::cout << "wrong arguments" << std::endl;
@@ -11,7 +11,7 @@ int main(int argc, char **argv) {
 	}
 
 	try {
-		config = parseConfig(argv[1]);
+		config = parseConfigFile(argv[1]);
 //		for (int i = 0; i < config.size(); ++i) {
 //			std::cout << "Config №" << i + 1 << std::endl;
 //			std::cout << "---------" << std::endl;

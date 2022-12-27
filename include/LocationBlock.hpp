@@ -6,7 +6,7 @@
 #include <map>
 
 
-class Location {
+class LocationBlock {
 public:
 	typedef std::vector<std::string>			AcceptedMethods;
 	typedef std::map<std::string, std::string>	CGIs;
@@ -29,12 +29,12 @@ public:
 
 public:
 	void setPath(const std::string& parameter);
-	void setAutoindex(const std::string& parameter);
+	void setAutoindex(const std::vector<std::string>& parameter);
 	void setCGIs(const std::vector<std::string>& parameter);
-	void setIndex(const std::string& parameter);
+	void setIndex(const std::vector<std::string>& parameter);
 	void setMethodsAllowed(const std::vector<std::string>& parameter);
 	void setRedirect(const std::vector<std::string>& parameter);
-	void setRoot(const std::string& parameter);
+	void setRoot(const std::vector<std::string>& parameter);
 
 };
 

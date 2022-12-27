@@ -1,63 +1,35 @@
 #include "../include/Config.hpp"
 
-static int line = 1;
+static size_t line = 1;
 
-void Config::print() {
-	std::cout << "listen: " <<  _listen << std::endl;
-	std::cout << "server_name: " << _server_name << std::endl << "error_pages: ";
+const char* validKeywords[] = {KW_AUTOINDEX, KW_CGI_PASS, KW_CLIENT_MAX_BODY_SIZE, KW_ERROR_PAGE,
+							   KW_INDEX, KW_LISTEN, KW_LOCATION, KW_METHODS_ALLOWED, KW_REDIRECT,
+							   KW_ROOT, KW_SERVER, KW_SERVER_NAME, KW_OPENING_BRACE, KW_CLOSING_BRACE,
+							   KW_SEMICOLON, NULL};
 
-	for (int i = 0; i < _error_pages.size(); ++i) {
-		std::cout << _error_pages[i] << " ";
+const char* validMainKeywords[] = {KW_SERVER, NULL};
+
+const char* validServerKeywords[] = {KW_CLIENT_MAX_BODY_SIZE, KW_ERROR_PAGE, KW_LISTEN, KW_LOCATION,
+									 KW_SERVER_NAME, NULL};
+
+const char* validLocationKeywords[] = {KW_AUTOINDEX, KW_CGI_PASS, KW_INDEX, KW_METHODS_ALLOWED,
+									   KW_REDIRECT, KW_ROOT, NULL};
+
+bool isValidKeyword(const std::string& keyword) {
+
+	if (keyword.empty()) {
+		return true;
 	}
-
-	std::cout << std::endl << "client_max_body_size: " << _client_max_body_size << std::endl;
-
-	for (int i = 0; i < _location.size(); ++i) {
-		std::cout << "path: " << _location[i]._path << std::endl;
-		std::cout << "autoindex: " << _location[i]._autoindex << std::endl;
-
-		std::cout << "CGIs: " << std::endl;
-		for (int i = 0; i < _location[i]._CGIs.size(); ++i) {
-			std::cout << _location[i]._CGIs[i] << " ";
+	for (size_t i = 0; validKeywords[i]; ++i) {
+		if (validKeywords[i] == keyword) {
+			return true;
 		}
-		std::cout << std::endl;
-
-		std::cout << "index: " << _location[i]._index << std::endl;
-		std::cout << "methods_allowed: " << std::endl;
-		std::cout << "CGIs: " << std::endl;
-		for (int i = 0; i < _location[i]._methods_allowed.size(); ++i) {
-			std::cout << _location[i]._methods_allowed[i] << " ";
-		}
-		std::cout << std::endl;
-
-		std::cout << "redirect: " << std::endl;
-		for (int i = 0; i < _location[i]._redirect.size(); ++i) {
-			std::cout << _location[i]._redirect[i] << " ";
-		}
-		std::cout << std::endl;
-		std::cout << "root: " << _location[i]._root << std::endl;
 	}
-	std::cout << std::endl;
+	return false;
 }
 
-void Config::setListen(const std::string &parameter) {
-	_listen = parameter;
-}
-
-void Config::setServerName(const std::string &parameter) {
-	_server_name = parameter;
-}
-
-void Config::setErrorPages(const std::vector<std::string>& parameter) {
-	_error_pages = parameter;
-}
-
-void Config::setClientMaxBodySize(const std::string &parameter) {
-	_client_max_body_size = parameter;
-}
-
-void Config::setLocation(const Location& parameter) {
-	_location.push_back(parameter);
+void Config::add(ServerBlock c) {
+	config.push_back(c);
 }
 
 std::vector<char> readFile(const std::string& filename) {
@@ -73,11 +45,11 @@ std::vector<char> readFile(const std::string& filename) {
 
 void skipSpace(const std::vector<char>& buffer, size_t* i) {
 	for ( ; *i < buffer.size(); ++*i) {
-		if (buffer[*i] == '\n') {
-			line++;
-		}
 		if (!isspace(buffer[*i])) {
 			break;
+		}
+		if (buffer[*i] == '\n') {
+			line++;
 		}
 	}
 }
@@ -88,9 +60,9 @@ std::string	getNextToken(const std::vector<char>& buffer, size_t* i) {
 	skipSpace(buffer, i);
 	for ( ; *i < buffer.size(); ++*i) {
 		if (isspace(buffer[*i]) ||
-		buffer[*i] == ';' ||
-		buffer[*i] == '{' ||
-		buffer[*i] == '}') {
+			buffer[*i] == ';' ||
+			buffer[*i] == '{' ||
+			buffer[*i] == '}') {
 			if (token.empty()) {
 				token.push_back(buffer[(*i)++]);
 			}
@@ -101,213 +73,144 @@ std::string	getNextToken(const std::vector<char>& buffer, size_t* i) {
 	return token;
 }
 
-void	getListenDirective(const std::vector<char>& buffer, size_t* i, Config& config) {
-	std::string parameter;
-
-	parameter = getNextToken(buffer, i);
-	if (getNextToken(buffer, i) != ";") {
-		throw ConfigException("expected \";\"");
-	}
-	config.setListen(parameter);
-}
-
-void	getClientMaxBodySizeDirective(const std::vector<char>& buffer, size_t* i, Config& config) {
-	std::string parameter;
-
-	parameter = getNextToken(buffer, i);
-	if (getNextToken(buffer, i) != ";") {
-		throw ConfigException("expected \";\"");
-	}
-	config.setClientMaxBodySize(parameter);
-}
-
-void	getErrorPageDirective(const std::vector<char>& buffer, size_t* i, Config& config) {
-	std::string parameter;
-	std::vector<std::string> params;
+std::vector<std::string> getValue(const std::vector<char>& buffer, size_t* i) {
+	std::vector<std::string>	value;
+	std::string					token;
 
 	while (*i < buffer.size()) {
-		parameter = getNextToken(buffer, i);
-		if (parameter == ";") {
+		token = getNextToken(buffer, i);
+
+		if (token == KW_SEMICOLON) {
 			break;
-		} else if (parameter == "{" || parameter == "}") {
-			throw ConfigException("unexpected brace");
 		}
-		params.push_back(parameter);
-	}
-	config.setErrorPages(params);
-}
-
-void	getServerNameDirective(const std::vector<char>& buffer, size_t* i, Config& config) {
-	std::string parameter;
-
-	parameter = getNextToken(buffer, i);
-	if (getNextToken(buffer, i) != ";") {
-		throw ConfigException("expecting \";\"");
-	}
-	config.setServerName(parameter);
-}
-
-void	getAutoindexDirective(const std::vector<char>& buffer, size_t* i, Location& location) {
-	std::string parameter;
-
-	parameter = getNextToken(buffer, i);
-	if (getNextToken(buffer, i) != ";") {
-		throw ConfigException("expected \";\"");
-	}
-	location.setAutoindex(parameter);
-}
-
-void	getCGIsDirective(const std::vector<char>& buffer, size_t* i, Location& location) {
-	std::string parameter;
-	std::vector<std::string> params;
-
-	while (*i < buffer.size()) {
-		parameter = getNextToken(buffer, i);
-		if (parameter == ";") {
-			break;
-		} else if (parameter == "{" || parameter == "}") {
-			throw ConfigException("unexpected brace");
+		if (token == KW_OPENING_BRACE || token == KW_CLOSING_BRACE) {
+			throw ConfigException("unexpected brace", line);
 		}
-		params.push_back(parameter);
+
+		value.push_back(token);
 	}
-	location.setCGIs(params);
+	return value;
 }
 
-void	getIndexDirective(const std::vector<char>& buffer, size_t* i, Location& location) {
-	std::string parameter;
-
-	parameter = getNextToken(buffer, i);
-	if (getNextToken(buffer, i) != ";") {
-		throw ConfigException("expected \";\"");
-	}
-	location.setIndex(parameter);
-}
-
-void	getMethodsAllowedDirective(const std::vector<char>& buffer, size_t* i, Location& location) {
-	std::string parameter;
-	std::vector<std::string> params;
-
-	while (*i < buffer.size()) {
-		parameter = getNextToken(buffer, i);
-		if (parameter == ";") {
-			break;
-		} else if (parameter == "{" || parameter == "}") {
-			throw ConfigException("unexpected brace");
-		}
-		params.push_back(parameter);
-	}
-	location.setMethodsAllowed(params);
-}
-
-void	getRedirectDirective(const std::vector<char>& buffer, size_t* i, Location& location) {
-	std::string parameter;
-	std::vector<std::string> params;
-
-	while (*i < buffer.size()) {
-		parameter = getNextToken(buffer, i);
-		if (parameter == ";") {
-			break;
-		} else if (parameter == "{" || parameter == "}") {
-			throw ConfigException("unexpected brace");
-		}
-		params.push_back(parameter);
-	}
-	location.setRedirect(params);
-}
-
-void	getRootDirective(const std::vector<char>& buffer, size_t* i, Location& location) {
-	std::string parameter;
-
-	parameter = getNextToken(buffer, i);
-	if (getNextToken(buffer, i) != ";") {
-		throw ConfigException("expected \";\"");
-	}
-	location.setRoot(parameter);
-}
-
-void	getLocationBlock(const std::vector<char>& buffer, size_t* i, Config& config) {
-	Location	location;
-	std::string	directiveName;
+void	getLocationBlock(const std::vector<char>& buffer, size_t* i, ServerBlock& serverBlock) {
+	LocationBlock				location;
+	std::string					keyword;
+	std::vector<std::string>	value;
 
 	location.setPath(getNextToken(buffer, i));
 
 	if (getNextToken(buffer, i) != "{") {
-		throw ConfigException("expecting \"{\"");
+		throw NoOpeningBraceConfigException(KW_LOCATION, line);
 	}
 
 	while (*i < buffer.size()) {
-		directiveName = getNextToken(buffer, i);
+		keyword = getNextToken(buffer, i);
+//		std::cout << keyword << std::endl;
 
-		if (directiveName.empty()) {
+		if (keyword.empty()) {
+			throw UnexpectedEndOfFileConfigException(line);
+		} else if (keyword == KW_OPENING_BRACE || keyword == KW_SEMICOLON) {
+			throw UnexpectedTokenConfigException(keyword, line);
+		} else if (!isValidKeyword(keyword)) {
+			throw UnknownDirectiveConfigException(keyword, line);
+		}
+
+		if (keyword == KW_CLOSING_BRACE) {
 			break;
-		} else if (directiveName == KW_AUTOINDEX) {
-			getAutoindexDirective(buffer, i, location);
-		} else if (directiveName == KW_CGI_PASS) {
-			getCGIsDirective(buffer, i, location);
-		} else if (directiveName == KW_INDEX) {
-			getIndexDirective(buffer, i, location);
-		} else if (directiveName == KW_METHODS_ALLOWED) {
-			getMethodsAllowedDirective(buffer, i, location);
-		} else if (directiveName == KW_REDIRECT) {
-			getRedirectDirective(buffer, i, location);
-		} else if (directiveName == KW_ROOT) {
-			getRootDirective(buffer, i, location);
-		} else {
-			throw UnknownDirectiveConfigException(directiveName);
+		}
+
+		value = getValue(buffer, i);
+		if (keyword == KW_AUTOINDEX) {
+			location.setAutoindex(value);
+		} else if (keyword == KW_CGI_PASS) {
+			location.setCGIs(value);
+		} else if (keyword == KW_INDEX) {
+			location.setIndex(value);
+		} else if (keyword == KW_METHODS_ALLOWED) {
+			location.setMethodsAllowed(value);
+		} else if (keyword == KW_REDIRECT) {
+			location.setRedirect(value);
+		} else if (keyword == KW_ROOT) {
+			location.setRoot(value);
 		}
 	}
-	config.setLocation(location);
+	serverBlock.setLocation(location);
 }
 
-Config	getServerBlock(const std::vector<char>& buffer, size_t* i) {
-	Config		config;
-	std::string	directiveName;
+ServerBlock	getServerBlock(const std::vector<char>& buffer, size_t* i) {
+	ServerBlock					serverBlock;
+	std::string					keyword;
+	std::vector<std::string>	value;
 
-	if (getNextToken(buffer, i) != "{") {
-		throw ConfigException("expecting \"{\"");
+	if (getNextToken(buffer, i) != KW_OPENING_BRACE) {
+		throw NoOpeningBraceConfigException(KW_SERVER, line);
 	}
-//	std::cout << getNextToken(buffer, i) << std::endl;
 
-	for ( ; *i < buffer.size(); ++*i) {
-		directiveName = getNextToken(buffer, i);
-		std::cout << directiveName << std::endl;
+	while (*i < buffer.size()) {
+		keyword = getNextToken(buffer, i);
+//		std::cout << keyword << std::endl;
 
-		if (directiveName.empty()) {
-			throw ConfigException("expecting }");
-		} else if (directiveName == KW_CLIENT_MAX_BODY_SIZE) {
-			getClientMaxBodySizeDirective(buffer, i, config);
-		} else if (directiveName == KW_ERROR_PAGE) {
-			getErrorPageDirective(buffer, i, config);
-		} else if (directiveName == KW_LISTEN) {
-			getListenDirective(buffer, i, config);
-		} else if (directiveName == KW_LOCATION) {
-			getLocationBlock(buffer, i, config);
-		} else if (directiveName == KW_SERVER_NAME) {
-			getServerNameDirective(buffer, i, config);
-		} else {
-			throw UnknownDirectiveConfigException(directiveName);
+		if (keyword.empty()) {
+			throw UnexpectedEndOfFileConfigException(line);
+		} else if (keyword == KW_OPENING_BRACE || keyword == KW_SEMICOLON) {
+			throw UnexpectedTokenConfigException(keyword, line);
+		} else if (!isValidKeyword(keyword)) {
+			throw UnknownDirectiveConfigException(keyword, line);
+		}
+
+		if (keyword == KW_CLOSING_BRACE) {
+			break;
+		}
+
+		if (keyword == KW_LOCATION) {
+			getLocationBlock(buffer, i, serverBlock);
+			continue;
+		}
+
+		value = getValue(buffer, i);
+		if (keyword == KW_CLIENT_MAX_BODY_SIZE) {
+			serverBlock.setClientMaxBodySize(value);
+		} else if (keyword == KW_ERROR_PAGE) {
+			serverBlock.setErrorPages(value);
+		} else if (keyword == KW_LISTEN) {
+			serverBlock.setListen(value);
+		} else if (keyword == KW_SERVER_NAME) {
+			serverBlock.setServerName(value);
 		}
 	}
-	return config;
+	return serverBlock;
 }
 
-std::vector<Config>	parseConfig(const std::string& filename) {
-	std::vector<Config>	config;
+Config	parseConfigFile(const std::string& filename) {
+	Config				config;
 	std::vector<char>	buffer;
-	std::string			directiveName;
+	std::string			keyword;
 
 	buffer = readFile(filename);
 
-	for (size_t i = 0; i < buffer.size(); ) {
-		directiveName = getNextToken(buffer, &i);
-//		std::cout << directiveName << std::endl;
+	size_t i = 0;
+	while (i < buffer.size()) {
+		keyword = getNextToken(buffer, &i);
+//		std::cout << keyword << std::endl;
 
-		if (directiveName == KW_SERVER) {
-			config.push_back(getServerBlock(buffer, &i));
+		if (keyword.empty()) {
+			//?
+		}
+
+		if (keyword == KW_OPENING_BRACE ||
+			keyword == KW_CLOSING_BRACE ||
+			keyword == KW_SEMICOLON) {
+			throw UnexpectedTokenConfigException(keyword, line);
+		}
+
+		if (keyword == KW_SERVER) {
+			config.add(getServerBlock(buffer, &i));
 		} else {
-			throw UnknownDirectiveConfigException(directiveName);
+			throw UnknownDirectiveConfigException(keyword, line);
 		}
 	}
 
 	return config;
 }
+
+
