@@ -1,4 +1,4 @@
-#include "../include/LocationBlock.hpp"
+#include "../../include/config/LocationBlock.hpp"
 
 void LocationBlock::setPath(const std::string &parameter) {
 	_path = parameter;

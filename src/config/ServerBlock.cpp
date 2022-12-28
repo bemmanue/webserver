@@ -1,4 +1,4 @@
-#include "../include/ServerBlock.hpp"
+#include "../../include/config/ServerBlock.hpp"
 
 void ServerBlock::setListen(const std::vector<std::string>& value) {
 //	_listen = parameter;

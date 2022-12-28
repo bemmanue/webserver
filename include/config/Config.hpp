@@ -30,16 +30,21 @@
 #define CTX_SERVER		1
 #define CTX_LOCATION	2
 
-
 class Config {
 public:
-	void add(ServerBlock config);
+	void add(const ServerBlock& c);
+	bool empty();
 
-private:
+//private:
 	std::vector<ServerBlock> config;
 };
 
-Config	parseConfigFile(const std::string& filename);
+std::vector<char>	readFile(const std::string& filename);
+std::string			getNextToken();
+
+Config				parseConfigFile(const std::string& filename);
+ServerBlock			getServerBlock();
+LocationBlock		getLocationBlock();
 
 
 #endif //CONFIG_HPP

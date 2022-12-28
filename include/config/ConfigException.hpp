@@ -1,19 +1,35 @@
 #ifndef CONFIG_EXCEPTION_HPP
 #define CONFIG_EXCEPTION_HPP
 
-class ConfigException : public std::exception {
+class EmptyFileConfigException : public std::exception {
 public:
-	explicit ConfigException(const std::string& message, size_t line):
-			_message(message + " in " +  std::to_string(line)) {}
-	virtual ~ConfigException() throw() {}
+	explicit EmptyFileConfigException() {}
+	virtual ~EmptyFileConfigException() throw() {}
 
 	virtual const char* what() const throw() {
-		return _message.c_str();
+		std::string msg = "configuration file is empty";
+		return msg.c_str();
 	}
-private:
-	std::string _message;
 };
 
+class NotAllowedDirectiveConfigException : public std::exception {
+public:
+	explicit NotAllowedDirectiveConfigException(const std::string& directive, size_t line)
+			: _directive(directive), _line(line) {}
+
+	virtual ~NotAllowedDirectiveConfigException() throw() {}
+
+	virtual const char* what() const throw() {
+		std::string msg;
+
+		msg = "directive \"" + _directive + "\" is not allowed here in line " + std::to_string(_line);
+		return msg.c_str();
+	}
+
+private:
+	std::string	_directive;
+	size_t		_line;
+};
 
 class UnknownDirectiveConfigException : public std::exception {
 public:
@@ -34,7 +50,6 @@ private:
 	size_t		_line;
 };
 
-
 class UnexpectedTokenConfigException : public std::exception {
 public:
 	explicit UnexpectedTokenConfigException(const std::string& token, size_t line)
@@ -53,7 +68,6 @@ private:
 	std::string _token;
 	size_t		_line;
 };
-
 
 class NoOpeningBraceConfigException : public std::exception {
 public:

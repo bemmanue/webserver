@@ -4,10 +4,11 @@ project(webserver)
 set(CMAKE_CXX_STANDARD 98)
 
 add_executable(webserver src/main.cpp
-        include/Config.hpp
-        include/LocationBlock.hpp
-        include/ServerBlock.hpp
-        src/Config.cpp
-        src/LocationBlock.cpp
-        src/ServerBlock.cpp
+        include/config/Config.hpp
+        include/config/LocationBlock.hpp
+        include/config/ConfigException.hpp
+        include/config/ServerBlock.hpp
+        src/config/Config.cpp
+        src/config/LocationBlock.cpp
+        src/config/ServerBlock.cpp
         )

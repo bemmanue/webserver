@@ -1,5 +1,5 @@
-#ifndef LOCATION_HPP
-#define LOCATION_HPP
+#ifndef LOCATION_BLOCK_HPP
+#define LOCATION_BLOCK_HPP
 
 #include <iostream>
 #include <vector>
@@ -39,4 +39,4 @@ public:
 };
 
 
-#endif //LOCATION_HPP
+#endif //LOCATION_BLOCK_HPP

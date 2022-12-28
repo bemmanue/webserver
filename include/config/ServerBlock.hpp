@@ -1,5 +1,5 @@
-#ifndef SERVERBLOCK_HPP
-#define SERVERBLOCK_HPP
+#ifndef SERVER_BLOCK_HPP
+#define SERVER_BLOCK_HPP
 
 #include <map>
 
@@ -33,4 +33,4 @@ public:
 	void print();
 };
 
-#endif //SERVERBLOCK_HPP
+#endif //SERVER_BLOCK_HPP
