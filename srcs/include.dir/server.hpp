@@ -1,15 +1,22 @@
 #pragma once
 
-class server {
-public:
-    static server &getInstance() {
-		static server instance;
-		return instance;
-    }
+#include "connection.hpp"
+#include <list>
 
-private:
-	server() {};
-	server(server const &);
-	void	operator=(server const&);
+namespace ft {
+
+class server {
+ public:
+  static server *getServer();
+
+ private:
+  server();
+  ~server();
+  server(server const&);
+  void operator=(server const&);
+
+  static server *instance_;
+  std::list<connection> connection_lists_;
 };
 
+}  // namespace Server
