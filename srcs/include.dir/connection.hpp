@@ -1,15 +1,19 @@
 #pragma once
 
 #include <netdb.h>
+#include <sys/types.h>
+#include <sys/socket.h>
+#include <cstring>
+#include <string>
+#include <ctime>
 
 #include "utils.hpp"
-#include <ctime>
 
 namespace ft {
 
 class connection {
  public:
-  connection(int port);
+  explicit connection(int port);
   ~connection();
 
  private:
@@ -19,39 +23,42 @@ class connection {
 
   void initStruct();
   void getSocketDescriptor(int const& port);
+  void bindSocket();
+  void connectSocket();
 
-  struct addrinfo hints_;
-  sock_t          socket_;
-  int             bind_;
-  int             opts_;
-  time_t          ses_;
+  struct addrinfo   hints_;
+  sock_t            socket_;
+  struct addrinfo*  record_;
+  int               bind_;
+  int               opts_;
+  time_t            ses_;
 
   /*CHECK THAT THIS WORKS CORRECTLY*/
 
 class MyException : public std::exception {
  public:
-  MyException(std::string err) throw() {
-    err_ = err;
+  explicit MyException(const std::string &err) throw()
+      : err_(err) {
   }
 
-  ~MyException() throw() {
-      delete ret;
-  };
-
-  const char *what() const throw() {
-    std::string error = std::string("getaddrinfo error:");
-    error.append(err_);
-    error.append("\n");
-
-    ret = new char[strlen(error.c_str())];
-    strncpy(ret, error.c_str(), strlen(error.c_str()));
-    return ret;
+  explicit MyException(const char *err) throw()
+      : err_(err) {
   }
 
- private:
+  MyException(MyException const& ex) throw()
+      : err_(ex.err_) {
+  }
+
+  virtual ~MyException() throw() {};
+
+  virtual const char *what() const throw() {
+    return err_.c_str();
+  }
+
+ protected:
   std::string err_;
-  static char* ret;
 };
+
 };
 
 }

@@ -1,6 +1,3 @@
-#include <cstring>
-#include <string>
-
 #include "include.dir/connection.hpp"
 
 namespace ft {
@@ -21,22 +18,44 @@ void connection::getSocketDescriptor(int const& port) {
   status = getaddrinfo(NULL, std::to_string(port).c_str(), &hints_, &results);
 
   if (status != 0) {
-    throw MyException(std::string(gai_strerror(status)));
-    //It may not work - needs to be tested!
+    std::string str = "getaddrinfo exception:";
+    str.insert(0, gai_strerror(status));
+    throw MyException(str);
   }
 
   for (record = results; record != NULL; record = record->ai_next) {
-    socket_ =
-        socket(record->ai_family, record->ai_socktype, record->ai_protocol);
+    socket_ = socket(
+        record->ai_family,
+        record->ai_socktype,
+        record->ai_protocol);
     if (socket_ == -1) {
       continue;
+    } else {
+      record_ = record;
+      break;
     }
   }
+}
+
+void connection::bindSocket() {
+  bind_ = bind(socket_, record_->ai_addr, record_->ai_addrlen);
+
+  if (bind_ < 0) {
+    std::string str = "bind exception:";
+    str.insert(0, strerror(errno));
+    throw MyException(str);
+  }
+}
+
+void connection::connectSocket() {
+
 }
 
 connection::connection(int port) {
   initStruct();
   getSocketDescriptor(port);
+  bindSocket();
+  connectSocket();
 }
 
 }
