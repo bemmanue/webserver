@@ -12,7 +12,7 @@ Context:    location
 Enables or disables the directory listing output.
 ###
 ```
-Syntax:     cgi_pass address;
+Syntax:     cgi_pass extension path;
 Default:    —
 Context:    location
 ```

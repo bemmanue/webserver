@@ -4,16 +4,20 @@ void LocationBlock::setPath(const std::string &parameter) {
 	_path = parameter;
 }
 
-void LocationBlock::setAutoindex(const std::vector<std::string>& parameter) {
-//	_autoindex = parameter;
+void LocationBlock::setAutoindex(const std::string& parameter) {
+	if (parameter == "on") {
+		_autoindex = true;
+	} else if (parameter == "on") {
+		_autoindex = false;
+	}
 }
 
-void LocationBlock::setCGIs(const std::vector<std::string> &parameter) {
-	_CGIs = parameter;
+void LocationBlock::setCGIs(const std::string& extension, const std::string& path) {
+	_CGIs[extension] = path;
 }
 
 void LocationBlock::setIndex(const std::vector<std::string>& parameter) {
-//	_index = parameter;
+	_index = parameter;
 }
 
 void LocationBlock::setMethodsAllowed(const std::vector<std::string> &parameter) {

@@ -1,8 +1,8 @@
 #include "../../include/config/Config.hpp"
 
 static std::vector<char> buffer;
-static size_t i		= 0;
-static size_t line	= 1;
+static size_t i = 0;
+static size_t line = 1;
 
 const char* validMainDirectives[] =	{
 		KW_SERVER, NULL
@@ -166,9 +166,15 @@ LocationBlock	getLocationBlock() {
 
 		parameters = getParameters();
 		if (keyword == KW_AUTOINDEX) {
-			location.setAutoindex(parameters);
+			if (parameters.size() != 1) {
+				throw InvalidNumberOfArgumentsConfigException(KW_AUTOINDEX, line);
+			}
+			location.setAutoindex(parameters[0]);
 		} else if (keyword == KW_CGI_PASS) {
-			location.setCGIs(parameters);
+			if (parameters.size() != 2) {
+				throw InvalidNumberOfArgumentsConfigException(KW_CGI_PASS, line);
+			}
+			location.setCGIs(parameters[0], parameters[1]);
 		} else if (keyword == KW_INDEX) {
 			location.setIndex(parameters);
 		} else if (keyword == KW_METHODS_ALLOWED) {

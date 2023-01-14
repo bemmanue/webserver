@@ -88,6 +88,25 @@ private:
 	size_t		_line;
 };
 
+class InvalidNumberOfArgumentsConfigException : public std::exception {
+public:
+	explicit InvalidNumberOfArgumentsConfigException(const std::string& directive, size_t line)
+			: _directive(directive), _line(line) {}
+
+	virtual ~InvalidNumberOfArgumentsConfigException() throw() {}
+
+	virtual const char* what() const throw() {
+		std::string msg;
+
+		msg = "invalid number of arguments in \"" + _directive + " in line " + std::to_string(_line);
+		return msg.c_str();
+	}
+
+private:
+	std::string _directive;
+	size_t		_line;
+};
+
 class UnexpectedEndOfFileConfigException : public std::exception {
 public:
 	explicit UnexpectedEndOfFileConfigException(size_t line)
