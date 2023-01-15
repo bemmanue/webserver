@@ -1,9 +1,11 @@
 #include <iostream>
 #include <netinet/in.h>
-#include <sys/fcntl.h>
+
 #include <cstdlib>
 #include <sstream>
 #include <unistd.h>
+#include <cstring>
+#include <cerrno>
 
 #define SERVER_PORT 8000
 #define BUF_SIZE 8192
@@ -33,13 +35,14 @@ int main() {
     if (l < 0) exit(1);
 
     while (true) {
-        sa = accept(sock, nullptr, nullptr);
+        sa = accept(sock, NULL, NULL);
+
         if (sa < 0) {
 			std::cerr << "accept failed: " << std::strerror(errno) << std::endl;
 			exit(1);
 		}
-
         res = recv(sa, buf, BUF_SIZE, 0);
+
 		if (res == SO_ERROR) {
 			std::cerr << "Recv failed: " << res << std::endl;
 			close(sock);
