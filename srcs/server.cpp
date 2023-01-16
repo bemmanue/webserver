@@ -2,6 +2,8 @@
 
 namespace ft {
 
+/*INITIALIZATION OF SERVER*/
+
 static struct addrinfo* results;
 
 void server::initStruct() {
@@ -10,6 +12,7 @@ void server::initStruct() {
   hints_.ai_socktype = SOCK_STREAM;
   hints_.ai_protocol = IPPROTO_TCP;
   hints_.ai_flags= AI_PASSIVE;
+  bzero(fds, sizeof (struct pollfd) * 10);
 }
 
 void server::getSocketDescriptor(const char *port) {
@@ -19,7 +22,7 @@ void server::getSocketDescriptor(const char *port) {
   status = getaddrinfo(NULL, port, &hints_, &results);
 
   if (status != 0) {
-    std::string str = "getaddrinfo exception:";
+    std::string str = "getaddrinfo exception: ";
     str.insert(0, gai_strerror(status));
     throw MyException(str);
   }
@@ -43,23 +46,29 @@ void server::setOptions() const {
 
   if (setsockopt(socket_, SOL_SOCKET, SO_REUSEADDR,
                  &opt, sizeof (int)) < -1) {
-    std::string str = "setsockopt exception:";
+    std::string str = "setsockopt exception: ";
+    str.insert(0, strerror(errno));
+    throw MyException(str);
+  }
+
+  if (ioctl(socket_, FIONBIO, &opt) < 0) {
+    std::string str = "ioctl exception: ";
     str.insert(0, strerror(errno));
     throw MyException(str);
   }
 }
 
 void server::bindSocket() {
-  bind_ = bind(socket_, record_->ai_addr, record_->ai_addrlen);
+  int aBind = bind(socket_, record_->ai_addr, record_->ai_addrlen);
 
-  if (bind_ < 0) {
-    std::string str = "bind exception:";
+  if (aBind < 0) {
+    std::string str = "bind exception: ";
     str.insert(0, strerror(errno));
     throw MyException(str);
   }
 
   if (record_ == NULL) {
-    std::string str = "server:failed to bind exception:";
+    std::string str = "server:failed to bind exception: ";
     str.insert(0, strerror(errno));
     throw MyException(str);
   }
@@ -67,15 +76,20 @@ void server::bindSocket() {
 
 void server::listenSocket() const {
   if (listen(socket_, FT_LISTEN_CLIENT_LIMIT) < 0) {
-    std::string str = "listen exception:";
+    std::string str = "listen exception: ";
     str.insert(0, strerror(errno));
     throw MyException(str);
   }
 }
 
+void server::setListeningSocket() {
+  fds[0].fd = socket_;
+  fds[0].events = POLLIN;
+}
+
 server::server(const char *port)
-    : hints_(), socket_(0), record_(NULL),
-      bind_(0) {
+    : hints_(), socket_(0), record_(NULL), fds() {
+  serverId = serverNumber++;
   initStruct();
   getSocketDescriptor(port);
   setOptions();
@@ -83,6 +97,7 @@ server::server(const char *port)
   listenSocket();
   freeaddrinfo(results);
   results = NULL;
+  setListeningSocket();
 }
 
 server::server() {
@@ -111,6 +126,8 @@ server *server::ofPort(std::string &strPort) {
   return newServer;
 }
 
+/*END OF SERVER INITIALIZATION BLOCK*/
+
 const std::list<connection>& server::getConnections() const {
   return connection_lists_;
 }
@@ -119,6 +136,14 @@ void server::setConnections(const std::list<connection>& connectionLists) {
 }
 sock_t server::getSocket() const {
   return socket_;
+}
+
+int server::serve() {
+  int pollResult;
+  int timeout = 1000;
+  pollResult = poll(fds, nfds[serverId], timeout);
+//https://www.ibm.com/docs/en/i/7.1?topic=designs-using-poll-instead-select
+  return pollResult;
 }
 
 }  // namespace ft

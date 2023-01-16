@@ -3,6 +3,8 @@
 #include "connection.hpp"
 #include <list>
 #include <iostream>
+#include <sys/ioctl.h>
+#include <sys/poll.h>
 #include <sstream>
 
 //#define TEST
@@ -21,7 +23,7 @@ class server {
   const std::list<connection>& getConnections() const;
   void setConnections(const std::list<connection>& connectionLists);
   sock_t getSocket() const;
-
+  int serve();
 
  private:
   server();
@@ -36,16 +38,18 @@ class server {
   void setOptions() const;
   void bindSocket();
   void listenSocket() const;
+  void setListeningSocket();
 
   /*Socket */
   struct addrinfo   hints_;
-
- private:
   sock_t            socket_;
   struct addrinfo*  record_;
-  int               bind_;
 
+  struct pollfd fds[10];
   std::list<connection> connection_lists_;
+  static int serverNumber;
+  int serverId;
+  nfds_t nfds[10];
 
   /*CHECK THAT THIS WORKS CORRECTLY*/
   class MyException : public std::exception {
