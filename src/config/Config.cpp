@@ -140,6 +140,45 @@ std::string	getLocationPath() {
 	return path;
 }
 
+void	setAutoindex(LocationBlock& location, const std::vector<std::string>& parameters) {
+	if (parameters.size() != 1) {
+		throw InvalidNumberOfArgumentsConfigException(KW_AUTOINDEX, line);
+	}
+	location.setAutoindex(parameters[0]);
+}
+
+void	setCGIs(LocationBlock& location, const std::vector<std::string>& parameters) {
+	if (parameters.size() != 2) {
+		throw InvalidNumberOfArgumentsConfigException(KW_CGI_PASS, line);
+	}
+	location.setCGIs(parameters[0], parameters[1]);
+}
+
+void	setMethodsAllowed(LocationBlock& location, const std::vector<std::string>& parameters) {
+	int j = 0;
+	try {
+		for (j = 0; j < parameters.size(); j++) {
+			location.setMethodsAllowed(parameters[j]);
+		}
+	} catch (const std::exception& exception) {
+		throw InvalidMethodConfigException(parameters[j], line);
+	}
+}
+
+void	setRedirect(LocationBlock& location, const std::vector<std::string>& parameters) {
+	if (parameters.size() != 2) {
+		throw InvalidNumberOfArgumentsConfigException(KW_REDIRECT, line);
+	}
+	location.setRedirect(parameters[0], parameters[1]);
+}
+
+void	setRoot(LocationBlock& location, const std::vector<std::string>& parameters) {
+	if (parameters.size() != 1) {
+		throw InvalidNumberOfArgumentsConfigException(KW_ROOT, line);
+	}
+	location.setRoot(parameters[0]);
+}
+
 LocationBlock	getLocationBlock() {
 	LocationBlock				location;
 	std::string					keyword;
@@ -166,23 +205,17 @@ LocationBlock	getLocationBlock() {
 
 		parameters = getParameters();
 		if (keyword == KW_AUTOINDEX) {
-			if (parameters.size() != 1) {
-				throw InvalidNumberOfArgumentsConfigException(KW_AUTOINDEX, line);
-			}
-			location.setAutoindex(parameters[0]);
+			setAutoindex(location, parameters);
 		} else if (keyword == KW_CGI_PASS) {
-			if (parameters.size() != 2) {
-				throw InvalidNumberOfArgumentsConfigException(KW_CGI_PASS, line);
-			}
-			location.setCGIs(parameters[0], parameters[1]);
+			setCGIs(location, parameters);
 		} else if (keyword == KW_INDEX) {
 			location.setIndex(parameters);
 		} else if (keyword == KW_METHODS_ALLOWED) {
-			location.setMethodsAllowed(parameters);
+			setMethodsAllowed(location, parameters);
 		} else if (keyword == KW_REDIRECT) {
-			location.setRedirect(parameters);
+			setRedirect(location, parameters);
 		} else if (keyword == KW_ROOT) {
-			location.setRoot(parameters);
+			setRoot(location, parameters);
 		}
 	}
 

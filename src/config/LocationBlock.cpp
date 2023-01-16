@@ -7,7 +7,7 @@ void LocationBlock::setPath(const std::string &parameter) {
 void LocationBlock::setAutoindex(const std::string& parameter) {
 	if (parameter == "on") {
 		_autoindex = true;
-	} else if (parameter == "on") {
+	} else if (parameter == "off") {
 		_autoindex = false;
 	}
 }
@@ -20,14 +20,21 @@ void LocationBlock::setIndex(const std::vector<std::string>& parameter) {
 	_index = parameter;
 }
 
-void LocationBlock::setMethodsAllowed(const std::vector<std::string> &parameter) {
-	_methods_allowed = parameter;
+void LocationBlock::setMethodsAllowed(const std::string& method) {
+	if (method == "GET" ||
+		method == "POST" ||
+		method == "DELETE") {
+		_methods_allowed.push_back(method);
+	} else {
+		throw std::exception();
+	}
 }
 
-void LocationBlock::setRedirect(const std::vector<std::string> &parameter) {
-	_redirect = parameter;
+void LocationBlock::setRedirect(const std::string& code, const std::string& uri) {
+	_redirect.code = std::stoi(code);
+	_redirect.uri = uri;
 }
 
-void LocationBlock::setRoot(const std::vector<std::string>& parameter) {
-//	_root = parameter;
+void LocationBlock::setRoot(const std::string& path) {
+	_root = path;
 }

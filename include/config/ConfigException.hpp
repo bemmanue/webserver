@@ -31,6 +31,25 @@ private:
 	size_t		_line;
 };
 
+class InvalidMethodConfigException : public std::exception {
+public:
+	explicit InvalidMethodConfigException(const std::string& method, size_t line)
+			: _method(method), _line(line) {}
+
+	virtual ~InvalidMethodConfigException() throw() {}
+
+	virtual const char* what() const throw() {
+		std::string msg;
+
+		msg = "invalid method \"" + _method + "\" in line " + std::to_string(_line);
+		return msg.c_str();
+	}
+
+private:
+	std::string	_method;
+	size_t		_line;
+};
+
 class UnknownDirectiveConfigException : public std::exception {
 public:
 	explicit UnknownDirectiveConfigException(const std::string& directive, size_t line)
@@ -98,7 +117,7 @@ public:
 	virtual const char* what() const throw() {
 		std::string msg;
 
-		msg = "invalid number of arguments in \"" + _directive + " in line " + std::to_string(_line);
+		msg = "invalid number of arguments in \"" + _directive + "\" in line " + std::to_string(_line);
 		return msg.c_str();
 	}
 

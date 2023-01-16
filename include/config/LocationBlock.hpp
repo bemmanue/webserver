@@ -10,31 +10,28 @@ class LocationBlock {
 public:
 	typedef std::vector<std::string>			AcceptedMethods;
 	typedef std::map<std::string, std::string>	CGIs;
+	typedef struct s_Redirect {
+		int			code;
+		std::string	uri;
+	}	Redirect;
 
 //private:
 	std::string					_path;
 	bool						_autoindex;
 	CGIs						_CGIs;
 	std::vector<std::string>	_index;
-	std::vector<std::string>	_methods_allowed;
-	std::vector<std::string>	_redirect;
+	AcceptedMethods				_methods_allowed;
+	Redirect					_redirect;
 	std::string					_root;
-//	std::string		_path;
-//	AcceptedMethods	_accepted_methods;
-//	std::string		_redirect;
-//	std::string		_root;
-//	bool			_autoindex;
-//	std::string 	_index;
-//	CGIs			_CGIs;
 
 public:
 	void setPath(const std::string& parameter);
 	void setAutoindex(const std::string& parameter);
 	void setCGIs(const std::string& extension, const std::string& path);
 	void setIndex(const std::vector<std::string>& parameter);
-	void setMethodsAllowed(const std::vector<std::string>& parameter);
-	void setRedirect(const std::vector<std::string>& parameter);
-	void setRoot(const std::vector<std::string>& parameter);
+	void setMethodsAllowed(const std::string& method);
+	void setRedirect(const std::string& code, const std::string& uri);
+	void setRoot(const std::string& path);
 
 };
 

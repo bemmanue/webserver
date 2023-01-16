@@ -41,10 +41,6 @@ void ServerBlock::print() {
 		}
 		std::cout << std::endl;
 
-		std::cout << "redirect: " << std::endl;
-		for (int i = 0; i < _location[i]._redirect.size(); ++i) {
-			std::cout << _location[i]._redirect[i] << " ";
-		}
 		std::cout << std::endl;
 		std::cout << "root: " << _location[i]._root << std::endl;
 	}
