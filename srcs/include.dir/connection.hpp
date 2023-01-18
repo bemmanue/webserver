@@ -6,18 +6,13 @@
 
 namespace ft
 {
-	class Connection {
+	class connection {
 	private:
-		struct sockaddr_in	channel_;
-		const sock_t		sock_fd_;
-		const int 			bind_;
-		int 				opts_;
-		time_t				ses_;
+		connection operator=(connection const &rhs);
+		connection(connection const &rhs);
 
-		Connection operator=(Connection const &rhs);
-		Connection(Connection const &rhs);
 	public:
-		Connection();
-		virtual ~Connection();
-	};
+		connection();
+		virtual ~connection();
+    };
 }
