@@ -72,5 +72,8 @@ connection::connection(connection& rhs) {
               sizeof (struct pollfd) * FT_LISTEN_CLIENT_LIMIT);
   numberOf = rhs.numberOf;
 }
+//int connection::getNumberOf() const {
+//  return numberOf;
+//}
 
 }  // namespace ft

@@ -80,6 +80,8 @@ void server::listenSocket() {
     throw MyException(str);
   }
   connections = new connection(socket_);
+//  bzero(theirAddrArr, sizeof (struct sockaddr_storage) *
+//        FT_LISTEN_CLIENT_LIMIT);
 }
 
 server::server(const char *port)
@@ -131,6 +133,29 @@ sock_t server::getSocket() const {
   return socket_;
 }
 
+void server::acceptConnections() {
+  sock_t newConnection;
+//  socklen_t addrSize;
+
+//  candidate for maybe later
+//  newConnection = accept(socket_, (struct sockaddr *)
+//                         &theirAddrArr[connections->getNumberOf()], &addrSize);
+  while (true) {
+    newConnection = accept(socket_, NULL, NULL);
+    if (newConnection < 0) {
+      if (errno != EWOULDBLOCK) {
+        throw MyException("accept() failed!");
+      }
+      break;
+    }
+    if (!connections->addConnection(newConnection)) {
+      std::cout << "Can't accept any more connections!";
+      break;
+    }
+    nfds++;
+  }
+}
+
 int server::serve() {
   int pollResult;
   int timeout = 100;
@@ -151,8 +176,12 @@ int server::serve() {
     if (fds[i].revents != POLLIN) {
       throw MyException("Poll result is unexpected!");
     }
-  }
+    if (fds[i].fd == socket_) {
+      acceptConnections();
+    } else {
 
+    }
+  }
   return pollResult;
 }
 

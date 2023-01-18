@@ -52,6 +52,9 @@ class server {
   static int serverNumber;
   int serverId;
   nfds_t nfds;
+//  struct sockaddr_storage theirAddrArr[FT_LISTEN_CLIENT_LIMIT];
+
+  void acceptConnections();
 };
 
 }  // namespace ft

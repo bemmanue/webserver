@@ -19,6 +19,7 @@ class connection {
   struct pollfd *getConnections();
   bool addConnection(sock_t newFd);
   bool removeConnection(sock_t oldFd);
+//  int getNumberOf() const;
 
   explicit connection(sock_t listeningSocket);
   connection(connection &rhs);
