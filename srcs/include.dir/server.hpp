@@ -21,7 +21,7 @@ class server {
  public:
   static server *ofPort(std::string &strPort);
 
-  connection getConnection() const;
+  connection *getConnection();
   sock_t getSocket() const;
   int serve();
 
@@ -37,7 +37,7 @@ class server {
   void getSocketDescriptor(const char *port);
   void setOptions() const;
   void bindSocket();
-  void listenSocket() const;
+  void listenSocket();
 
   /*Socket*/
   struct addrinfo   hints_;
@@ -45,9 +45,10 @@ class server {
   struct addrinfo*  record_;
 
   /*Poll*/
-  struct pollfd fds[FT_LISTEN_CLIENT_LIMIT]; // 10 is maximum
-                                             // allowed connections for server
-  connection connection_list_;
+//  struct pollfd fds[FT_LISTEN_CLIENT_LIMIT];
+// 10 is maximum allowed connections for server
+// moved to connections
+  connection * connections;
   static int serverNumber;
   int serverId;
   nfds_t nfds;

@@ -2,7 +2,7 @@
 
 namespace ft {
 
-struct pollfd *connection::getConnections() const {
+struct pollfd *connection::getConnections() {
   return clientFds;
 }
 
@@ -40,10 +40,8 @@ bool connection::removeConnection(sock_t oldFd) {
 
 connection::connection(sock_t listeningSocket)
     : clientFds(), numberOf(0)  {
-  if (numberOf == 0) {
-    clientFds = new struct pollfd[FT_LISTEN_CLIENT_LIMIT];
-    bzero(clientFds, sizeof (*clientFds) * 10);
-  }
+  clientFds = new struct pollfd[FT_LISTEN_CLIENT_LIMIT];
+  bzero(clientFds, sizeof (*clientFds) * FT_LISTEN_CLIENT_LIMIT);
   if (!addConnection(listeningSocket)) {
     std::string str = "poll exception: ";
     str.insert(0, "couldn't init connection");
@@ -51,5 +49,28 @@ connection::connection(sock_t listeningSocket)
   }
 }
 connection::connection() : numberOf(0), clientFds() {}
+
+connection& connection::operator=(connection const &rhs) {
+  if (&rhs == this) {
+    return *this;
+  }
+  this->clientFds =
+      new struct pollfd[sizeof (struct pollfd) * FT_LISTEN_CLIENT_LIMIT];
+  std::memcpy(this->clientFds, rhs.clientFds,
+              sizeof (struct pollfd) * FT_LISTEN_CLIENT_LIMIT);
+  numberOf = rhs.numberOf;
+  return *this;
+}
+
+connection::connection(connection& rhs) {
+  if (&rhs == this) {
+    return;
+  }
+  this->clientFds =
+      new struct pollfd[sizeof (struct pollfd) * FT_LISTEN_CLIENT_LIMIT];
+  std::memcpy(this->clientFds, rhs.clientFds,
+              sizeof (struct pollfd) * FT_LISTEN_CLIENT_LIMIT);
+  numberOf = rhs.numberOf;
+}
 
 }  // namespace ft

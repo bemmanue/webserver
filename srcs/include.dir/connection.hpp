@@ -16,19 +16,20 @@ namespace ft {
 
 class connection {
  public:
-  struct pollfd *getConnections() const;
+  struct pollfd *getConnections();
   bool addConnection(sock_t newFd);
   bool removeConnection(sock_t oldFd);
 
   explicit connection(sock_t listeningSocket);
+  connection(connection &rhs);
+  connection &operator=(connection const &rhs);
   connection();
-
- private:
-  int numberOf;
   ~connection() {
     delete[] clientFds;
   }
-  void operator=(connection const&);
+
+ private:
+  int numberOf;
   struct pollfd *clientFds;
 };
 

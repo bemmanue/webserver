@@ -12,7 +12,6 @@ void server::initStruct() {
   hints_.ai_socktype = SOCK_STREAM;
   hints_.ai_protocol = IPPROTO_TCP;
   hints_.ai_flags= AI_PASSIVE;
-  bzero(fds, sizeof (struct pollfd) * 10);
 }
 
 void server::getSocketDescriptor(const char *port) {
@@ -74,16 +73,18 @@ void server::bindSocket() {
   }
 }
 
-void server::listenSocket() const {
+void server::listenSocket() {
   if (listen(socket_, FT_LISTEN_CLIENT_LIMIT) < 0) {
     std::string str = "listen exception: ";
     str.insert(0, strerror(errno));
     throw MyException(str);
   }
+  connections = new connection(socket_);
 }
 
 server::server(const char *port)
-    : hints_(), socket_(0), record_(NULL), fds(), nfds(1) {
+    : hints_(), socket_(0),
+      nfds(1) {
   serverId = serverNumber++;
   initStruct();
   getSocketDescriptor(port);
@@ -122,8 +123,8 @@ server *server::ofPort(std::string &strPort) {
 
 /*END OF SERVER INITIALIZATION BLOCK*/
 
-connection server::getConnection() const {
-  return connection_list_;
+connection *server::getConnection() {
+  return connections;
 }
 
 sock_t server::getSocket() const {
@@ -133,7 +134,7 @@ sock_t server::getSocket() const {
 int server::serve() {
   int pollResult;
   int timeout = 100;
-
+  struct pollfd *fds = connections->getConnections();
 
   pollResult = poll(fds, nfds, timeout);
   if (pollResult < 0) {
@@ -144,7 +145,12 @@ int server::serve() {
     return pollResult;
   }
   for (int i = 0, currentSize = nfds; i < currentSize; i++) {
-
+    if (fds[i].revents == 0) {
+      continue ;
+    }
+    if (fds[i].revents != POLLIN) {
+      throw MyException("Poll result is unexpected!");
+    }
   }
 
   return pollResult;
