@@ -2,3 +2,4 @@
 *.o
 *.d
 cmake-build-debug
+.ccls-cache

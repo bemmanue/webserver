@@ -1,47 +1,57 @@
 #pragma once
 
 #include "connection.hpp"
-
-
 #include <list>
-#include <string>
-#include <cstring>
-#include <sys/socket.h>
-#include <sys/types.h>
-#include <netdb.h>
-#include <netinet/in.h>
-#include <cerrno>
+#include <iostream>
+#include <sys/ioctl.h>
+#include <sys/poll.h>
+#include <sstream>
+
+//#define TEST
+
+#ifdef TEST
+# define PORT "8081"
+
+#endif
 
 namespace ft {
 
 class server {
-public:
-  static server *of(int port);
+ public:
+  static server *ofPort(std::string &strPort);
+
+  const std::list<connection>& getConnections() const;
+  void setConnections(const std::list<connection>& connectionLists);
+  sock_t getSocket() const;
+  int serve();
 
  private:
   server();
+  explicit server(const char *port);
   ~server();
-  explicit server(int port);
   server(server const&);
   void operator=(server const&);
 
-  struct addrinfo  hints_;
-  struct addrinfo  *record_;
-  sock_t           socket_;
-  int              bind_;
-  int              opts_;
-  time_t           ses_;
-
-
-  void getSocketDescriptor(const int& port);
-
-  std::list<connection> connection_lists_;
+  /*System calls wrappers*/
   void initStruct();
+  void getSocketDescriptor(const char *port);
+  void setOptions() const;
   void bindSocket();
-  void connectSocket();
+  void listenSocket() const;
+  void setListeningSocket();
+
+  /*Socket */
+  struct addrinfo   hints_;
+  sock_t            socket_;
+  struct addrinfo*  record_;
+
+  struct pollfd fds[10];
+  std::list<connection> connection_lists_;
+  static int serverNumber;
+  int serverId;
+  nfds_t nfds[10];
 
   /*CHECK THAT THIS WORKS CORRECTLY*/
-
   class MyException : public std::exception {
    public:
     explicit MyException(const std::string &err) throw()
@@ -65,7 +75,6 @@ public:
    protected:
     std::string err_;
   };
-
 };
 
-}  // namespace Server
+}  // namespace ft

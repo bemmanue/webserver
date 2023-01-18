@@ -1,7 +1,13 @@
 #include "include.dir/connection.hpp"
 
 namespace ft {
+connection::connection(int port) {
 
-connection::connection() {}
-connection::~connection() {}
 }
+
+connection::~connection() {
+
+}
+
+
+}  // namespace ft

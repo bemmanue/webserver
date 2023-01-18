@@ -1,18 +1,29 @@
 #pragma once
 
-#include <netinet/in.h>
-#include "utils.hpp"
+#include <netdb.h>
+#include <sys/types.h>
+#include <sys/socket.h>
+#include <cstring>
+#include <string>
 #include <ctime>
 
-namespace ft
-{
-	class connection {
-	private:
-		connection operator=(connection const &rhs);
-		connection(connection const &rhs);
+#include "utils.hpp"
 
-	public:
-		connection();
-		virtual ~connection();
-    };
-}
+namespace ft {
+
+#define FT_LISTEN_CLIENT_LIMIT 10
+
+class connection {
+ public:
+  explicit connection(int port);
+  ~connection();
+
+ private:
+  connection() {};
+  connection(connection const&);
+  void operator=(connection const&);
+
+};
+
+
+}  // namespace ft
