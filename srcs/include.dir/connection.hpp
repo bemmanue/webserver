@@ -1,13 +1,14 @@
 #pragma once
 
 #include <netdb.h>
-#include <sys/types.h>
+#include <sys/poll.h>
 #include <sys/socket.h>
+#include <sys/types.h>
 #include <cstring>
-#include <string>
 #include <ctime>
-
 #include "utils.hpp"
+#include "MyException.hpp"
+#include <cerrno>
 
 namespace ft {
 
@@ -15,14 +16,20 @@ namespace ft {
 
 class connection {
  public:
-  explicit connection(int port);
-  ~connection();
+  struct pollfd *getConnections() const;
+  bool addConnection(sock_t newFd);
+  bool removeConnection(sock_t oldFd);
+
+  explicit connection(sock_t listeningSocket);
+  connection();
 
  private:
-  connection() {};
-  connection(connection const&);
+  int numberOf;
+  ~connection() {
+    delete[] clientFds;
+  }
   void operator=(connection const&);
-
+  struct pollfd *clientFds;
 };
 
 

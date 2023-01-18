@@ -82,13 +82,8 @@ void server::listenSocket() const {
   }
 }
 
-void server::setListeningSocket() {
-  fds[0].fd = socket_;
-  fds[0].events = POLLIN;
-}
-
 server::server(const char *port)
-    : hints_(), socket_(0), record_(NULL), fds() {
+    : hints_(), socket_(0), record_(NULL), fds(), nfds(1) {
   serverId = serverNumber++;
   initStruct();
   getSocketDescriptor(port);
@@ -97,7 +92,6 @@ server::server(const char *port)
   listenSocket();
   freeaddrinfo(results);
   results = NULL;
-  setListeningSocket();
 }
 
 server::server() {
@@ -128,21 +122,31 @@ server *server::ofPort(std::string &strPort) {
 
 /*END OF SERVER INITIALIZATION BLOCK*/
 
-const std::list<connection>& server::getConnections() const {
-  return connection_lists_;
+connection server::getConnection() const {
+  return connection_list_;
 }
-void server::setConnections(const std::list<connection>& connectionLists) {
-  connection_lists_ = connectionLists;
-}
+
 sock_t server::getSocket() const {
   return socket_;
 }
 
 int server::serve() {
   int pollResult;
-  int timeout = 1000;
-  pollResult = poll(fds, nfds[serverId], timeout);
-//https://www.ibm.com/docs/en/i/7.1?topic=designs-using-poll-instead-select
+  int timeout = 100;
+
+
+  pollResult = poll(fds, nfds, timeout);
+  if (pollResult < 0) {
+    std::string str = "poll exception: ";
+    str.insert(0, strerror(errno));
+    throw MyException(str);
+  } else if (pollResult == 0) {
+    return pollResult;
+  }
+  for (int i = 0, currentSize = nfds; i < currentSize; i++) {
+
+  }
+
   return pollResult;
 }
 

@@ -1,8 +1,6 @@
-//
-// Created by Davis Willard on 12/2/22.
-//
-
 #pragma once
+
+#include <list>
 
 namespace ft
 {

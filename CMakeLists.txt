@@ -9,4 +9,4 @@ add_executable(webserv
         srcs/include.dir/server.hpp
         srcs/include.dir/connection.hpp
         srcs/connection.cpp
-        srcs/include.dir/utils.hpp)
+        srcs/include.dir/utils.hpp srcs/include.dir/MyException.hpp)
