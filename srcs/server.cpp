@@ -18,7 +18,7 @@ void server::getSocketDescriptor(const char *port) {
   int status;
   struct addrinfo* record;
 
-  status = getaddrinfo(NULL, port, &hints_, &results);
+  status = getaddrinfo("localhost", port, &hints_, &results);
 
   if (status != 0) {
     std::string str = "getaddrinfo exception: ";
@@ -44,7 +44,7 @@ void server::setOptions() const {
   int opt = 1;
 
   if (setsockopt(socket_, SOL_SOCKET, SO_REUSEADDR,
-                 &opt, sizeof (int)) < -1) {
+                 (char *)&opt, sizeof (int)) < 0) {
     std::string str = "setsockopt exception: ";
     str.insert(0, strerror(errno));
     throw MyException(str);
@@ -87,7 +87,6 @@ void server::listenSocket() {
 server::server(const char *port)
     : hints_(), socket_(0),
       nfds(1) {
-  serverId = serverNumber++;
   initStruct();
   getSocketDescriptor(port);
   setOptions();
@@ -109,7 +108,7 @@ server *server::ofPort(std::string &strPort) {
   short port;
   ss >> port;
 
-  if (port < 1024) {
+  if (port < 1024 && port != 80) {
     throw MyException("Trying to init server on restricted port");
   }
 
@@ -149,10 +148,86 @@ void server::acceptConnections() {
       break;
     }
     if (!connections->addConnection(newConnection)) {
-      std::cout << "Can't accept any more connections!";
+      std::cout << "Can't accept any more connections!" << std::endl;
       break;
     }
     nfds++;
+  }
+}
+
+void server::sendAndReceive(int fd, short revents) {
+  char buffer[BUFFER_SIZE + 1];
+  int rc;
+
+  if (revents & POLLIN) {
+    rc = recv(fd, buffer, sizeof (buffer), 0);
+    if (rc == 0) {
+      std::cout << "Connection closed\n" << std::endl;
+    } else if (rc < 0 && errno != EWOULDBLOCK) {
+      std::string str = "Connection receive failed\n";
+      throw MyException(str);
+    } else {
+      std::cout << buffer << std::endl;
+    }
+  } else if (revents & POLLOUT) {
+    const char *strrr = "<!doctype html>\n"
+        "<html>\n"
+        "<head>\n"
+        "    <title>Example Domain</title>\n"
+        "\n"
+        "    <meta charset=\"utf-8\" />\n"
+        "    <meta http-equiv=\"Content-type\" content=\"text/html; "
+        "charset=utf-8\" />\n"
+        "    <meta name=\"viewport\" content=\"width=device-width, "
+        "initial-scale=1\" />\n"
+        "    <style type=\"text/css\">\n"
+        "    body {\n"
+        "        background-color: #f0f0f2;\n"
+        "        margin: 0;\n"
+        "        padding: 0;\n"
+        "        font-family: -apple-system, system-ui, BlinkMacSystemFont, "
+        "\"Segoe UI\", \"Open Sans\", \"Helvetica Neue\", Helvetica, Arial, "
+        "sans-serif;\n"
+        "        \n"
+        "    }\n"
+        "    div {\n"
+        "        width: 600px;\n"
+        "        margin: 5em auto;\n"
+        "        padding: 2em;\n"
+        "        background-color: #fdfdff;\n"
+        "        border-radius: 0.5em;\n"
+        "        box-shadow: 2px 3px 7px 2px rgba(0,0,0,0.02);\n"
+        "    }\n"
+        "    a:link, a:visited {\n"
+        "        color: #38488f;\n"
+        "        text-decoration: none;\n"
+        "    }\n"
+        "    @media (max-width: 700px) {\n"
+        "        div {\n"
+        "            margin: 0 auto;\n"
+        "            width: auto;\n"
+        "        }\n"
+        "    }\n"
+        "    </style>    \n"
+        "</head>\n"
+        "\n"
+        "<body>\n"
+        "<div>\n"
+        "    <h1>Example Domain</h1>\n"
+        "    <p>This domain is for use in illustrative examples in documents. You "
+        "may use this\n"
+        "    domain in literature without prior coordination or asking for "
+        "permission.</p>\n"
+        "    <p><a href=\"https://www.iana.org/domains/example\">More "
+        "information...</a></p>\n"
+        "</div>\n"
+        "</body>\n"
+        "</html>";
+    rc = send(fd, strrr, std::strlen(strrr), 0);
+    if (rc < 0) {
+      std::string str = "Connection send failed\n";
+      throw MyException(str);
+    }
   }
 }
 
@@ -173,13 +248,10 @@ int server::serve() {
     if (fds[i].revents == 0) {
       continue ;
     }
-    if (fds[i].revents != POLLIN) {
-      throw MyException("Poll result is unexpected!");
-    }
     if (fds[i].fd == socket_) {
       acceptConnections();
     } else {
-
+      sendAndReceive(fds[i].fd, fds[i].revents);
     }
   }
   return pollResult;

@@ -17,6 +17,8 @@
 
 namespace ft {
 
+static const std::size_t BUFFER_SIZE = 65536;
+
 class server {
  public:
   static server *ofPort(std::string &strPort);
@@ -48,13 +50,15 @@ class server {
 //  struct pollfd fds[FT_LISTEN_CLIENT_LIMIT];
 // 10 is maximum allowed connections for server
 // moved to connections
-  connection * connections;
-  static int serverNumber;
-  int serverId;
+
+  connection* connections;
   nfds_t nfds;
+
 //  struct sockaddr_storage theirAddrArr[FT_LISTEN_CLIENT_LIMIT];
 
+  /*Poll operations with connections*/
   void acceptConnections();
+  void sendAndReceive(int fd, short revents);
 };
 
 }  // namespace ft

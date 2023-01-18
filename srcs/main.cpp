@@ -9,7 +9,10 @@ int main(int argc, char *argv[]) {
   std::string testPort = "8081";
   serverList.push_back(ft::server::ofPort(testPort));
   while (true) {
-    sinSize = sizeof their_addr;
-
+    for (std::list<ft::server *>::iterator iter = serverList.begin();
+         iter != serverList.end();
+         ++iter) {
+      (*iter)->serve();
+    }
   }
 }
