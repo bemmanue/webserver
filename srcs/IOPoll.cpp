@@ -48,7 +48,7 @@ int IOPoll::pollOut(int fd, connection *connections) {
             << response_body.str();
   int sd;
 
-  sd = send(fd, response_body.str().c_str(), response->str().size(), 0);
+  sd = send(fd, response->str().c_str(), response->str().size(), 0);
   while (sd > 0) {
     if (sd < 0) {
       std::string str = "Connection send failed\n";
