@@ -14,17 +14,13 @@ namespace ft {
 
 #define FT_LISTEN_CLIENT_LIMIT 10
 
-enum status {
-  RECEIVE = false,
-  SEND = true
-};
 
 class connection {
  public:
   struct pollfd *getConnections();
   bool addConnection(sock_t newFd);
   bool removeConnection(sock_t oldFd);
-  void setSendable(status flag, sock_t responceSocket);
+  void setEventFlag(short flag, sock_t responceSocket);
 //  int getNumberOf() const;
 
   explicit connection(sock_t listeningSocket);
@@ -37,7 +33,6 @@ class connection {
 
  private:
   int numberOf;
-  bool events[FT_LISTEN_CLIENT_LIMIT];
   struct pollfd *clientFds;
 };
 

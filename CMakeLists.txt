@@ -6,10 +6,11 @@ set(CMAKE_CXX_STANDARD 98)
 add_executable(
         webserv
         srcs/main.cpp
-        srcs/server.cpp
-        srcs/include.dir/server.hpp
-        srcs/include.dir/connection.hpp
-        srcs/connection.cpp
+
         srcs/include.dir/utils.hpp
         srcs/include.dir/MyException.hpp
+
+        srcs/server.cpp srcs/include.dir/server.hpp
+        srcs/connection.cpp srcs/include.dir/connection.hpp
+        srcs/IOPoll.cpp srcs/include.dir/IOPoll.hpp
 )

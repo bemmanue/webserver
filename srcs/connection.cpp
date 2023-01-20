@@ -38,16 +38,16 @@ bool connection::removeConnection(sock_t oldFd) {
   return false;
 }
 
-void connection::setSendable(status flag, sock_t responceSocket) {
+void connection::setEventFlag(short flag, sock_t responceSocket) {
   for (int i = 0; i < numberOf; i++) {
     if (clientFds[i].fd == responceSocket) {
-      events[i] = flag;
+      clientFds[i].events = flag;
     }
   }
 }
 
 connection::connection(sock_t listeningSocket)
-    : clientFds(), numberOf(0), events()  {
+    : clientFds(), numberOf(0) {
   clientFds = new struct pollfd[FT_LISTEN_CLIENT_LIMIT];
   bzero(clientFds, sizeof (*clientFds) * FT_LISTEN_CLIENT_LIMIT);
   if (!addConnection(listeningSocket)) {
@@ -57,7 +57,7 @@ connection::connection(sock_t listeningSocket)
   }
 }
 
-connection::connection() : numberOf(0), clientFds(), events() {}
+connection::connection() : numberOf(0), clientFds() {}
 
 connection& connection::operator=(connection const &rhs) {
   if (&rhs == this) {
@@ -67,12 +67,11 @@ connection& connection::operator=(connection const &rhs) {
       new struct pollfd[sizeof (struct pollfd) * FT_LISTEN_CLIENT_LIMIT];
   std::memcpy(this->clientFds, rhs.clientFds,
               sizeof (struct pollfd) * FT_LISTEN_CLIENT_LIMIT);
-  std::memcpy(this->events, rhs.events, sizeof events);
   numberOf = rhs.numberOf;
   return *this;
 }
 
-connection::connection(connection& rhs) : events() {
+connection::connection(connection& rhs) {
   if (&rhs == this) {
     return;
   }
@@ -80,7 +79,6 @@ connection::connection(connection& rhs) : events() {
       new struct pollfd[sizeof (struct pollfd) * FT_LISTEN_CLIENT_LIMIT];
   std::memcpy(this->clientFds, rhs.clientFds,
               sizeof (struct pollfd) * FT_LISTEN_CLIENT_LIMIT);
-  std::memcpy(this->events, rhs.events, sizeof events);
   numberOf = rhs.numberOf;
 }
 

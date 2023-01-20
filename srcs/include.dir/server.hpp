@@ -1,6 +1,7 @@
 #pragma once
 
 #include "connection.hpp"
+#include "IOPoll.hpp"
 #include "MyException.hpp"
 #include <iostream>
 #include <sys/ioctl.h>
@@ -47,13 +48,8 @@ class server {
   struct addrinfo*  record_;
 
   /*Poll*/
-//  struct pollfd fds[FT_LISTEN_CLIENT_LIMIT];
-// 10 is maximum allowed connections for server
-// moved to connections
-
   connection* connections;
   nfds_t nfds;
-
 //  struct sockaddr_storage theirAddrArr[FT_LISTEN_CLIENT_LIMIT];
 
   /*Poll operations with connections*/
