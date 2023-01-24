@@ -1,7 +1,11 @@
 #include "../../include/config/ServerBlock.hpp"
 
-void ServerBlock::setListen(const std::vector<std::string>& value) {
-//	_listen = parameter;
+void ServerBlock::setAddr(const std::string& addr) {
+	_addr = addr;
+}
+
+void ServerBlock::setPort(size_t port) {
+	_port = port;
 }
 
 void ServerBlock::setServerName(const std::vector<std::string>& value) {
@@ -21,7 +25,8 @@ void ServerBlock::setLocation(const LocationBlock& parameter) {
 }
 
 void ServerBlock::print() {
-	std::cout << "listen: " <<  _listen << std::endl;
+	std::cout << "port: " << _port << std::endl;
+	std::cout << "addr: " << _addr << std::endl;
 	std::cout << "server_name: " << _server_name << std::endl << "error_pages: ";
 
 	for (int i = 0; i < _error_pages.size(); ++i) {

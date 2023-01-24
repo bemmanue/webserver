@@ -8,6 +8,7 @@
 #include "ConfigException.hpp"
 #include "LocationBlock.hpp"
 #include "ServerBlock.hpp"
+#include "../URI.hpp"
 
 #define KW_AUTOINDEX			"autoindex"
 #define KW_CGI_PASS				"cgi_pass"

@@ -11,20 +11,16 @@ public:
 	typedef std::map<std::string, LocationBlock>	Locations;
 
 private:
-	std::string					_listen;
+	std::string     			_addr;
+	size_t            			_port;
 	std::string					_server_name;
 	std::vector<std::string>	_error_pages;
 	std::string					_client_max_body_size;
 	std::vector<LocationBlock>	_location;
-//	std::string		_host;
-//	int				_port;
-//	std::string		_server_name;
-//	ErrorPages		_error_pages;
-//	int				_client_max_body_size;
-//	Locations		_locations;
 
 public:
-	void setListen(const std::vector<std::string>& value);
+	void setAddr(const std::string& addr);
+	void setPort(size_t port);
 	void setServerName(const std::vector<std::string>& value);
 	void setErrorPages(const std::vector<std::string>& value);
 	void setClientMaxBodySize(const std::vector<std::string>& value);

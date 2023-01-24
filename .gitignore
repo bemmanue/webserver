@@ -1,4 +1,5 @@
-.idea
-*.o
-*.d
-cmake-build-debug
+*
+!*/**/*.cpp
+!*/**/*.hpp
+!CMakeLists.txt
+!*/**/*.conf

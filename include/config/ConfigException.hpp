@@ -1,147 +1,84 @@
 #ifndef CONFIG_EXCEPTION_HPP
 #define CONFIG_EXCEPTION_HPP
 
-class EmptyFileConfigException : public std::exception {
-public:
-	explicit EmptyFileConfigException() {}
-	virtual ~EmptyFileConfigException() throw() {}
 
-	virtual const char* what() const throw() {
-		std::string msg = "configuration file is empty";
-		return msg.c_str();
+class ConfigException : public std::exception {
+public:
+	explicit ConfigException(const std::string& msg) {
+		_message = new std::string(msg);
+	}
+	explicit ConfigException(const std::string& msg, size_t line) {
+		_message = new std::string(msg + " in line " + std::to_string(line));
+	}
+	virtual ~ConfigException() throw() { delete _message; }
+	virtual const char* what() const throw() { return _message->c_str(); }
+
+protected:
+	std::string*	_message;
+};
+
+
+class EmptyFileConfigException : public ConfigException {
+public:
+	explicit EmptyFileConfigException() :
+		ConfigException("configuration file is empty") {
 	}
 };
 
-class NotAllowedDirectiveConfigException : public std::exception {
+
+class UnexpectedEndOfFileConfigException : public ConfigException {
 public:
-	explicit NotAllowedDirectiveConfigException(const std::string& directive, size_t line)
-			: _directive(directive), _line(line) {}
-
-	virtual ~NotAllowedDirectiveConfigException() throw() {}
-
-	virtual const char* what() const throw() {
-		std::string msg;
-
-		msg = "directive \"" + _directive + "\" is not allowed here in line " + std::to_string(_line);
-		return msg.c_str();
+	explicit UnexpectedEndOfFileConfigException(size_t line) :
+		ConfigException("unexpected end of file, expecting \"}\"", line) {
 	}
-
-private:
-	std::string	_directive;
-	size_t		_line;
 };
 
-class InvalidMethodConfigException : public std::exception {
+
+class NotAllowedDirectiveConfigException : public ConfigException {
 public:
-	explicit InvalidMethodConfigException(const std::string& method, size_t line)
-			: _method(method), _line(line) {}
-
-	virtual ~InvalidMethodConfigException() throw() {}
-
-	virtual const char* what() const throw() {
-		std::string msg;
-
-		msg = "invalid method \"" + _method + "\" in line " + std::to_string(_line);
-		return msg.c_str();
+	explicit NotAllowedDirectiveConfigException(const std::string& directive, size_t line) :
+		ConfigException("directive \"" + directive + "\" is not allowed here", line){
 	}
-
-private:
-	std::string	_method;
-	size_t		_line;
 };
 
-class UnknownDirectiveConfigException : public std::exception {
+
+class InvalidMethodConfigException : public ConfigException {
 public:
-	explicit UnknownDirectiveConfigException(const std::string& directive, size_t line)
-		: _directive(directive), _line(line) {}
-
-	virtual ~UnknownDirectiveConfigException() throw() {}
-
-	virtual const char* what() const throw() {
-		std::string msg;
-
-		msg = "unknown directive \"" + _directive + "\" in line " + std::to_string(_line);
-		return msg.c_str();
+	explicit InvalidMethodConfigException(const std::string& method, size_t line) :
+		ConfigException("invalid method \"" + method + "\"", line){
 	}
-
-private:
-	std::string	_directive;
-	size_t		_line;
 };
 
-class UnexpectedTokenConfigException : public std::exception {
+
+class UnknownDirectiveConfigException : public ConfigException {
 public:
-	explicit UnexpectedTokenConfigException(const std::string& token, size_t line)
-		: _token(token), _line(line) {}
-
-	virtual ~UnexpectedTokenConfigException() throw() {}
-
-	virtual const char* what() const throw() {
-		std::string msg;
-
-		msg = "unexpected token \"" + _token + "\" in line " + std::to_string(_line);
-		return msg.c_str();
+	explicit UnknownDirectiveConfigException(const std::string& directive, size_t line) :
+		ConfigException("unknown directive \"" + directive + "\"", line) {
 	}
-
-private:
-	std::string _token;
-	size_t		_line;
 };
 
-class NoOpeningBraceConfigException : public std::exception {
+
+class UnexpectedTokenConfigException : public ConfigException {
 public:
-	explicit NoOpeningBraceConfigException(const std::string& directive, size_t line)
-		: _directive(directive), _line(line) {}
-
-	virtual ~NoOpeningBraceConfigException() throw() {}
-
-	virtual const char* what() const throw() {
-		std::string msg;
-
-		msg = "directive \"" + _directive + "\" has no opening \"{\" in line " + std::to_string(_line);
-		return msg.c_str();
+	explicit UnexpectedTokenConfigException(const std::string& token, size_t line) :
+		ConfigException("unexpected token \"" + token + "\"", line) {
 	}
-
-private:
-	std::string _directive;
-	size_t		_line;
 };
 
-class InvalidNumberOfArgumentsConfigException : public std::exception {
+
+class NoOpeningBraceConfigException : public ConfigException {
 public:
-	explicit InvalidNumberOfArgumentsConfigException(const std::string& directive, size_t line)
-			: _directive(directive), _line(line) {}
-
-	virtual ~InvalidNumberOfArgumentsConfigException() throw() {}
-
-	virtual const char* what() const throw() {
-		std::string msg;
-
-		msg = "invalid number of arguments in \"" + _directive + "\" in line " + std::to_string(_line);
-		return msg.c_str();
+	explicit NoOpeningBraceConfigException(const std::string& directive, size_t line) :
+		ConfigException("directive \"" + directive + "\" has no opening \"{\"", line) {
 	}
-
-private:
-	std::string _directive;
-	size_t		_line;
 };
 
-class UnexpectedEndOfFileConfigException : public std::exception {
+
+class InvalidNumberOfArgumentsConfigException : public ConfigException {
 public:
-	explicit UnexpectedEndOfFileConfigException(size_t line)
-			: _line(line) {}
-
-	virtual ~UnexpectedEndOfFileConfigException() throw() {}
-
-	virtual const char* what() const throw() {
-		std::string msg;
-
-		msg = "unexpected end of file, expecting \"}\" in line" + std::to_string(_line);
-		return msg.c_str();
+	explicit InvalidNumberOfArgumentsConfigException(const std::string& directive, size_t line) :
+		ConfigException("invalid number of arguments in \"" + directive + "\"", line) {
 	}
-
-private:
-	size_t		_line;
 };
 
 

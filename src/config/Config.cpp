@@ -45,20 +45,20 @@ bool isValidKeyword(const std::string& keyword) {
 
 bool isValidDirective(const std::string& directive, size_t context) {
 	if (context == CTX_MAIN) {
-		for (size_t i = 0; validMainDirectives[i]; ++i) {
-			if (directive == validMainDirectives[i]) {
+		for (size_t j = 0; validMainDirectives[j]; ++j) {
+			if (directive == validMainDirectives[j]) {
 				return true;
 			}
 		}
 	} else if (context == CTX_SERVER) {
-		for (size_t i = 0; validServerDirectives[i]; ++i) {
-			if (directive == validServerDirectives[i]) {
+		for (size_t j = 0; validServerDirectives[j]; ++j) {
+			if (directive == validServerDirectives[j]) {
 				return true;
 			}
 		}
 	} else if (context == CTX_LOCATION) {
-		for (size_t i = 0; validLocationDirectives[i]; ++i) {
-			if (directive == validLocationDirectives[i]) {
+		for (size_t j = 0; validLocationDirectives[j]; ++j) {
+			if (directive == validLocationDirectives[j]) {
 				return true;
 			}
 		}
@@ -69,7 +69,6 @@ bool isValidDirective(const std::string& directive, size_t context) {
 std::vector<char> readFile(const std::string& filename) {
 	std::ifstream file(filename, std::ios::binary | std::ios::ate);
 	std::streamsize size = file.tellg();
-	std::vector<char> buffer;
 
 	buffer.resize(size);
 	file.seekg(0, std::ios::beg);
@@ -140,28 +139,29 @@ std::string	getLocationPath() {
 	return path;
 }
 
-void	setAutoindex(LocationBlock& location, const std::vector<std::string>& parameters) {
-	if (parameters.size() != 1) {
+void	setAutoindex(LocationBlock& location, const std::vector<std::string>& params) {
+	if (params.size() != 1) {
 		throw InvalidNumberOfArgumentsConfigException(KW_AUTOINDEX, line);
 	}
-	location.setAutoindex(parameters[0]);
+	location.setAutoindex(params[0]);
 }
 
-void	setCGIs(LocationBlock& location, const std::vector<std::string>& parameters) {
-	if (parameters.size() != 2) {
+void	setCGIs(LocationBlock& location, const std::vector<std::string>& params) {
+	if (params.size() != 2) {
 		throw InvalidNumberOfArgumentsConfigException(KW_CGI_PASS, line);
 	}
-	location.setCGIs(parameters[0], parameters[1]);
+	location.setCGIs(params[0], params[1]);
 }
 
-void	setMethodsAllowed(LocationBlock& location, const std::vector<std::string>& parameters) {
-	int j = 0;
+void	setMethodsAllowed(LocationBlock& location, const std::vector<std::string>& params) {
+	int j;
+
 	try {
-		for (j = 0; j < parameters.size(); j++) {
-			location.setMethodsAllowed(parameters[j]);
+		for (j = 0; j < params.size(); j++) {
+			location.setMethodsAllowed(params[j]);
 		}
 	} catch (const std::exception& exception) {
-		throw InvalidMethodConfigException(parameters[j], line);
+		throw InvalidMethodConfigException(params[j], line);
 	}
 }
 
@@ -172,17 +172,40 @@ void	setRedirect(LocationBlock& location, const std::vector<std::string>& parame
 	location.setRedirect(parameters[0], parameters[1]);
 }
 
-void	setRoot(LocationBlock& location, const std::vector<std::string>& parameters) {
-	if (parameters.size() != 1) {
+void	setRoot(LocationBlock& location, const std::vector<std::string>& params) {
+	if (params.size() != 1) {
 		throw InvalidNumberOfArgumentsConfigException(KW_ROOT, line);
 	}
-	location.setRoot(parameters[0]);
+	location.setRoot(params[0]);
+}
+
+void	setListen(ServerBlock& server, const std::vector<std::string>& params) {
+	if (params.size() != 1) {
+		throw InvalidNumberOfArgumentsConfigException(KW_LISTEN, line);
+	}
+
+	URI uri;
+	uri.parse(params[0]);
+	server.setAddr(uri._host);
+	server.setPort(uri._port);
+}
+
+void	setClientMaxBodySize(ServerBlock& server, const std::vector<std::string>& params) {
+
+}
+
+void	setErrorPages(ServerBlock& server, const std::vector<std::string>& params) {
+
+}
+
+void	setServerNames(ServerBlock& server, const std::vector<std::string>& params) {
+
 }
 
 LocationBlock	getLocationBlock() {
 	LocationBlock				location;
 	std::string					keyword;
-	std::vector<std::string>	parameters;
+	std::vector<std::string>	params;
 
 	location.setPath(getLocationPath());
 
@@ -203,19 +226,19 @@ LocationBlock	getLocationBlock() {
 			break;
 		}
 
-		parameters = getParameters();
+		params = getParameters();
 		if (keyword == KW_AUTOINDEX) {
-			setAutoindex(location, parameters);
+			setAutoindex(location, params);
 		} else if (keyword == KW_CGI_PASS) {
-			setCGIs(location, parameters);
+			setCGIs(location, params);
 		} else if (keyword == KW_INDEX) {
-			location.setIndex(parameters);
+			location.setIndex(params);
 		} else if (keyword == KW_METHODS_ALLOWED) {
-			setMethodsAllowed(location, parameters);
+			setMethodsAllowed(location, params);
 		} else if (keyword == KW_REDIRECT) {
-			setRedirect(location, parameters);
+			setRedirect(location, params);
 		} else if (keyword == KW_ROOT) {
-			setRoot(location, parameters);
+			setRoot(location, params);
 		}
 	}
 
@@ -229,7 +252,7 @@ LocationBlock	getLocationBlock() {
 ServerBlock	getServerBlock() {
 	ServerBlock					server;
 	std::string					keyword;
-	std::vector<std::string>	parameters;
+	std::vector<std::string>	params;
 
 	if (getNextToken() != KW_OPENING_BRACE) {
 		throw NoOpeningBraceConfigException(KW_SERVER, line);
@@ -253,15 +276,15 @@ ServerBlock	getServerBlock() {
 			continue;
 		}
 
-		parameters = getParameters();
+		params = getParameters();
 		if (keyword == KW_CLIENT_MAX_BODY_SIZE) {
-			server.setClientMaxBodySize(parameters);
+			setClientMaxBodySize(server, params);
 		} else if (keyword == KW_ERROR_PAGE) {
-			server.setErrorPages(parameters);
+			setErrorPages(server, params);
 		} else if (keyword == KW_LISTEN) {
-			server.setListen(parameters);
+			setListen(server, params);
 		} else if (keyword == KW_SERVER_NAME) {
-			server.setServerName(parameters);
+			setServerNames(server, params);
 		}
 	}
 
