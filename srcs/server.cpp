@@ -49,12 +49,6 @@ void server::setOptions() const {
     str.insert(0, strerror(errno));
     throw MyException(str);
   }
-
-  if (ioctl(socket_, FIONBIO, &opt) < 0) {
-    std::string str = "ioctl exception: ";
-    str.insert(0, strerror(errno));
-    throw MyException(str);
-  }
 }
 
 void server::bindSocket() {
@@ -135,11 +129,7 @@ sock_t server::getSocket() const {
 
 void server::acceptConnections() {
   sock_t newConnection;
-//  socklen_t addrSize;
 
-//  candidate for maybe later
-//  newConnection = accept(socket_, (struct sockaddr *)
-//                         &theirAddrArr[connections->getNumberOf()], &addrSize);
   while (true) {
     newConnection = accept(socket_, NULL, NULL);
     if (newConnection < 0) {
