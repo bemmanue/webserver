@@ -9,15 +9,7 @@
 #include <sstream>
 #include <cerrno>
 
-//#define TEST
-
-#ifdef TEST
-# define PORT "8081"
-
-#endif
-
 namespace ft {
-
 static const std::size_t BUFFER_SIZE = 65536;
 
 class server {

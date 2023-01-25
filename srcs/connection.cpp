@@ -82,8 +82,4 @@ connection::connection(connection& rhs) {
   numberOf = rhs.numberOf;
 }
 
-//int connection::getNumberOf() const {
-//  return numberOf;
-//}
-
 }  // namespace ft

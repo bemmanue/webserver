@@ -30,6 +30,23 @@ namespace ft {
   return rc;
 }
 
+int IOPoll::pollOutHelper(int fd, const char *str, size_t *size) {
+  int total = 0;
+  int bytes_left = *size;
+  int n;
+
+  while (total < *size) {
+    n = send(fd, str + total, bytes_left, 0);
+    if (n < 0) {
+      break;
+    }
+    total += n;
+    bytes_left -= n;
+  }
+  *size = total;
+  return n;
+}
+
 int IOPoll::pollOut(int fd, connection *connections) {
   std::stringstream *response;
   std::stringstream response_body;
@@ -38,7 +55,6 @@ int IOPoll::pollOut(int fd, connection *connections) {
                 << "<h1>Test page</h1>\n"
                 << "<p>This is body of the test page...</p>\n"
                 << "<h2>Request headers</h2>\n"
-//                << "<pre>" << stt << "</pre>\n" // testing
                 << "<em><small>Test C++ Http server</small></em>\n";
   *response << "HTTP/1.1 200 OK\r\n"
             << "Version: HTTP/1.1\r\n"
@@ -46,22 +62,18 @@ int IOPoll::pollOut(int fd, connection *connections) {
             << "Content-Length: " << response_body.str().length()
             << "\r\n\r\n"
             << response_body.str();
-  int sd;
+  size_t sd = response->str().size();
+  int res = pollOutHelper(fd, response->str().c_str(), &sd);
 
-  sd = send(fd, response->str().c_str(), response->str().size(), 0);
-  while (sd > 0) {
-    if (sd < 0) {
-      std::string str = "Connection send failed\n";
-      throw MyException(str);
-    }
-    std::cout << "SENT SIZE: " << sd
-              << "\nREAL SIZE: " << response->str().size() << std::endl;
-    std::cout << response->str() << std::endl;
-    connections->setEventFlag(POLLIN, fd);
-    if (sd == response->str().size()) {
-      break;
-    }
+//  sd = send(fd, response->str().c_str(), response->str().size(), 0);
+  if (res < 0) {
+    std::string str = "Connection send failed\n";
+    throw MyException(str);
   }
+  std::cout << "SENT SIZE: " << sd
+            << "\nREAL SIZE: " << response->str().size() << std::endl;
+  std::cout << response->str() << std::endl;
+  connections->setEventFlag(POLLIN, fd);
   return sd;
 }
 }
