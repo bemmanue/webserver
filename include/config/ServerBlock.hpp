@@ -2,6 +2,8 @@
 #define SERVER_BLOCK_HPP
 
 #include <map>
+#include <arpa/inet.h>
+#include <netdb.h>
 
 #include "LocationBlock.hpp"
 
@@ -19,7 +21,7 @@ private:
 	std::vector<LocationBlock>	_location;
 
 public:
-	void setAddr(const std::string& addr);
+	void setHost(const std::string& addr);
 	void setPort(size_t port);
 	void setServerName(const std::vector<std::string>& value);
 	void setErrorPages(const std::vector<std::string>& value);

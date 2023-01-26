@@ -15,9 +15,10 @@
 #define KW_CLIENT_MAX_BODY_SIZE	"client_max_body_size"
 #define KW_ERROR_PAGE			"error_page"
 #define KW_INDEX				"index"
-#define KW_LISTEN				"listen"
+#define KW_HOST					"host"
 #define KW_LOCATION				"location"
 #define KW_METHODS_ALLOWED		"methods_allowed"
+#define KW_PORT					"port"
 #define KW_REDIRECT				"redirect"
 #define KW_ROOT					"root"
 #define KW_SERVER				"server"
@@ -30,6 +31,12 @@
 #define CTX_MAIN		0
 #define CTX_SERVER		1
 #define CTX_LOCATION	2
+
+#ifndef FILE_SIZE
+# define KB 1000
+# define MB 1000 * KB
+# define GB 1000 * MB
+#endif
 
 class Config {
 public:

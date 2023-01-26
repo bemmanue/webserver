@@ -4,12 +4,8 @@ void LocationBlock::setPath(const std::string &parameter) {
 	_path = parameter;
 }
 
-void LocationBlock::setAutoindex(const std::string& parameter) {
-	if (parameter == "on") {
-		_autoindex = true;
-	} else if (parameter == "off") {
-		_autoindex = false;
-	}
+void LocationBlock::setAutoindex(bool status) {
+	_autoindex = status;
 }
 
 void LocationBlock::setCGIs(const std::string& extension, const std::string& path) {

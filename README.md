@@ -40,12 +40,11 @@ Context:    location
 Defines files that will be used as an index.
 ###
 ```
-Syntax:     listen address[:port];
-            listen port;
-Default:    listen *:80 | *:8000;
+Syntax:     host address;
+Default:    host *;
 Context:    server
 ```
-Sets the address and port for IP.
+Sets the address for IP.
 ###
 ```
 Syntax:     location uri;
@@ -61,6 +60,13 @@ Context:    location
 ```
 Defines a list of accepted HTTP methods for the route.
 The method parameter can be one of the following: GET, POST, DELETE.
+###
+```
+Syntax:     port port;
+Default:    port 8000;
+Context:    server
+```
+Sets port for IP.
 ###
 ```
 Syntax:     redirect code URL;

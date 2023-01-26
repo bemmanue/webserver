@@ -1,0 +1,22 @@
+# ninja log v5
+1162	1362	1668608917000000000	Webserv	7f74aecf840a9358
+1	120	1674730993000000000	build.ninja	674e2d320ef865d0
+2	1040	1674560296000000000	CMakeFiles/webserver.dir/src/config/Config.cpp.o	e6be51890478229c
+4	582	1672243812000000000	CMakeFiles/webserver.dir/src/ServerBlock.cpp.o	d5d29b0923afedf5
+3	1038	1670928644000000000	CMakeFiles/webserv.dir/srcs/main.cpp.o	48dd490160a666ed
+3	79	1670252723000000000	CMakeFiles/webserv.dir/srcs/server.cpp.o	61760a6bd6582a1c
+4	426	1674559358000000000	CMakeFiles/webserver.dir/src/URI.cpp.o	54cecbf1d86003d3
+4	543	1672154623000000000	CMakeFiles/webserver.dir/src/Location.cpp.o	7055cc79b01e2ff3
+4	642	1674559358000000000	CMakeFiles/webserver.dir/src/config/ServerBlock.cpp.o	a3ffb20498b56bcf
+1041	1094	1674560296000000000	webserver	8a66a377ec3dc4d1
+0	1162	1668608917000000000	CMakeFiles/Webserv.dir/main.cpp.o	861f06814a494297
+0	882	1671016383000000000	CMakeFiles/webserver.dir/srcs/main.cpp.o	2ef4e7b35ee5d8d7
+7	1353	1673889068000000000	CMakeFiles/webserver.dir/src/config/LocationBlock.cpp.o	e13a3f469268f975
+4	704	1674559358000000000	CMakeFiles/webserver.dir/src/main.cpp.o	421a2a7acd1c9abf
+3	782	1672243945000000000	CMakeFiles/webserver.dir/src/Config.cpp.o	e2696ed29fefe7e5
+1038	1194	1670928645000000000	webserv	9dfe565b070e9d9d
+4	516	1672243812000000000	CMakeFiles/webserver.dir/src/LocationBlock.cpp.o	2f70ac5bcd1da14d
+3	1350	1674734267000000000	CMakeFiles/webserver.dir/src/config/ServerBlock.cpp.o	a3ffb20498b56bcf
+3	1350	1674734267000000000	CMakeFiles/webserver.dir/src/main.cpp.o	421a2a7acd1c9abf
+3	1381	1674734267000000000	CMakeFiles/webserver.dir/src/config/Config.cpp.o	e6be51890478229c
+1381	1643	1674734268000000000	webserver	8a66a377ec3dc4d1

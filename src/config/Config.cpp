@@ -9,7 +9,7 @@ const char* validMainDirectives[] =	{
 };
 
 const char* validServerDirectives[] = {
-		KW_CLIENT_MAX_BODY_SIZE, KW_ERROR_PAGE, KW_LISTEN, KW_LOCATION,
+		KW_CLIENT_MAX_BODY_SIZE, KW_ERROR_PAGE, KW_HOST, KW_LOCATION, KW_PORT,
 		KW_SERVER_NAME, KW_OPENING_BRACE, KW_CLOSING_BRACE, NULL
 };
 
@@ -20,7 +20,7 @@ const char* validLocationDirectives[] =	{
 
 const char* validKeywords[] = {
 		KW_AUTOINDEX, KW_CGI_PASS, KW_CLIENT_MAX_BODY_SIZE, KW_ERROR_PAGE,
-		KW_INDEX, KW_LISTEN, KW_LOCATION, KW_METHODS_ALLOWED, KW_REDIRECT,
+		KW_INDEX, KW_HOST, KW_LOCATION, KW_METHODS_ALLOWED, KW_PORT, KW_REDIRECT,
 		KW_ROOT, KW_SERVER, KW_SERVER_NAME, KW_OPENING_BRACE, KW_CLOSING_BRACE,
 		KW_SEMICOLON, NULL
 };
@@ -34,9 +34,38 @@ bool Config::empty() {
 	return config.empty();
 }
 
+uint64_t	parseSize(std::string &s) {
+	uint64_t bytes;
+
+	if (!std::isdigit(s[0])) {
+		throw std::exception();
+	}
+
+	char *end = NULL;
+	uint64_t res = strtoull(s.c_str(), &end, 10);
+
+	if (end == NULL) {
+		throw std::exception();
+	}
+
+	if (!strcmp(end, "b") || !strcmp(end, "B")) {
+		bytes = res;
+	} else if (!strcmp(end, "k") || !strcmp(end, "K")) {
+		bytes = res * KB;
+	} else if (!strcmp(end, "m") || !strcmp(end, "M")) {
+		bytes = res * MB;
+	} else if (!strcmp(end, "g") || !strcmp(end, "G")) {
+		bytes = res * GB;
+	} else {
+		throw std::exception();
+	}
+
+	return bytes;
+}
+
 bool isValidKeyword(const std::string& keyword) {
-	for (size_t i = 0; validKeywords[i]; ++i) {
-		if (validKeywords[i] == keyword) {
+	for (size_t j = 0; validKeywords[j]; ++j) {
+		if (validKeywords[j] == keyword) {
 			return true;
 		}
 	}
@@ -143,7 +172,14 @@ void	setAutoindex(LocationBlock& location, const std::vector<std::string>& param
 	if (params.size() != 1) {
 		throw InvalidNumberOfArgumentsConfigException(KW_AUTOINDEX, line);
 	}
-	location.setAutoindex(params[0]);
+
+	if (params[0] == "on") {
+		location.setAutoindex(true);
+	} else if (params[0] == "off") {
+		location.setAutoindex(false);
+	} else {
+		throw InvalidAutoindexValueConfigException(params[0], line);
+	}
 }
 
 void	setCGIs(LocationBlock& location, const std::vector<std::string>& params) {
@@ -179,18 +215,36 @@ void	setRoot(LocationBlock& location, const std::vector<std::string>& params) {
 	location.setRoot(params[0]);
 }
 
-void	setListen(ServerBlock& server, const std::vector<std::string>& params) {
+void	setHost(ServerBlock& server, const std::vector<std::string>& params) {
 	if (params.size() != 1) {
-		throw InvalidNumberOfArgumentsConfigException(KW_LISTEN, line);
+		throw InvalidNumberOfArgumentsConfigException(KW_HOST, line);
 	}
 
-	URI uri;
-	uri.parse(params[0]);
-	server.setAddr(uri._host);
-	server.setPort(uri._port);
+	try {
+		server.setHost(params[0]);
+	} catch (const std::exception& ex) {
+		throw HostNotFoundConfigException(params[0], line);
+	}
+}
+
+void	setPort(ServerBlock& server, const std::vector<std::string>& params) {
+	if (params.size() != 1) {
+		throw InvalidNumberOfArgumentsConfigException(KW_PORT, line);
+	}
+
+	try {
+		size_t port = std::stoul(params[0]);
+		server.setPort(port);
+	} catch (const std::exception& ex) {
+		throw InvalidPortConfigException(params[0], line);
+	}
 }
 
 void	setClientMaxBodySize(ServerBlock& server, const std::vector<std::string>& params) {
+	if (params.size() != 1) {
+		throw InvalidNumberOfArgumentsConfigException(KW_CLIENT_MAX_BODY_SIZE, line);
+	}
+
 
 }
 
@@ -281,8 +335,10 @@ ServerBlock	getServerBlock() {
 			setClientMaxBodySize(server, params);
 		} else if (keyword == KW_ERROR_PAGE) {
 			setErrorPages(server, params);
-		} else if (keyword == KW_LISTEN) {
-			setListen(server, params);
+		} else if (keyword == KW_HOST) {
+			setHost(server, params);
+		} else if (keyword == KW_PORT) {
+			setPort(server, params);
 		} else if (keyword == KW_SERVER_NAME) {
 			setServerNames(server, params);
 		}

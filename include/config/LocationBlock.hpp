@@ -26,7 +26,7 @@ public:
 
 public:
 	void setPath(const std::string& parameter);
-	void setAutoindex(const std::string& parameter);
+	void setAutoindex(bool status);
 	void setCGIs(const std::string& extension, const std::string& path);
 	void setIndex(const std::vector<std::string>& parameter);
 	void setMethodsAllowed(const std::string& method);

@@ -1,10 +1,43 @@
 #include "../../include/config/ServerBlock.hpp"
 
-void ServerBlock::setAddr(const std::string& addr) {
-	_addr = addr;
+bool isHostAddr(const std::string& addr) {
+	in_addr_t		in_addr;
+	struct in_addr	ip;
+	hostent*		hostnames;
+
+	in_addr = inet_addr(addr.c_str());
+	if (in_addr == INADDR_NONE) {
+		return false;
+	}
+
+	ip.s_addr = in_addr;
+
+	hostnames = gethostbyaddr(&ip, sizeof(ip), AF_INET);
+	if (hostnames == nullptr|| hostnames[0].h_name == nullptr) {
+		return false;
+	}
+	return true;
+}
+
+bool isHostName(const std::string& addr) {
+	if (!gethostbyname(addr.c_str())) {
+		return false;
+	}
+	return true;
+}
+
+void ServerBlock::setHost(const std::string& addr) {
+	if (isHostAddr(addr) || isHostName(addr)) {
+		_addr = addr;
+	} else {
+		throw std::exception();
+	}
 }
 
 void ServerBlock::setPort(size_t port) {
+	if (port > 65535) {
+		throw std::exception();
+	}
 	_port = port;
 }
 
