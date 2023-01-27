@@ -34,7 +34,15 @@ bool Config::empty() {
 	return config.empty();
 }
 
-uint64_t	parseSize(std::string &s) {
+void Config::print() {
+	for (int j = 0; j < config.size(); j++) {
+		std::cout << "Server №" << (j + 1) << std::endl;
+		config[j].print();
+		std::cout << std::endl;
+	}
+}
+
+uint64_t	parseSize(const std::string& s) {
 	uint64_t bytes;
 
 	if (!std::isdigit(s[0])) {
@@ -153,9 +161,7 @@ std::vector<std::string> getParameters() {
 }
 
 std::string	getLocationPath() {
-	std::string path;
-
-	path = getNextToken();
+	std::string path = getNextToken();
 
 	if (path.empty()) {
 		throw UnexpectedEndOfFileConfigException(line);
@@ -189,6 +195,10 @@ void	setCGIs(LocationBlock& location, const std::vector<std::string>& params) {
 	location.setCGIs(params[0], params[1]);
 }
 
+void	setIndex(LocationBlock& location, const std::vector<std::string>& params) {
+	location.setIndex(params);
+}
+
 void	setMethodsAllowed(LocationBlock& location, const std::vector<std::string>& params) {
 	int j;
 
@@ -201,11 +211,17 @@ void	setMethodsAllowed(LocationBlock& location, const std::vector<std::string>& 
 	}
 }
 
-void	setRedirect(LocationBlock& location, const std::vector<std::string>& parameters) {
-	if (parameters.size() != 2) {
+void	setRedirect(LocationBlock& location, const std::vector<std::string>& params) {
+	if (params.size() != 2) {
 		throw InvalidNumberOfArgumentsConfigException(KW_REDIRECT, line);
 	}
-	location.setRedirect(parameters[0], parameters[1]);
+
+	try {
+		int code = std::stoul(params[0]);
+		location.setRedirect(code, params[1]);
+	} catch (const std::exception& ex) {
+		throw InvalidErrorPageConfigException(params[0], line);
+	}
 }
 
 void	setRoot(LocationBlock& location, const std::vector<std::string>& params) {
@@ -245,15 +261,31 @@ void	setClientMaxBodySize(ServerBlock& server, const std::vector<std::string>& p
 		throw InvalidNumberOfArgumentsConfigException(KW_CLIENT_MAX_BODY_SIZE, line);
 	}
 
-
+	try {
+		uint64_t size = parseSize(params[0]);
+		server.setClientMaxBodySize(size);
+	} catch (const std::exception& ex) {
+		throw ClientMaxBodySizeConfigException(params[0], line);
+	}
 }
 
 void	setErrorPages(ServerBlock& server, const std::vector<std::string>& params) {
+	if (params.size() != 2) {
+		throw InvalidNumberOfArgumentsConfigException(KW_ERROR_PAGE, line);
+	}
 
+	try {
+		int code = std::stoul(params[0]);
+		server.setErrorPages(code, params[1]);
+	} catch (const std::exception& ex) {
+		throw InvalidErrorPageConfigException(params[0], line);
+	}
 }
 
 void	setServerNames(ServerBlock& server, const std::vector<std::string>& params) {
-
+	for (int j = 0; j < params.size(); j++) {
+		server.setServerName(params[j]);
+	}
 }
 
 LocationBlock	getLocationBlock() {
@@ -286,7 +318,7 @@ LocationBlock	getLocationBlock() {
 		} else if (keyword == KW_CGI_PASS) {
 			setCGIs(location, params);
 		} else if (keyword == KW_INDEX) {
-			location.setIndex(params);
+			setIndex(location, params);
 		} else if (keyword == KW_METHODS_ALLOWED) {
 			setMethodsAllowed(location, params);
 		} else if (keyword == KW_REDIRECT) {

@@ -17,6 +17,18 @@ protected:
 	std::string*	_message;
 };
 
+class ClientMaxBodySizeConfigException : public ConfigException {
+public:
+	explicit ClientMaxBodySizeConfigException(const std::string& value, size_t line) :
+	ConfigException("invalid value \"" + value + "\"", line) {}
+};
+
+class InvalidErrorPageConfigException : public ConfigException {
+public:
+	explicit InvalidErrorPageConfigException(const std::string& value, size_t line) :
+	ConfigException("value \"" + value + "\" must be between 300 and 599", line) {}
+};
+
 class InvalidAutoindexValueConfigException : public ConfigException {
 public:
 	explicit InvalidAutoindexValueConfigException(const std::string& value, size_t line) :

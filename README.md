@@ -26,9 +26,10 @@ Context:    server
 Sets the maximum allowed size of the client request body.
 ###
 ```
-Syntax:     error_page code ... [response] uri;
+Syntax:     error_page code path;
 Default:    —
 Context:    server
+Example:    error_page 404 /404.html;
 ```
 Defines the URI that will be shown for the specified errors.
 ###

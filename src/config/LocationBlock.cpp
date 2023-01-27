@@ -20,17 +20,42 @@ void LocationBlock::setMethodsAllowed(const std::string& method) {
 	if (method == "GET" ||
 		method == "POST" ||
 		method == "DELETE") {
-		_methods_allowed.push_back(method);
+		_methods_allowed.insert(method);
 	} else {
 		throw std::exception();
 	}
 }
 
-void LocationBlock::setRedirect(const std::string& code, const std::string& uri) {
-	_redirect.code = std::stoi(code);
-	_redirect.uri = uri;
+void LocationBlock::setRedirect(int code, const std::string& uri) {
+	if (code < 300 || code > 599) {
+		throw std::exception();
+	}
+	_redirect[code] = uri;
 }
 
 void LocationBlock::setRoot(const std::string& path) {
 	_root = path;
+}
+
+void LocationBlock::print() {
+	std::cout << "\t\t" << "path: " << _path << std::endl;
+	std::cout << "\t\t" << "autoindex: " << std::boolalpha << _autoindex << std::endl;
+
+	for (std::map<std::string, std::string>::iterator i = _CGIs.begin(); i != _CGIs.end(); i++) {
+		std::cout << "\t\t" << "cgi: " << (*i).first << " " << (*i).second << std::endl;
+	}
+
+	for (int i = 0; i < _index.size(); i++) {
+		std::cout << "\t\t" << "index: " << _index[i] << std::endl;
+	}
+
+	for (std::set<std::string>::iterator i = _methods_allowed.begin(); i != _methods_allowed.end(); i++) {
+		std::cout << "\t\t" << "method_allowed: " << *i << std::endl;
+	}
+
+	for (std::map<int, std::string>::iterator i = _redirect.begin(); i != _redirect.end(); i++) {
+		std::cout << "\t\t" << "error_page: " << (*i).first << " " << (*i).second << std::endl;
+	}
+
+	std::cout << "\t\t" << "root: " << _root << std::endl;
 }

@@ -12,15 +12,10 @@ int main(int argc, char **argv) {
 
 	try {
 		config = parseConfigFile(argv[1]);
-//		for (int i = 0; i < config.config.size(); ++i) {
-//			std::cout << "Config №" << i + 1 << std::endl;
-//			std::cout << "---------" << std::endl;
-//			config.config[i].print();
-//		}
 	} catch (const std::exception& exception) {
 		std::cout << exception.what() << std::endl;
 	}
-
+	config.print();
 
     return 0;
 }

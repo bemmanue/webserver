@@ -41,16 +41,19 @@ void ServerBlock::setPort(size_t port) {
 	_port = port;
 }
 
-void ServerBlock::setServerName(const std::vector<std::string>& value) {
-//	_server_name = parameter;
+void ServerBlock::setServerName(const std::string& name) {
+	_server_name.insert(name);
 }
 
-void ServerBlock::setErrorPages(const std::vector<std::string>& value) {
-	_error_pages = value;
+void ServerBlock::setErrorPages(int code, const std::string& path) {
+	if (code < 300 || code > 599) {
+		throw std::exception();
+	}
+	_error_pages[code] = path;
 }
 
-void ServerBlock::setClientMaxBodySize(const std::vector<std::string>& value) {
-//	_client_max_body_size = parameter;
+void ServerBlock::setClientMaxBodySize(uint64_t bytes) {
+	_client_max_body_size = bytes;
 }
 
 void ServerBlock::setLocation(const LocationBlock& parameter) {
@@ -58,29 +61,21 @@ void ServerBlock::setLocation(const LocationBlock& parameter) {
 }
 
 void ServerBlock::print() {
-	std::cout << "port: " << _port << std::endl;
-	std::cout << "addr: " << _addr << std::endl;
-	std::cout << "server_name: " << _server_name << std::endl << "error_pages: ";
+	std::cout << "\t" << "addr: " << _addr << std::endl;
+	std::cout << "\t" << "port: " << _port << std::endl;
 
-	for (int i = 0; i < _error_pages.size(); ++i) {
-		std::cout << _error_pages[i] << " ";
+	for (std::set<std::string>::iterator i = _server_name.begin(); i != _server_name.end(); i++) {
+		std::cout << "\t" << "server_name: " << *i << std::endl;
 	}
 
-	std::cout << std::endl << "client_max_body_size: " << _client_max_body_size << std::endl;
+	for (std::map<int, std::string>::iterator i = _error_pages.begin(); i != _error_pages.end(); i++) {
+		std::cout << "\t" << "error_page: " << (*i).first << " " << (*i).second << std::endl;
+	}
+
+	std::cout << "\t" << "client_max_body_size: " << _client_max_body_size << std::endl;
 
 	for (int i = 0; i < _location.size(); ++i) {
-		std::cout << "path: " << _location[i]._path << std::endl;
-		std::cout << "autoindex: " << _location[i]._autoindex << std::endl;
-
-		std::cout << "methods_allowed: " << std::endl;
-		std::cout << "CGIs: " << std::endl;
-		for (int i = 0; i < _location[i]._methods_allowed.size(); ++i) {
-			std::cout << _location[i]._methods_allowed[i] << " ";
-		}
-		std::cout << std::endl;
-
-		std::cout << std::endl;
-		std::cout << "root: " << _location[i]._root << std::endl;
+		std::cout << "\t" << "Location №" << (i + 1) << std::endl;
+		_location[i].print();
 	}
-	std::cout << std::endl;
 }
