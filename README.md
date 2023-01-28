@@ -8,6 +8,7 @@
 Syntax:     autoindex on | off;
 Default:    autoindex off;
 Context:    location
+Example:    autoindex on;
 ```
 Enables or disables the directory listing output.
 ###
@@ -64,8 +65,9 @@ The method parameter can be one of the following: GET, POST, DELETE.
 ###
 ```
 Syntax:     port port;
-Default:    port 8000;
+Default:    port 8080;
 Context:    server
+Example:    port 80;
 ```
 Sets port for IP.
 ###

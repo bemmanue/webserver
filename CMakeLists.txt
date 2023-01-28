@@ -8,7 +8,9 @@ add_executable(webserver src/main.cpp
         include/config/LocationBlock.hpp
         include/config/ConfigException.hpp
         include/config/ServerBlock.hpp
+        include/Request.hpp
         src/config/Config.cpp
         src/config/LocationBlock.cpp
         src/config/ServerBlock.cpp
+        src/Request.cpp
         )

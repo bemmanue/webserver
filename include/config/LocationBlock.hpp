@@ -15,7 +15,7 @@ private:
 	std::vector<std::string>			_index;	//ok
 	std::set<std::string>				_methods_allowed;	//ok
 	std::map<int, std::string>			_redirect;	//ok
-	std::string							_root;	//
+	std::string							_root;	//ok
 
 public:
 	void setPath(const std::string& parameter);
@@ -26,7 +26,15 @@ public:
 	void setRedirect(int code, const std::string& uri);
 	void setRoot(const std::string& path);
 
-	void print();
+	std::string							getPath() const;
+	bool								getAutoindex() const;
+	std::map<std::string, std::string>	getCGIs() const;
+	std::vector<std::string>			getIndex() const;
+	std::set<std::string>				getMethodsAllowed() const;
+	std::map<int, std::string>			getRedirect() const;
+	std::string							getRoot() const;
+
+	void print();	//debug
 };
 
 

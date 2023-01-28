@@ -59,3 +59,31 @@ void LocationBlock::print() {
 
 	std::cout << "\t\t" << "root: " << _root << std::endl;
 }
+
+std::string LocationBlock::getPath() const {
+	return _path;
+}
+
+bool LocationBlock::getAutoindex() const {
+	return _autoindex;
+}
+
+std::map<std::string, std::string> LocationBlock::getCGIs() const {
+	return _CGIs;
+}
+
+std::vector<std::string> LocationBlock::getIndex() const {
+	return _index;
+}
+
+std::set<std::string> LocationBlock::getMethodsAllowed() const {
+	return _methods_allowed;
+}
+
+std::map<int, std::string> LocationBlock::getRedirect() const {
+	return _redirect;
+}
+
+std::string LocationBlock::getRoot() const {
+	return _root;
+}

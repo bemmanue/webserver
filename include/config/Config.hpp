@@ -32,7 +32,7 @@
 #define CTX_LOCATION	2
 
 #ifndef FILE_SIZE
-# define KB 1000
+# define KB	1000
 # define MB 1000 * KB
 # define GB 1000 * MB
 #endif

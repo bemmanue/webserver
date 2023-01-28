@@ -337,6 +337,7 @@ LocationBlock	getLocationBlock() {
 
 ServerBlock	getServerBlock() {
 	ServerBlock					server;
+	LocationBlock 				location;
 	std::string					keyword;
 	std::vector<std::string>	params;
 
@@ -358,7 +359,8 @@ ServerBlock	getServerBlock() {
 		}
 
 		if (keyword == KW_LOCATION) {
-			server.setLocation(getLocationBlock());
+			location = getLocationBlock();
+			server.setLocation(location.getPath(), location);
 			continue;
 		}
 
