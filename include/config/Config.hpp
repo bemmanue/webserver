@@ -39,12 +39,13 @@
 
 class Config {
 public:
-	void add(const ServerBlock& c);
-	bool empty();
-	void print();
+	void addServerBlock(const ServerBlock& c);
+	bool  isEmpty();
+	void print();//debug
+    std::vector<ServerBlock> getServers();
 
-//private:
-	std::vector<ServerBlock> config;
+private:
+	std::vector<ServerBlock> _servers;
 };
 
 std::vector<char>	readFile(const std::string& filename);

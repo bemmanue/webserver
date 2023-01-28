@@ -1,4 +1,5 @@
-#include "include.dir/server.hpp"
+#include "../include/server.hpp"
+#include "../include/Request.hpp"
 
 namespace ft {
 
@@ -6,12 +7,15 @@ namespace ft {
 
 static struct addrinfo* results;
 
+server::server(const ServerBlock& config) : config_(config) {
+}
+
 void server::initStruct() {
   bzero(&hints_, sizeof (hints_));
   hints_.ai_family = AF_INET;
   hints_.ai_socktype = SOCK_STREAM;
   hints_.ai_protocol = IPPROTO_TCP;
-  hints_.ai_flags= AI_PASSIVE;
+  hints_.ai_flags = AI_PASSIVE;
 }
 
 void server::getSocketDescriptor(const char *port) {
@@ -96,7 +100,7 @@ server::server() {
 server::~server() {
 }
 
-server *server::ofPort(std::string &strPort) {
+server *server::ofPort(const std::string &strPort) {
 
   std::stringstream ss(strPort);
   short port;
@@ -148,7 +152,12 @@ void server::acceptConnections() {
 
 void server::sendAndReceive(int fd, short revents) {
   if (revents & POLLIN) {
-    IOPoll::pollIn(fd, connections);
+    std::string *str = new std::string;
+    IOPoll::pollIn(fd, connections, str);
+//    Request request = parseRequest(str);
+//    Response response(request);
+//    std::string resp = response.getResponse();
+    delete str;
   }
   if (revents & POLLOUT) {
     IOPoll::pollOut(fd, connections);

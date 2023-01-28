@@ -8,13 +8,15 @@
 #include <sys/poll.h>
 #include <sstream>
 #include <cerrno>
+#include "config/ServerBlock.hpp"
 
 namespace ft {
 static const std::size_t BUFFER_SIZE = 65536;
 
 class server {
  public:
-  static server *ofPort(std::string &strPort);
+  explicit server(const ServerBlock& config);
+  static server *ofPort(const std::string &strPort);
 
   connection *getConnection();
   sock_t getSocket() const;
@@ -38,6 +40,7 @@ class server {
   struct addrinfo   hints_;
   sock_t            socket_;
   struct addrinfo*  record_;
+  ServerBlock       config_;
 
   /*Poll*/
   connection* connections;

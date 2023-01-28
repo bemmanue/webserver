@@ -12,6 +12,7 @@ private:
 	std::string _body;
 };
 
-Request parseRequest(char *str);
+
+static Request parseRequest(std::string *str);
 
 #endif //REQUEST_HPP

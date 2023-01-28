@@ -5,7 +5,7 @@
 namespace ft {
 class IOPoll {
  public:
-  static int pollIn(int fd, connection *connections);
+  static int pollIn(int fd, connection *connections, std::string *str);
   static int pollOut(int fd, connection *connections);
 
  private:

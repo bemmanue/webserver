@@ -13,11 +13,10 @@ add_executable(webserver src/main.cpp
         src/config/LocationBlock.cpp
         src/config/ServerBlock.cpp
         src/Request.cpp
-        srcs/include.dir/utils.hpp
-        srcs/include.dir/MyException.hpp
-
-        srcs/server.cpp srcs/include.dir/server.hpp
-        srcs/connection.cpp srcs/include.dir/connection.hpp
-        srcs/IOPoll.cpp srcs/include.dir/IOPoll.hpp
-        srcs/client.cpp srcs/include.dir/client.hpp
-        srcs/cgi/cgi.cpp srcs/cgi/cgi.hpp)
+        include/utils.hpp
+        include/MyException.hpp
+        src/server.cpp include/server.hpp
+        src/connection.cpp include/connection.hpp
+        src/IOPoll.cpp include/IOPoll.hpp
+        src/client.cpp include/client.hpp
+        src/cgi/cgi.cpp src/cgi/cgi.hpp)

@@ -26,20 +26,23 @@ const char* validKeywords[] = {
 };
 
 
-void Config::add(const ServerBlock& c) {
-	config.push_back(c);
+void Config::addServerBlock(const ServerBlock& c) {
+	_servers.push_back(c);
 }
 
-bool Config::empty() {
-	return config.empty();
+bool Config::isEmpty() {
+	return _servers.empty();
 }
 
 void Config::print() {
-	for (int j = 0; j < config.size(); j++) {
+	for (int j = 0; j < _servers.size(); j++) {
 		std::cout << "Server №" << (j + 1) << std::endl;
-		config[j].print();
+		_servers[j].print();
 		std::cout << std::endl;
 	}
+}
+std::vector<ServerBlock> Config::getServers() {
+  return _servers;
 }
 
 uint64_t	parseSize(const std::string& s) {
@@ -403,11 +406,11 @@ Config	parseConfigFile(const std::string& filename) {
 		}
 
 		if (keyword == KW_SERVER) {
-			config.add(getServerBlock());
+			config.addServerBlock(getServerBlock());
 		}
 	}
 
-	if (config.empty()) {
+	if (config.isEmpty()) {
 		throw EmptyFileConfigException();
 	}
 

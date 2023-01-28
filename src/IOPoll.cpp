@@ -1,11 +1,10 @@
-#include "include.dir/IOPoll.hpp"
+#include "../include/IOPoll.hpp"
 
 namespace ft {
 
- int IOPoll::pollIn(int fd, connection *connections) {
+ int IOPoll::pollIn(int fd, connection *connections, std::string *str) {
   int rc;
   char buffer[BUFFER_SIZE + 1];
-  std::string str;
 
   rc = recv(fd, buffer, sizeof (buffer), 0);
   if (rc == 0) {
@@ -23,7 +22,7 @@ namespace ft {
       break;
     }
     std::cout << buffer << std::endl;
-    str.insert(str.size(), buffer);
+    str->insert(str->size(), buffer);
     rc = recv(fd, buffer, sizeof(buffer), 0);
   }
   connections->setEventFlag(POLLOUT, fd);
