@@ -1,5 +1,4 @@
-#ifndef CONFIG_HPP
-#define CONFIG_HPP
+#pragma once
 
 #include <iostream>
 #include <fstream>
@@ -54,5 +53,3 @@ Config				parseConfigFile(const std::string& filename);
 ServerBlock			getServerBlock();
 LocationBlock		getLocationBlock();
 
-
-#endif //CONFIG_HPP

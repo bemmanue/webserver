@@ -1,5 +1,4 @@
-#ifndef SERVER_BLOCK_HPP
-#define SERVER_BLOCK_HPP
+#pragma once
 
 #include <map>
 #include <set>
@@ -42,5 +41,3 @@ public:
 
 	void print();	//debug
 };
-
-#endif //SERVER_BLOCK_HPP

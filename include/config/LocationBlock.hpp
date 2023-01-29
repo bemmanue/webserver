@@ -1,5 +1,4 @@
-#ifndef LOCATION_BLOCK_HPP
-#define LOCATION_BLOCK_HPP
+#pragma once
 
 #include <iostream>
 #include <vector>
@@ -37,5 +36,3 @@ public:
 	void print();	//debug
 };
 
-
-#endif //LOCATION_BLOCK_HPP

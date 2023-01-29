@@ -1,5 +1,4 @@
-#ifndef CONFIG_EXCEPTION_HPP
-#define CONFIG_EXCEPTION_HPP
+#pragma once
 
 
 class ConfigException : public std::exception {
@@ -105,5 +104,3 @@ public:
 		ConfigException("invalid number of arguments in \"" + directive + "\"", line) {}
 };
 
-
-#endif //CONFIG_EXCEPTION_HPP
