@@ -1,14 +1,12 @@
+#pragma clang diagnostic push
+#pragma ide diagnostic ignored "modernize-use-nullptr"
 #include "../include/server.hpp"
-#include "../include/Request.hpp"
 
 namespace ft {
 
 /*INITIALIZATION OF SERVER*/
 
 static struct addrinfo* results;
-
-server::server(const ServerBlock& config) : config_(config) {
-}
 
 void server::initStruct() {
   bzero(&hints_, sizeof (hints_));
@@ -18,11 +16,14 @@ void server::initStruct() {
   hints_.ai_flags = AI_PASSIVE;
 }
 
-void server::getSocketDescriptor(const char *port) {
+void server::getSocketDescriptor() {
   int status;
   struct addrinfo* record;
+  std::string host = config_.getHost();
+  char* port = NULL;
 
-  status = getaddrinfo("localhost", port, &hints_, &results);
+  sprintf(port, "%lu", config_.getPort());
+  status = getaddrinfo(host.c_str(), port, &hints_, &results);
 
   if (status != 0) {
     std::string str = "getaddrinfo exception: ";
@@ -82,11 +83,12 @@ void server::listenSocket() {
 //        FT_LISTEN_CLIENT_LIMIT);
 }
 
-server::server(const char *port)
-    : hints_(), socket_(0),
-      nfds(1) {
+
+server::server(const ServerBlock& config)
+    : config_(config), connections(), hints_(),
+      socket_(0), record_(), nfds(1) {
   initStruct();
-  getSocketDescriptor(port);
+  getSocketDescriptor();
   setOptions();
   bindSocket();
   listenSocket();
@@ -100,19 +102,12 @@ server::server() {
 server::~server() {
 }
 
-server *server::ofPort(const std::string &strPort) {
+server *server::ofBlock(const ServerBlock& servBlock) {
 
-  std::stringstream ss(strPort);
-  short port;
-  ss >> port;
-
-  if (port < 1024 && port != 80) {
-    throw MyException("Trying to init server on restricted port");
-  }
 
   server* newServer;
   try {
-     newServer = new server(strPort.c_str());
+     newServer = new server(servBlock);
   } catch (MyException &ex) {
     delete newServer;
     throw ex;
@@ -191,3 +186,4 @@ int server::serve() {
 }
 
 }  // namespace ft
+#pragma clang diagnostic pop

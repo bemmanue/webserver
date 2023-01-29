@@ -8,16 +8,16 @@ namespace ft {
 
   void Request::setBody(const std::string& body) {}
 
-  std::string getNextLine(std::string & string) {
-    std::string line;
-    int i;
-
-    for (i = 0; i < string.size(); i++) {
-      line.push_back(string[i]);
-      if ()
-    }
-    return line;
-  }
+//  std::string getNextLine(std::string & string) {
+//    std::string line;
+//    int i;
+//
+//    for (i = 0; i < string.size(); i++) {
+//      line.push_back(string[i]);
+//      if ()
+//    }
+//    return line;
+//  }
 
   void parseRequestLine(const std::string& line) {}
 

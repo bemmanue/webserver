@@ -11,33 +11,34 @@
 #define DEFAULT_HOST 					"127.0.0.1"
 #define DEFAULT_CLIENT_MAX_BODY_SIZE	1000000
 
-
+namespace ft {
 class ServerBlock {
-private:
-	std::string     						_host;	//ok
-	size_t            						_port;	//ok
-	std::set<std::string>					_server_names;	//ok
-	std::map<int, std::string>				_error_pages;	//ok
-	uint64_t 								_client_max_body_size;	//ok
-	std::map<std::string, LocationBlock>	_locations;	//ok
+ private:
+  std::string _host;                                //ok
+  size_t _port;                                     //ok
+  std::set<std::string> _server_names;              //ok
+  std::map<int, std::string> _error_pages;          //ok
+  uint64_t _client_max_body_size;                   //ok
+  std::map<std::string, LocationBlock> _locations;  //ok
 
-public:
-	ServerBlock();
-	~ServerBlock();
+ public:
+  ServerBlock();
+  ~ServerBlock();
 
-	void setHost(const std::string& addr);
-	void setPort(size_t port);
-	void setServerName(const std::string& name);
-	void setErrorPages(int code, const std::string& path);
-	void setClientMaxBodySize(uint64_t bytes);
-	void setLocation(const std::string& path, const LocationBlock& location);
+  void setHost(const std::string& addr);
+  void setPort(size_t port);
+  void setServerName(const std::string& name);
+  void setErrorPages(int code, const std::string& path);
+  void setClientMaxBodySize(uint64_t bytes);
+  void setLocation(const std::string& path, const LocationBlock& location);
 
-	std::string								getHost() const;
-	size_t									getPort() const;
-	std::set<std::string>					getServerNames() const;
-	std::map<int, std::string>				getErrorPages() const;
-	uint64_t								getClientMaxBodySize() const;
-	std::map<std::string, LocationBlock>	getLocation() const;
+  std::string getHost() const;
+  size_t getPort() const;
+  std::set<std::string> getServerNames() const;
+  std::map<int, std::string> getErrorPages() const;
+  uint64_t getClientMaxBodySize() const;
+  std::map<std::string, LocationBlock> getLocation() const;
 
-	void print();	//debug
+  void print();  //debug
 };
+}  // namespace ft

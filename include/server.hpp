@@ -5,19 +5,20 @@
 #include <sys/poll.h>
 #include <sstream>
 #include <cerrno>
+#include <cstdio>
 
 #include "connection.hpp"
 #include "IOPoll.hpp"
 #include "MyException.hpp"
 #include "config/ServerBlock.hpp"
+#include "../include/Request.hpp"
 
 namespace ft {
 static const std::size_t BUFFER_SIZE = 65536;
 
 class server {
  public:
-  explicit server(const ServerBlock& config);
-  static server *ofPort(const std::string &strPort);
+  static server *ofBlock(const ServerBlock& servBlock);
 
   connection *getConnection();
   sock_t getSocket() const;
@@ -25,14 +26,14 @@ class server {
 
  private:
   server();
-  explicit server(const char *port);
+  explicit server(const ServerBlock& config);
   ~server();
   server(server const&);
   void operator=(server const&);
 
   /*System calls wrappers*/
   void initStruct();
-  void getSocketDescriptor(const char *port);
+  void getSocketDescriptor();
   void setOptions() const;
   void bindSocket();
   void listenSocket();
