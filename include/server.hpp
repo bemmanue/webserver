@@ -1,13 +1,14 @@
 #pragma once
 
-#include "connection.hpp"
-#include "IOPoll.hpp"
-#include "MyException.hpp"
 #include <iostream>
 #include <sys/ioctl.h>
 #include <sys/poll.h>
 #include <sstream>
 #include <cerrno>
+
+#include "connection.hpp"
+#include "IOPoll.hpp"
+#include "MyException.hpp"
 #include "config/ServerBlock.hpp"
 
 namespace ft {

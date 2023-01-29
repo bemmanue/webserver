@@ -31,16 +31,15 @@
 #define CTX_SERVER		1
 #define CTX_LOCATION	2
 
-#ifndef FILE_SIZE
-# define KB	1000
-# define MB 1000 * KB
-# define GB 1000 * MB
-#endif
+#define KB	1000
+#define MB	1000 * KB
+#define GB	1000 * MB
+
 
 class Config {
 public:
 	void addServerBlock(const ServerBlock& c);
-	bool  isEmpty();
+	bool isEmpty();
 	void print();//debug
     std::vector<ServerBlock> getServers();
 

@@ -1,8 +1,8 @@
 #include "../../include/config/Config.hpp"
 
-static std::vector<char> buffer;
-static size_t i = 0;
-static size_t line = 1;
+static std::vector<char> g_buffer;
+static size_t g_index = 0;
+static size_t g_line = 1;
 
 const char* validMainDirectives[] =	{
 		KW_SERVER, NULL
@@ -110,19 +110,19 @@ std::vector<char> readFile(const std::string& filename) {
 	std::ifstream file(filename, std::ios::binary | std::ios::ate);
 	std::streamsize size = file.tellg();
 
-	buffer.resize(size);
+	g_buffer.resize(size);
 	file.seekg(0, std::ios::beg);
-	file.read(buffer.data(), size);
-	return buffer;
+	file.read(g_buffer.data(), size);
+	return g_buffer;
 }
 
 void skipSpace() {
-	for ( ; i < buffer.size(); ++i) {
-		if (!isspace(buffer[i])) {
+	for ( ; g_index < g_buffer.size(); ++g_index) {
+		if (!isspace(g_buffer[g_index])) {
 			break;
 		}
-		if (buffer[i] == '\n') {
-			line++;
+		if (g_buffer[g_index] == '\n') {
+			g_line++;
 		}
 	}
 }
@@ -131,17 +131,17 @@ std::string	getNextToken() {
 	std::string token;
 
 	skipSpace();
-	for ( ; i < buffer.size(); ++i) {
-		if (isspace(buffer[i]) ||
-			buffer[i] == ';' ||
-			buffer[i] == '{' ||
-			buffer[i] == '}') {
+	for ( ; g_index < g_buffer.size(); ++g_index) {
+		if (isspace(g_buffer[g_index]) ||
+			g_buffer[g_index] == ';' ||
+			g_buffer[g_index] == '{' ||
+			g_buffer[g_index] == '}') {
 			if (token.empty()) {
-				token.push_back(buffer[i++]);
+				token.push_back(g_buffer[g_index++]);
 			}
 			break;
 		}
-		token.push_back(buffer[i]);
+		token.push_back(g_buffer[g_index]);
 	}
 	return token;
 }
@@ -155,7 +155,7 @@ std::vector<std::string> getParameters() {
 			break;
 		}
 		if (token == KW_OPENING_BRACE || token == KW_CLOSING_BRACE) {
-			throw UnexpectedTokenConfigException(token, line);
+			throw UnexpectedTokenConfigException(token, g_line);
 		}
 
 		value.push_back(token);
@@ -167,11 +167,11 @@ std::string	getLocationPath() {
 	std::string path = getNextToken();
 
 	if (path.empty()) {
-		throw UnexpectedEndOfFileConfigException(line);
+		throw UnexpectedEndOfFileConfigException(g_line);
 	} else if (path == KW_SEMICOLON
 		|| path == KW_OPENING_BRACE
 		|| path == KW_CLOSING_BRACE) {
-		throw UnexpectedTokenConfigException(path, line);
+		throw UnexpectedTokenConfigException(path, g_line);
 	}
 
 	return path;
@@ -179,7 +179,7 @@ std::string	getLocationPath() {
 
 void	setAutoindex(LocationBlock& location, const std::vector<std::string>& params) {
 	if (params.size() != 1) {
-		throw InvalidNumberOfArgumentsConfigException(KW_AUTOINDEX, line);
+		throw InvalidNumberOfArgumentsConfigException(KW_AUTOINDEX, g_line);
 	}
 
 	if (params[0] == "on") {
@@ -187,13 +187,13 @@ void	setAutoindex(LocationBlock& location, const std::vector<std::string>& param
 	} else if (params[0] == "off") {
 		location.setAutoindex(false);
 	} else {
-		throw InvalidAutoindexValueConfigException(params[0], line);
+		throw InvalidAutoindexValueConfigException(params[0], g_line);
 	}
 }
 
 void	setCGIs(LocationBlock& location, const std::vector<std::string>& params) {
 	if (params.size() != 2) {
-		throw InvalidNumberOfArgumentsConfigException(KW_CGI_PASS, line);
+		throw InvalidNumberOfArgumentsConfigException(KW_CGI_PASS, g_line);
 	}
 	location.setCGIs(params[0], params[1]);
 }
@@ -210,78 +210,78 @@ void	setMethodsAllowed(LocationBlock& location, const std::vector<std::string>& 
 			location.setMethodsAllowed(params[j]);
 		}
 	} catch (const std::exception& exception) {
-		throw InvalidMethodConfigException(params[j], line);
+		throw InvalidMethodConfigException(params[j], g_line);
 	}
 }
 
 void	setRedirect(LocationBlock& location, const std::vector<std::string>& params) {
 	if (params.size() != 2) {
-		throw InvalidNumberOfArgumentsConfigException(KW_REDIRECT, line);
+		throw InvalidNumberOfArgumentsConfigException(KW_REDIRECT, g_line);
 	}
 
 	try {
 		int code = std::stoul(params[0]);
 		location.setRedirect(code, params[1]);
 	} catch (const std::exception& ex) {
-		throw InvalidErrorPageConfigException(params[0], line);
+		throw InvalidErrorPageConfigException(params[0], g_line);
 	}
 }
 
 void	setRoot(LocationBlock& location, const std::vector<std::string>& params) {
 	if (params.size() != 1) {
-		throw InvalidNumberOfArgumentsConfigException(KW_ROOT, line);
+		throw InvalidNumberOfArgumentsConfigException(KW_ROOT, g_line);
 	}
 	location.setRoot(params[0]);
 }
 
 void	setHost(ServerBlock& server, const std::vector<std::string>& params) {
 	if (params.size() != 1) {
-		throw InvalidNumberOfArgumentsConfigException(KW_HOST, line);
+		throw InvalidNumberOfArgumentsConfigException(KW_HOST, g_line);
 	}
 
 	try {
 		server.setHost(params[0]);
 	} catch (const std::exception& ex) {
-		throw HostNotFoundConfigException(params[0], line);
+		throw HostNotFoundConfigException(params[0], g_line);
 	}
 }
 
 void	setPort(ServerBlock& server, const std::vector<std::string>& params) {
 	if (params.size() != 1) {
-		throw InvalidNumberOfArgumentsConfigException(KW_PORT, line);
+		throw InvalidNumberOfArgumentsConfigException(KW_PORT, g_line);
 	}
 
 	try {
 		size_t port = std::stoul(params[0]);
 		server.setPort(port);
 	} catch (const std::exception& ex) {
-		throw InvalidPortConfigException(params[0], line);
+		throw InvalidPortConfigException(params[0], g_line);
 	}
 }
 
 void	setClientMaxBodySize(ServerBlock& server, const std::vector<std::string>& params) {
 	if (params.size() != 1) {
-		throw InvalidNumberOfArgumentsConfigException(KW_CLIENT_MAX_BODY_SIZE, line);
+		throw InvalidNumberOfArgumentsConfigException(KW_CLIENT_MAX_BODY_SIZE, g_line);
 	}
 
 	try {
 		uint64_t size = parseSize(params[0]);
 		server.setClientMaxBodySize(size);
 	} catch (const std::exception& ex) {
-		throw ClientMaxBodySizeConfigException(params[0], line);
+		throw ClientMaxBodySizeConfigException(params[0], g_line);
 	}
 }
 
 void	setErrorPages(ServerBlock& server, const std::vector<std::string>& params) {
 	if (params.size() != 2) {
-		throw InvalidNumberOfArgumentsConfigException(KW_ERROR_PAGE, line);
+		throw InvalidNumberOfArgumentsConfigException(KW_ERROR_PAGE, g_line);
 	}
 
 	try {
 		int code = std::stoul(params[0]);
 		server.setErrorPages(code, params[1]);
 	} catch (const std::exception& ex) {
-		throw InvalidErrorPageConfigException(params[0], line);
+		throw InvalidErrorPageConfigException(params[0], g_line);
 	}
 }
 
@@ -299,16 +299,16 @@ LocationBlock	getLocationBlock() {
 	location.setPath(getLocationPath());
 
 	if (getNextToken() != KW_OPENING_BRACE) {
-		throw NoOpeningBraceConfigException(KW_LOCATION, line);
+		throw NoOpeningBraceConfigException(KW_LOCATION, g_line);
 	}
 
 	while (!(keyword = getNextToken()).empty()) {
 		if (keyword == KW_OPENING_BRACE || keyword == KW_SEMICOLON) {
-			throw UnexpectedTokenConfigException(keyword, line);
+			throw UnexpectedTokenConfigException(keyword, g_line);
 		} else if (!isValidKeyword(keyword)) {
-			throw UnknownDirectiveConfigException(keyword, line);
+			throw UnknownDirectiveConfigException(keyword, g_line);
 		} else if (!isValidDirective(keyword, CTX_LOCATION)) {
-			throw NotAllowedDirectiveConfigException(keyword, line);
+			throw NotAllowedDirectiveConfigException(keyword, g_line);
 		}
 
 		if (keyword == KW_CLOSING_BRACE) {
@@ -332,7 +332,7 @@ LocationBlock	getLocationBlock() {
 	}
 
 	if (keyword.empty()) {
-		throw UnexpectedEndOfFileConfigException(line);
+		throw UnexpectedEndOfFileConfigException(g_line);
 	}
 
 	return location;
@@ -345,16 +345,16 @@ ServerBlock	getServerBlock() {
 	std::vector<std::string>	params;
 
 	if (getNextToken() != KW_OPENING_BRACE) {
-		throw NoOpeningBraceConfigException(KW_SERVER, line);
+		throw NoOpeningBraceConfigException(KW_SERVER, g_line);
 	}
 
 	while (!(keyword = getNextToken()).empty()) {
 		if (keyword == KW_OPENING_BRACE || keyword == KW_SEMICOLON) {
-			throw UnexpectedTokenConfigException(keyword, line);
+			throw UnexpectedTokenConfigException(keyword, g_line);
 		} else if (!isValidKeyword(keyword)) {
-			throw UnknownDirectiveConfigException(keyword, line);
+			throw UnknownDirectiveConfigException(keyword, g_line);
 		} else if (!isValidDirective(keyword, CTX_SERVER)) {
-			throw NotAllowedDirectiveConfigException(keyword, line);
+			throw NotAllowedDirectiveConfigException(keyword, g_line);
 		}
 
 		if (keyword == KW_CLOSING_BRACE) {
@@ -382,7 +382,7 @@ ServerBlock	getServerBlock() {
 	}
 
 	if (keyword.empty()) {
-		throw UnexpectedEndOfFileConfigException(line);
+		throw UnexpectedEndOfFileConfigException(g_line);
 	}
 
 	return server;
@@ -392,17 +392,18 @@ Config	parseConfigFile(const std::string& filename) {
 	Config		config;
 	std::string	keyword;
 
-	buffer = readFile(filename);
+	g_index = 0, g_line = 1;
+	g_buffer = readFile(filename);
 
 	while (!(keyword = getNextToken()).empty()) {
 		if (keyword == KW_OPENING_BRACE ||
 			keyword == KW_CLOSING_BRACE ||
 			keyword == KW_SEMICOLON) {
-			throw UnexpectedTokenConfigException(keyword, line);
+			throw UnexpectedTokenConfigException(keyword, g_line);
 		} else if (!isValidKeyword(keyword)) {
-			throw UnknownDirectiveConfigException(keyword, line);
+			throw UnknownDirectiveConfigException(keyword, g_line);
 		} else if (!isValidDirective(keyword, CTX_MAIN)) {
-			throw NotAllowedDirectiveConfigException(keyword, line);
+			throw NotAllowedDirectiveConfigException(keyword, g_line);
 		}
 
 		if (keyword == KW_SERVER) {
