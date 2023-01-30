@@ -38,6 +38,8 @@
 
 class Config {
 public:
+//	Config();
+//	~Config();
 	void addServerBlock(const ServerBlock& c);
 	bool isEmpty();
 	void print();//debug
