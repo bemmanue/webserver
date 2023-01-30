@@ -45,7 +45,7 @@ void LocationBlock::print() {
 		std::cout << "\t\t" << "cgi: " << (*i).first << " " << (*i).second << std::endl;
 	}
 
-	for (int i = 0; i < _index.size(); i++) {
+	for (unsigned i = 0; i < _index.size(); i++) {
 		std::cout << "\t\t" << "index: " << _index[i] << std::endl;
 	}
 

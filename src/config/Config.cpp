@@ -49,7 +49,7 @@ namespace ft {
   }
 
   void Config::print() {
-    for (int j = 0; j < _servers.size(); j++) {
+    for (unsigned j = 0; j < _servers.size(); j++) {
       std::cout << "Server №" << (j + 1) << std::endl;
       _servers[j].print();
       std::cout << std::endl;
@@ -121,7 +121,7 @@ namespace ft {
   }
 
   std::vector<char> readFile(const std::string& filename) {
-    std::ifstream file(filename, std::ios::binary | std::ios::ate);
+    std::ifstream file(filename.c_str(), std::ios::binary | std::ios::ate);
     std::streamsize size = file.tellg();
 
     g_buffer.resize(size);
@@ -218,7 +218,7 @@ namespace ft {
 
   void setMethodsAllowed(LocationBlock & location,
                          const std::vector<std::string>& params) {
-    int j;
+    unsigned j;
 
     try {
       for (j = 0; j < params.size(); j++) {
@@ -236,7 +236,10 @@ namespace ft {
     }
 
     try {
-      int code = std::stoul(params[0]);
+      int code = std::atoi(params[0].c_str());
+      if (code < 0) {
+        code *= -1;
+      }
       location.setRedirect(code, params[1]);
     } catch (const std::exception& ex) {
       throw InvalidErrorPageConfigException(params[0], g_line);
@@ -269,7 +272,10 @@ namespace ft {
     }
 
     try {
-      size_t port = std::stoul(params[0]);
+      size_t port = std::atoi(params[0].c_str());
+      if (port < 0) {
+        port *= -1;
+      }
       server.setPort(port);
     } catch (const std::exception& ex) {
       throw InvalidPortConfigException(params[0], g_line);
@@ -298,7 +304,10 @@ namespace ft {
     }
 
     try {
-      int code = std::stoul(params[0]);
+      int code = std::atoi(params[0].c_str());
+      if (code < 0) {
+        code *= -1;
+      }
       server.setErrorPages(code, params[1]);
     } catch (const std::exception& ex) {
       throw InvalidErrorPageConfigException(params[0], g_line);
@@ -307,7 +316,7 @@ namespace ft {
 
   void setServerNames(ServerBlock & server,
                       const std::vector<std::string>& params) {
-    for (int j = 0; j < params.size(); j++) {
+    for (unsigned j = 0; j < params.size(); j++) {
       server.setServerName(params[j]);
     }
   }

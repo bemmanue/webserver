@@ -1,5 +1,4 @@
 #pragma clang diagnostic push
-#pragma ide diagnostic ignored "modernize-use-nullptr"
 #include "../include/server.hpp"
 
 namespace ft {
@@ -85,8 +84,8 @@ void server::listenSocket() {
 
 
 server::server(const ServerBlock& config)
-    : config_(config), connections(), hints_(),
-      socket_(0), record_(), nfds(1) {
+    : hints_(), socket_(0), record_(),
+      config_(config), nfds(1) {
   initStruct();
   getSocketDescriptor();
   setOptions();

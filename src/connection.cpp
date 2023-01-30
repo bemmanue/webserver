@@ -47,7 +47,7 @@ void connection::setEventFlag(short flag, sock_t responceSocket) {
 }
 
 connection::connection(sock_t listeningSocket)
-    : clientFds(), numberOf(0) {
+    : numberOf(0), clientFds() {
   clientFds = new struct pollfd[FT_LISTEN_CLIENT_LIMIT];
   bzero(clientFds, sizeof (*clientFds) * FT_LISTEN_CLIENT_LIMIT);
   if (!addConnection(listeningSocket)) {

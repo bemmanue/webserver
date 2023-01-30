@@ -30,7 +30,7 @@ namespace ft {
 }
 
 int IOPoll::pollOutHelper(int fd, const char *str, size_t *size) {
-  int total = 0;
+  unsigned total = 0;
   int bytes_left = *size;
   int n;
 

@@ -53,5 +53,4 @@ class server {
   void acceptConnections();
   void sendAndReceive(int fd, short revents);
 };
-
 }  // namespace ft

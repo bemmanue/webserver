@@ -7,7 +7,8 @@ public:
 		_message = new std::string(msg);
 	}
 	explicit ConfigException(const std::string& msg, size_t line) {
-		_message = new std::string(msg + " in line " + std::to_string(line));
+		_message = new std::string(msg + " in line ");
+        _message->append(_message->size(), line);
 	}
 	virtual ~ConfigException() throw() { delete _message; }
 	virtual const char* what() const throw() { return _message->c_str(); }

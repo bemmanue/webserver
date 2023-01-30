@@ -14,7 +14,6 @@ namespace ft {
 
 #define FT_LISTEN_CLIENT_LIMIT 10
 
-
 class connection {
  public:
   struct pollfd *getConnections();
