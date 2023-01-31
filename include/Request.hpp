@@ -115,6 +115,7 @@ private:
 	void		parseHeaderFields(const std::string& request, size_t* i);
 	void		parseBody(const std::string& request, size_t* i);
 	void		skipSpace(const std::string& request, size_t* i);
+	std::string	getToken(const std::string& request, size_t* i);
 	bool		isTchar(char a);
 };
 
