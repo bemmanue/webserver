@@ -20,7 +20,11 @@ int main(int argc, char* argv[]) {
   std::vector<ft::ServerBlock> serverConfigs;
   serverConfigs = config.getServers();
 
-  serverList.push_back(ft::server::ofBlock(serverConfigs.front()));
+  for (std::vector<ft::ServerBlock>::iterator i = serverConfigs.begin();
+       i != serverConfigs.end(); ++i) {
+    serverList.push_back(ft::server::ofBlock(*i));
+  }
+
   while (true) {
     for (std::list<ft::server*>::iterator iter = serverList.begin();
          iter != serverList.end(); ++iter) {

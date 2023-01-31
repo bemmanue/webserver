@@ -6,6 +6,7 @@
 #include <sstream>
 #include <cerrno>
 #include <cstdio>
+#include <fcntl.h>
 
 #include "connection.hpp"
 #include "IOPoll.hpp"
@@ -47,7 +48,6 @@ class server {
   /*Poll*/
   connection* connections;
   nfds_t nfds;
-//  struct sockaddr_storage theirAddrArr[FT_LISTEN_CLIENT_LIMIT];
 
   /*Poll operations with connections*/
   void acceptConnections();

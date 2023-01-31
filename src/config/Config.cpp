@@ -272,9 +272,12 @@ namespace ft {
     }
 
     try {
-      size_t port = std::atoi(params[0].c_str());
-      if (port < 0) {
-        port *= -1;
+      size_t port;
+      int res = std::atoi(params[0].c_str());
+      if (res < 0) {
+        port  = res * -1;
+      } else {
+        port = res;
       }
       server.setPort(port);
     } catch (const std::exception& ex) {

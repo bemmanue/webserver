@@ -1,4 +1,3 @@
-#pragma clang diagnostic push
 #include "../include/server.hpp"
 
 namespace ft {
@@ -19,8 +18,9 @@ void server::getSocketDescriptor() {
   int status;
   struct addrinfo* record;
   std::string host = config_.getHost();
-  char* port = NULL;
+  char port[6];
 
+  bzero(port, sizeof (port));
   sprintf(port, "%lu", config_.getPort());
   status = getaddrinfo(host.c_str(), port, &hints_, &results);
 
@@ -50,7 +50,12 @@ void server::setOptions() const {
   if (setsockopt(socket_, SOL_SOCKET, SO_REUSEADDR,
                  (char *)&opt, sizeof (int)) < 0) {
     std::string str = "setsockopt exception: ";
-    str.insert(0, strerror(errno));
+    str.insert(str.size(), strerror(errno));
+    throw MyException(str);
+  }
+  if (fcntl(socket_, F_SETFL,  O_NONBLOCK)) {
+    std::string str = "fcntl exception: ";
+    str.insert(str.size(), strerror(errno));
     throw MyException(str);
   }
 }
@@ -103,15 +108,12 @@ server::~server() {
 
 server *server::ofBlock(const ServerBlock& servBlock) {
 
-
   server* newServer;
   try {
      newServer = new server(servBlock);
   } catch (MyException &ex) {
-    delete newServer;
     throw ex;
   }
-
   return newServer;
 }
 
@@ -185,4 +187,3 @@ int server::serve() {
 }
 
 }  // namespace ft
-#pragma clang diagnostic pop

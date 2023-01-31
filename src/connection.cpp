@@ -1,4 +1,5 @@
 #include "../include/connection.hpp"
+#include <fcntl.h>
 
 namespace ft {
 
@@ -11,6 +12,11 @@ bool connection::addConnection(sock_t newFd) {
     return false;
   }
   clientFds[numberOf].fd = newFd;
+  if (fcntl(clientFds[numberOf].fd, F_SETFL,  O_NONBLOCK)) {
+    std::string str = "fcntl exception: ";
+    str.insert(str.size(), strerror(errno));
+    throw MyException(str);
+  }
   clientFds[numberOf].events = POLLIN;
   numberOf++;
   return true;
