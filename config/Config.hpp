@@ -3,6 +3,7 @@
 
 #include <iostream>
 #include <fstream>
+#include <sstream>
 #include <map>
 
 #include "ConfigException.hpp"
@@ -37,25 +38,49 @@
 
 
 class Config {
-public:
-//	Config();
-//	~Config();
-	void addServerBlock(const ServerBlock& c);
-	bool isEmpty();
-	void print();//debug
-    std::vector<ServerBlock> getServers();
-
 private:
-	std::vector<ServerBlock> _servers;
+	std::vector<ServerBlock>	_servers;
+
+public:
+	Config();
+	Config(const Config& other);
+	Config& operator=(const Config& other);
+	~Config();
+
+	void	setServerBlock(const ServerBlock& c);
+	bool	isEmpty();
+	void	print(); //debug
+
+    std::vector<ServerBlock>	getServerBlocks();
 };
 
+std::string					readFile(const std::string& filename);
+std::string					getNextToken();
+ServerBlock					getServerBlock();
+LocationBlock				getLocationBlock();
+std::vector<std::string>	getParameters();
+std::string					getLocationPath();
+void						skipSpace();
 
-std::vector<char>	readFile(const std::string& filename);
-std::string			getNextToken();
+Config		parseConfigFile(const std::string& filename) throw(ConfigException);
+void		setServerNames(ServerBlock& server, const std::vector<std::string>& params);
+void		setErrorPages(ServerBlock& server, const std::vector<std::string>& params);
+void		setClientMaxBodySize(ServerBlock& server, const std::vector<std::string>& params);
+void		setPort(ServerBlock& server, const std::vector<std::string>& params);
+void		setHost(ServerBlock& server, const std::vector<std::string>& params);
+void		setRoot(LocationBlock& location, const std::vector<std::string>& params);
+void		setRedirect(LocationBlock& location, const std::vector<std::string>& params);
+void		setMethodsAllowed(LocationBlock& location, const std::vector<std::string>& params);
+void		setIndex(LocationBlock& location, const std::vector<std::string>& params);
+void		setCGIs(LocationBlock& location, const std::vector<std::string>& params);
+void		setAutoindex(LocationBlock& location, const std::vector<std::string>& params);
 
-Config				parseConfigFile(const std::string& filename);
-ServerBlock			getServerBlock();
-LocationBlock		getLocationBlock();
+bool		isValidDirective(const std::string& directive, size_t context);
+bool		isValidKeyword(const std::string& keyword);
+uint64_t	parseSize(const std::string& s);
+
+
+
 
 
 #endif //CONFIG_HPP

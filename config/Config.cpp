@@ -1,8 +1,8 @@
 #include "Config.hpp"
 
-static std::vector<char> g_buffer;
-static size_t g_index = 0;
-static size_t g_line = 1;
+static std::string	g_buffer;
+static size_t 		g_index = 0;
+static size_t 		g_line = 1;
 
 const char* validMainDirectives[] =	{
 		KW_SERVER, NULL
@@ -25,8 +25,148 @@ const char* validKeywords[] = {
 		KW_SEMICOLON, NULL
 };
 
+Config::Config() {}
 
-void Config::addServerBlock(const ServerBlock& c) {
+Config::Config(const Config& other) {
+	this->_servers = other._servers;
+}
+
+Config& Config::operator=(const Config& other) {
+	if (this != &other) {
+		this->_servers = other._servers;
+	}
+	return *this;
+}
+
+Config::~Config() {}
+
+Config	parseConfigFile(const std::string& filename) throw(ConfigException) {
+	Config		config;
+	std::string	keyword;
+
+	g_index = 0, g_line = 1;
+	g_buffer = readFile(filename);
+
+	while (!(keyword = getNextToken()).empty()) {
+		if (keyword == KW_OPENING_BRACE ||
+			keyword == KW_CLOSING_BRACE ||
+			keyword == KW_SEMICOLON) {
+			throw UnexpectedTokenConfigException(keyword, g_line);
+		} else if (!isValidKeyword(keyword)) {
+			throw UnknownDirectiveConfigException(keyword, g_line);
+		} else if (!isValidDirective(keyword, CTX_MAIN)) {
+			throw NotAllowedDirectiveConfigException(keyword, g_line);
+		}
+
+		if (keyword == KW_SERVER) {
+			config.setServerBlock(getServerBlock());
+		}
+	}
+
+	if (config.isEmpty()) {
+		throw EmptyFileConfigException();
+	}
+	return config;
+}
+
+ServerBlock	getServerBlock() {
+	ServerBlock					server;
+	LocationBlock 				location;
+	std::string					keyword;
+	std::vector<std::string>	params;
+
+	if (getNextToken() != KW_OPENING_BRACE) {
+		throw NoOpeningBraceConfigException(KW_SERVER, g_line);
+	}
+
+	while (!(keyword = getNextToken()).empty()) {
+		if (keyword == KW_OPENING_BRACE || keyword == KW_SEMICOLON) {
+			throw UnexpectedTokenConfigException(keyword, g_line);
+		} else if (!isValidKeyword(keyword)) {
+			throw UnknownDirectiveConfigException(keyword, g_line);
+		} else if (!isValidDirective(keyword, CTX_SERVER)) {
+			throw NotAllowedDirectiveConfigException(keyword, g_line);
+		}
+
+		if (keyword == KW_CLOSING_BRACE) {
+			break;
+		}
+
+		if (keyword == KW_LOCATION) {
+			location = getLocationBlock();
+			server.setLocation(location.getPath(), location);
+			continue;
+		}
+
+		params = getParameters();
+		if (keyword == KW_CLIENT_MAX_BODY_SIZE) {
+			setClientMaxBodySize(server, params);
+		} else if (keyword == KW_ERROR_PAGE) {
+			setErrorPages(server, params);
+		} else if (keyword == KW_HOST) {
+			setHost(server, params);
+		} else if (keyword == KW_PORT) {
+			setPort(server, params);
+		} else if (keyword == KW_SERVER_NAME) {
+			setServerNames(server, params);
+		}
+	}
+
+	if (keyword.empty()) {
+		throw UnexpectedEndOfFileConfigException(g_line);
+	}
+
+	return server;
+}
+
+LocationBlock	getLocationBlock() {
+	LocationBlock				location;
+	std::string					keyword;
+	std::vector<std::string>	params;
+
+	location.setPath(getLocationPath());
+
+	if (getNextToken() != KW_OPENING_BRACE) {
+		throw NoOpeningBraceConfigException(KW_LOCATION, g_line);
+	}
+
+	while (!(keyword = getNextToken()).empty()) {
+		if (keyword == KW_OPENING_BRACE || keyword == KW_SEMICOLON) {
+			throw UnexpectedTokenConfigException(keyword, g_line);
+		} else if (!isValidKeyword(keyword)) {
+			throw UnknownDirectiveConfigException(keyword, g_line);
+		} else if (!isValidDirective(keyword, CTX_LOCATION)) {
+			throw NotAllowedDirectiveConfigException(keyword, g_line);
+		}
+
+		if (keyword == KW_CLOSING_BRACE) {
+			break;
+		}
+
+		params = getParameters();
+		if (keyword == KW_AUTOINDEX) {
+			setAutoindex(location, params);
+		} else if (keyword == KW_CGI_PASS) {
+			setCGIs(location, params);
+		} else if (keyword == KW_INDEX) {
+			setIndex(location, params);
+		} else if (keyword == KW_METHODS_ALLOWED) {
+			setMethodsAllowed(location, params);
+		} else if (keyword == KW_REDIRECT) {
+			setRedirect(location, params);
+		} else if (keyword == KW_ROOT) {
+			setRoot(location, params);
+		}
+	}
+
+	if (keyword.empty()) {
+		throw UnexpectedEndOfFileConfigException(g_line);
+	}
+
+	return location;
+}
+
+void Config::setServerBlock(const ServerBlock& c) {
 	_servers.push_back(c);
 }
 
@@ -41,7 +181,7 @@ void Config::print() {
 		std::cout << std::endl;
 	}
 }
-std::vector<ServerBlock> Config::getServers() {
+std::vector<ServerBlock> Config::getServerBlocks() {
   return _servers;
 }
 
@@ -106,14 +246,16 @@ bool isValidDirective(const std::string& directive, size_t context) {
 	return false;
 }
 
-std::vector<char> readFile(const std::string& filename) {
-	std::ifstream file(filename, std::ios::binary | std::ios::ate);
-	std::streamsize size = file.tellg();
+std::string	readFile(const std::string& filename) {
+	std::ifstream		file(filename);
+	std::stringstream	buffer;
 
-	g_buffer.resize(size);
-	file.seekg(0, std::ios::beg);
-	file.read(g_buffer.data(), size);
-	return g_buffer;
+	if (!file.is_open()) {
+		throw ConfigException("error openning config file");
+	}
+	buffer << file.rdbuf();
+
+	return buffer.str();
 }
 
 void skipSpace() {
@@ -146,7 +288,7 @@ std::string	getNextToken() {
 	return token;
 }
 
-std::vector<std::string> getParameters() {
+std::vector<std::string>	getParameters() {
 	std::vector<std::string>	value;
 	std::string					token;
 
@@ -289,131 +431,4 @@ void	setServerNames(ServerBlock& server, const std::vector<std::string>& params)
 	for (int j = 0; j < params.size(); j++) {
 		server.setServerName(params[j]);
 	}
-}
-
-LocationBlock	getLocationBlock() {
-	LocationBlock				location;
-	std::string					keyword;
-	std::vector<std::string>	params;
-
-	location.setPath(getLocationPath());
-
-	if (getNextToken() != KW_OPENING_BRACE) {
-		throw NoOpeningBraceConfigException(KW_LOCATION, g_line);
-	}
-
-	while (!(keyword = getNextToken()).empty()) {
-		if (keyword == KW_OPENING_BRACE || keyword == KW_SEMICOLON) {
-			throw UnexpectedTokenConfigException(keyword, g_line);
-		} else if (!isValidKeyword(keyword)) {
-			throw UnknownDirectiveConfigException(keyword, g_line);
-		} else if (!isValidDirective(keyword, CTX_LOCATION)) {
-			throw NotAllowedDirectiveConfigException(keyword, g_line);
-		}
-
-		if (keyword == KW_CLOSING_BRACE) {
-			break;
-		}
-
-		params = getParameters();
-		if (keyword == KW_AUTOINDEX) {
-			setAutoindex(location, params);
-		} else if (keyword == KW_CGI_PASS) {
-			setCGIs(location, params);
-		} else if (keyword == KW_INDEX) {
-			setIndex(location, params);
-		} else if (keyword == KW_METHODS_ALLOWED) {
-			setMethodsAllowed(location, params);
-		} else if (keyword == KW_REDIRECT) {
-			setRedirect(location, params);
-		} else if (keyword == KW_ROOT) {
-			setRoot(location, params);
-		}
-	}
-
-	if (keyword.empty()) {
-		throw UnexpectedEndOfFileConfigException(g_line);
-	}
-
-	return location;
-}
-
-ServerBlock	getServerBlock() {
-	ServerBlock					server;
-	LocationBlock 				location;
-	std::string					keyword;
-	std::vector<std::string>	params;
-
-	if (getNextToken() != KW_OPENING_BRACE) {
-		throw NoOpeningBraceConfigException(KW_SERVER, g_line);
-	}
-
-	while (!(keyword = getNextToken()).empty()) {
-		if (keyword == KW_OPENING_BRACE || keyword == KW_SEMICOLON) {
-			throw UnexpectedTokenConfigException(keyword, g_line);
-		} else if (!isValidKeyword(keyword)) {
-			throw UnknownDirectiveConfigException(keyword, g_line);
-		} else if (!isValidDirective(keyword, CTX_SERVER)) {
-			throw NotAllowedDirectiveConfigException(keyword, g_line);
-		}
-
-		if (keyword == KW_CLOSING_BRACE) {
-			break;
-		}
-
-		if (keyword == KW_LOCATION) {
-			location = getLocationBlock();
-			server.setLocation(location.getPath(), location);
-			continue;
-		}
-
-		params = getParameters();
-		if (keyword == KW_CLIENT_MAX_BODY_SIZE) {
-			setClientMaxBodySize(server, params);
-		} else if (keyword == KW_ERROR_PAGE) {
-			setErrorPages(server, params);
-		} else if (keyword == KW_HOST) {
-			setHost(server, params);
-		} else if (keyword == KW_PORT) {
-			setPort(server, params);
-		} else if (keyword == KW_SERVER_NAME) {
-			setServerNames(server, params);
-		}
-	}
-
-	if (keyword.empty()) {
-		throw UnexpectedEndOfFileConfigException(g_line);
-	}
-
-	return server;
-}
-
-Config	parseConfigFile(const std::string& filename) {
-	Config		config;
-	std::string	keyword;
-
-	g_index = 0, g_line = 1;
-	g_buffer = readFile(filename);
-
-	while (!(keyword = getNextToken()).empty()) {
-		if (keyword == KW_OPENING_BRACE ||
-			keyword == KW_CLOSING_BRACE ||
-			keyword == KW_SEMICOLON) {
-			throw UnexpectedTokenConfigException(keyword, g_line);
-		} else if (!isValidKeyword(keyword)) {
-			throw UnknownDirectiveConfigException(keyword, g_line);
-		} else if (!isValidDirective(keyword, CTX_MAIN)) {
-			throw NotAllowedDirectiveConfigException(keyword, g_line);
-		}
-
-		if (keyword == KW_SERVER) {
-			config.addServerBlock(getServerBlock());
-		}
-	}
-
-	if (config.isEmpty()) {
-		throw EmptyFileConfigException();
-	}
-
-	return config;
 }
