@@ -1,0 +1,18 @@
+# ninja log v5
+4	978	1676026648000000000	CMakeFiles/webserver.dir/main.cpp.o	477d6810ac2df33a
+1062	1598	1676026324000000000	CMakeFiles/webserver.dir/config/Global.cpp.o	3fe00462689fbe97
+2	1423	1676026324000000000	CMakeFiles/webserver.dir/config/ServerBlock.cpp.o	f0cf1140be3cf54c
+999	1159	1676026648000000000	webserver	7a04afd322f31f80
+2	1327	1676026324000000000	CMakeFiles/webserver.dir/config/LocationBlock.cpp.o	3fea772667c737ce
+0	1064	1676026324000000000	CMakeFiles/webserver.dir/Request.cpp.o	8ca2c71710e1dbf1
+0	156	1676026657000000000	build.ninja	674e2d320ef865d0
+1	1631	1676026324000000000	CMakeFiles/webserver.dir/config/Config.cpp.o	aaafc5903cf78f1e
+1	1600	1676026324000000000	CMakeFiles/webserver.dir/Response.cpp.o	751898fc62061d5e
+5	565	1676026648000000000	CMakeFiles/webserver.dir/http/Request.cpp.o	535dc23d310d8b0d
+1	1091	1676026324000000000	CMakeFiles/webserver.dir/Status.cpp.o	f6d1b241b61cc78b
+1	1061	1676026324000000000	CMakeFiles/webserver.dir/Utils.cpp.o	2626dd32f902e31e
+5	496	1676026648000000000	CMakeFiles/webserver.dir/http/Utils.cpp.o	cf5855d03afa6b9e
+5	999	1676026648000000000	CMakeFiles/webserver.dir/http/Response.cpp.o	2b279077a5a7db9
+4	722	1676026416000000000	CMakeFiles/webserver.dir/http/Status.cpp.o	520d046a2b62f6f8
+4	929	1676026764000000000	CMakeFiles/webserver.dir/main.cpp.o	477d6810ac2df33a
+929	1175	1676026764000000000	webserver	7a04afd322f31f80
