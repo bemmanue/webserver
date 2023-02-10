@@ -1,12 +1,14 @@
-#include "http/Response.hpp"
-#include "config/Config.hpp"
+#include "src/http/Response.hpp"
+#include "src/config/Config.hpp"
 
 int main(int argc, char **argv) {
-	Config config;
+	std::vector<ServerBlock> config;
 
 	try {
-		config = parseConfigFile("webserver.conf");
-		config.print();
+		config = parseConfigFile("conf/webserver.conf");
+		for (int i = 0; i < config.size(); ++i) {
+			config[i].print();
+		}
 	} catch (const std::exception& exception) {
 		std::cout << exception.what() << std::endl;
 		exit(0);

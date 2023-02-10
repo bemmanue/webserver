@@ -1,9 +1,23 @@
 #include "ServerBlock.hpp"
 
-ServerBlock::ServerBlock() :
+ServerBlock::ServerBlock():
+	_major(1),
+	_minor(1),
 	_host(DEFAULT_HOST),
 	_port(DEFAULT_PORT),
 	_client_max_body_size(DEFAULT_CLIENT_MAX_BODY_SIZE) {
+}
+
+ServerBlock::ServerBlock(const ServerBlock &other) {
+	operator=(other);
+}
+
+ServerBlock& ServerBlock::operator=(const ServerBlock &other) {
+	if (this != &other) {
+		_major = other._major;
+		_minor = other._minor;
+	}
+	return *this;
 }
 
 ServerBlock::~ServerBlock() {
@@ -116,3 +130,4 @@ std::map<std::string, LocationBlock> ServerBlock::getLocations() const {
 bool ServerBlock::hasLocation(const std::string &location) {
 	return false;
 }
+
