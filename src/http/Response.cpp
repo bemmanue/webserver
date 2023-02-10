@@ -76,7 +76,7 @@ void	Response::makeResponseForDir(const std::string& requestTarget) {
 		return;
 	}
 
-	indices = _serverConfig.getLocations()[requestTarget].getIndices();
+	indices = _serverConfig.getLocations().at(requestTarget).getIndices();
 
 	for (int i = 0; i < indices.size(); i++) {
 		std::string path;

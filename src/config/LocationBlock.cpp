@@ -1,11 +1,30 @@
 #include "LocationBlock.hpp"
 
-LocationBlock::LocationBlock() {
+LocationBlock::LocationBlock() {}
 
+
+LocationBlock::LocationBlock(ServerBlock *serverBlock) {
+	_serverBlock = serverBlock;
+}
+
+LocationBlock::LocationBlock(const LocationBlock &other) {
+	operator=(other);
+}
+
+LocationBlock &LocationBlock::operator=(const LocationBlock &other) {
+	if (this != &other) {
+		_path = other._path;
+		_autoindex = other._autoindex;
+		_CGIs = other._CGIs;
+		_index = other._index;
+		_limitExcept = other._limitExcept;
+		_redirect = other._redirect;
+		_root = other._root;
+	}
+	return *this;
 }
 
 LocationBlock::~LocationBlock() {
-
 }
 
 void LocationBlock::setPath(const std::string &parameter) {
@@ -24,9 +43,12 @@ void LocationBlock::setIndex(const std::vector<std::string>& parameter) {
 	_index = parameter;
 }
 
-void LocationBlock::setMethodsAllowed(const std::string& method) {
-	if (global.isAllowedMethod(method)) {
-		_methods_allowed.insert(method);
+void LocationBlock::setLimitExcept(const std::string& method) {
+	if (!_serverBlock) {
+		throw std::exception();
+	}
+	if (_serverBlock->isMethodAllowed(method)) {
+		_limitExcept.insert(method);
 	} else {
 		throw std::exception();
 	}
@@ -41,29 +63,6 @@ void LocationBlock::setRedirect(int code, const std::string& uri) {
 
 void LocationBlock::setRoot(const std::string& path) {
 	_root = path;
-}
-
-void LocationBlock::print() {
-	std::cout << "\t\t" << "path: " << _path << std::endl;
-	std::cout << "\t\t" << "autoindex: " << std::boolalpha << _autoindex << std::endl;
-
-	for (std::map<std::string, std::string>::iterator i = _CGIs.begin(); i != _CGIs.end(); i++) {
-		std::cout << "\t\t" << "cgi: " << (*i).first << " " << (*i).second << std::endl;
-	}
-
-	for (int i = 0; i < _index.size(); i++) {
-		std::cout << "\t\t" << "index: " << _index[i] << std::endl;
-	}
-
-	for (std::set<std::string>::iterator i = _methods_allowed.begin(); i != _methods_allowed.end(); i++) {
-		std::cout << "\t\t" << "method_allowed: " << *i << std::endl;
-	}
-
-	for (std::map<int, std::string>::iterator i = _redirect.begin(); i != _redirect.end(); i++) {
-		std::cout << "\t\t" << "error_page: " << (*i).first << " " << (*i).second << std::endl;
-	}
-
-	std::cout << "\t\t" << "root: " << _root << std::endl;
 }
 
 std::string LocationBlock::getPath() const {
@@ -83,7 +82,7 @@ std::vector<std::string> LocationBlock::getIndices() const {
 }
 
 std::set<std::string> LocationBlock::getMethodsAllowed() const {
-	return _methods_allowed;
+	return _limitExcept;
 }
 
 std::map<int, std::string> LocationBlock::getRedirect() const {
@@ -92,4 +91,16 @@ std::map<int, std::string> LocationBlock::getRedirect() const {
 
 std::string LocationBlock::getRoot() const {
 	return _root;
+}
+
+bool LocationBlock::isMethodAllowed(const std::string &method) {
+	if (_limitExcept.empty()) {
+		return true;
+	}
+
+	std::set<std::string>::const_iterator pos = _limitExcept.find(method);
+	if (pos == _limitExcept.end()) {
+		return false;
+	}
+	return true;
 }

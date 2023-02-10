@@ -188,7 +188,7 @@ void	setMethodsAllowed(LocationBlock& location, const std::vector<std::string>& 
 
 	try {
 		for (j = 0; j < params.size(); j++) {
-			location.setMethodsAllowed(params[j]);
+			location.setLimitExcept(params[j]);
 		}
 	} catch (const std::exception& exception) {
 		throw InvalidMethodConfigException(params[j], g_line);
@@ -272,8 +272,8 @@ void	setServerNames(ServerBlock& server, const std::vector<std::string>& params)
 	}
 }
 
-LocationBlock	getLocationBlock(const std::string& file) {
-	LocationBlock				location;
+LocationBlock	getLocationBlock(const std::string& file, ServerBlock& serverBlock) {
+	LocationBlock				location(&serverBlock);
 	std::string					keyword;
 	std::vector<std::string>	params;
 
@@ -343,7 +343,7 @@ ServerBlock	getServerBlock(const std::string& file) {
 		}
 
 		if (keyword == KW_LOCATION) {
-			location = getLocationBlock(file);
+			location = getLocationBlock(file, server);
 			server.setLocation(location.getPath(), location);
 			continue;
 		}

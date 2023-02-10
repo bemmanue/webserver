@@ -7,7 +7,7 @@ int main(int argc, char **argv) {
 	try {
 		config = parseConfigFile("conf/webserver.conf");
 		for (int i = 0; i < config.size(); ++i) {
-			config[i].print();
+			std::cout << config[i];
 		}
 	} catch (const std::exception& exception) {
 		std::cout << exception.what() << std::endl;

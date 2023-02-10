@@ -1,11 +1,14 @@
 #include "ServerBlock.hpp"
 
 ServerBlock::ServerBlock():
-	_major(1),
-	_minor(1),
+	_majorVersion(1),
+	_minorVersion(1),
 	_host(DEFAULT_HOST),
 	_port(DEFAULT_PORT),
 	_client_max_body_size(DEFAULT_CLIENT_MAX_BODY_SIZE) {
+	_methods_allowed.insert(GET);
+	_methods_allowed.insert(POST);
+	_methods_allowed.insert(DELETE);
 }
 
 ServerBlock::ServerBlock(const ServerBlock &other) {
@@ -14,8 +17,15 @@ ServerBlock::ServerBlock(const ServerBlock &other) {
 
 ServerBlock& ServerBlock::operator=(const ServerBlock &other) {
 	if (this != &other) {
-		_major = other._major;
-		_minor = other._minor;
+		_majorVersion = other._majorVersion;
+		_minorVersion = other._minorVersion;
+		_host = other._host;
+		_port = other._port;
+		_server_names = other._server_names;
+		_error_pages = other._error_pages;
+		_client_max_body_size = other._client_max_body_size;
+		_locations = other._locations;
+		_methods_allowed = other._methods_allowed;
 	}
 	return *this;
 }
@@ -83,27 +93,7 @@ void ServerBlock::setLocation(const std::string& path, const LocationBlock& loca
 	_locations[path] = location;
 }
 
-void ServerBlock::print() {
-	std::cout << "\t" << "host: " << _host << std::endl;
-	std::cout << "\t" << "port: " << _port << std::endl;
-
-	for (std::set<std::string>::iterator i = _server_names.begin(); i != _server_names.end(); i++) {
-		std::cout << "\t" << "server_name: " << *i << std::endl;
-	}
-
-	for (std::map<int, std::string>::iterator i = _error_pages.begin(); i != _error_pages.end(); i++) {
-		std::cout << "\t" << "error_page: " << (*i).first << " " << (*i).second << std::endl;
-	}
-
-	std::cout << "\t" << "client_max_body_size: " << _client_max_body_size << std::endl;
-
-	for (std::map<std::string, LocationBlock>::iterator i = _locations.begin(); i != _locations.end(); i++) {
-		std::cout << "\t" << "Location: " << (*i).first << std::endl;
-		(*i).second.print();
-	}
-}
-
-std::string ServerBlock::getHost() const {
+const std::string& ServerBlock::getHost() const {
 	return _host;
 }
 
@@ -111,11 +101,19 @@ size_t ServerBlock::getPort() const {
 	return _port;
 }
 
-std::set<std::string> ServerBlock::getServerNames() const {
+size_t ServerBlock::getMajorVersion() const {
+	return _majorVersion;
+}
+
+size_t ServerBlock::getMinorVersion() const {
+	return _minorVersion;
+}
+
+const std::set<std::string>& ServerBlock::getServerNames() const {
 	return _server_names;
 }
 
-std::map<int, std::string> ServerBlock::getErrorPages() const {
+const std::map<int, std::string>& ServerBlock::getErrorPages() const {
 	return _error_pages;
 }
 
@@ -123,7 +121,7 @@ uint64_t ServerBlock::getClientMaxBodySize() const {
 	return _client_max_body_size;
 }
 
-std::map<std::string, LocationBlock> ServerBlock::getLocations() const {
+const std::map<std::string, LocationBlock>& ServerBlock::getLocations() const {
 	return _locations;
 }
 
@@ -131,3 +129,10 @@ bool ServerBlock::hasLocation(const std::string &location) {
 	return false;
 }
 
+bool ServerBlock::isMethodAllowed(const std::string &method) {
+	std::set<std::string>::const_iterator pos = _methods_allowed.find(method);
+	if (pos == _methods_allowed.end()) {
+		return false;
+	}
+	return true;
+}
