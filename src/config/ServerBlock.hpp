@@ -9,6 +9,12 @@
 #include "LocationBlock.hpp"
 #include "Global.hpp"
 
+#ifndef ALLOWED_METHODS
+	# define GET		"GET"
+	# define POST		"POST"
+	# define DELETE		"DELETE"
+#endif
+
 #define DEFAULT_PORT 					8080
 #define DEFAULT_HOST 					"127.0.0.1"
 #define DEFAULT_CLIENT_MAX_BODY_SIZE	1000000

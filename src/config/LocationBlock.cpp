@@ -1,10 +1,9 @@
 #include "LocationBlock.hpp"
 
-LocationBlock::LocationBlock() {}
-
-
-LocationBlock::LocationBlock(ServerBlock *serverBlock) {
-	_serverBlock = serverBlock;
+LocationBlock::LocationBlock() {
+	_methodsAllowed.insert(GET);
+	_methodsAllowed.insert(POST);
+	_methodsAllowed.insert(DELETE);
 }
 
 LocationBlock::LocationBlock(const LocationBlock &other) {
@@ -44,14 +43,11 @@ void LocationBlock::setIndex(const std::vector<std::string>& parameter) {
 }
 
 void LocationBlock::setLimitExcept(const std::string& method) {
-	if (!_serverBlock) {
+	std::set<std::string>::const_iterator pos = _methodsAllowed.find(method);
+	if (pos == _methodsAllowed.end()) {
 		throw std::exception();
 	}
-	if (_serverBlock->isMethodAllowed(method)) {
-		_limitExcept.insert(method);
-	} else {
-		throw std::exception();
-	}
+	_limitExcept.insert(method);
 }
 
 void LocationBlock::setRedirect(int code, const std::string& uri) {

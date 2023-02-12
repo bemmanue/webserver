@@ -1,0 +1,141 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CodeBlocks_project_file>
+	<FileVersion major="1" minor="6"/>
+	<Project>
+		<Option title="webserver"/>
+		<Option makefile_is_custom="1"/>
+		<Option compiler="gcc"/>
+		<Option virtualFolders="CMake Files\;"/>
+		<Build>
+			<Target title="all">
+				<Option working_dir="/Users/uliakulikova/Desktop/webserver/cmake-build-debug"/>
+				<Option type="4"/>
+				<MakeCommands>
+					<Build command="/usr/bin/make -j4 -f &quot;/Users/uliakulikova/Desktop/webserver/cmake-build-debug/Makefile&quot;  VERBOSE=1 all"/>
+					<CompileFile command="/usr/bin/make -j4 -f &quot;/Users/uliakulikova/Desktop/webserver/cmake-build-debug/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/make -j4 -f &quot;/Users/uliakulikova/Desktop/webserver/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/make -j4 -f &quot;/Users/uliakulikova/Desktop/webserver/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+			<Target title="rebuild_cache">
+				<Option working_dir="/Users/uliakulikova/Desktop/webserver/cmake-build-debug"/>
+				<Option type="4"/>
+				<MakeCommands>
+					<Build command="/usr/bin/make -j4 -f &quot;/Users/uliakulikova/Desktop/webserver/cmake-build-debug/Makefile&quot;  VERBOSE=1 rebuild_cache"/>
+					<CompileFile command="/usr/bin/make -j4 -f &quot;/Users/uliakulikova/Desktop/webserver/cmake-build-debug/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/make -j4 -f &quot;/Users/uliakulikova/Desktop/webserver/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/make -j4 -f &quot;/Users/uliakulikova/Desktop/webserver/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+			<Target title="edit_cache">
+				<Option working_dir="/Users/uliakulikova/Desktop/webserver/cmake-build-debug"/>
+				<Option type="4"/>
+				<MakeCommands>
+					<Build command="/usr/bin/make -j4 -f &quot;/Users/uliakulikova/Desktop/webserver/cmake-build-debug/Makefile&quot;  VERBOSE=1 edit_cache"/>
+					<CompileFile command="/usr/bin/make -j4 -f &quot;/Users/uliakulikova/Desktop/webserver/cmake-build-debug/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/make -j4 -f &quot;/Users/uliakulikova/Desktop/webserver/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/make -j4 -f &quot;/Users/uliakulikova/Desktop/webserver/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+			<Target title="webserver">
+				<Option output="/Users/uliakulikova/Desktop/webserver/cmake-build-debug/webserver" prefix_auto="0" extension_auto="0"/>
+				<Option working_dir="/Users/uliakulikova/Desktop/webserver/cmake-build-debug"/>
+				<Option object_output="./"/>
+				<Option type="1"/>
+				<Option compiler="gcc"/>
+				<Compiler>
+					<Add directory="/Library/Developer/CommandLineTools/usr/bin/../include/c++/v1"/>
+					<Add directory="/usr/local/include"/>
+					<Add directory="/Library/Developer/CommandLineTools/usr/lib/clang/12.0.0/include"/>
+					<Add directory="/Library/Developer/CommandLineTools/usr/include"/>
+					<Add directory="/System/Library/Frameworks"/>
+					<Add directory="/Library/Frameworks"/>
+				</Compiler>
+				<MakeCommands>
+					<Build command="/usr/bin/make -j4 -f &quot;/Users/uliakulikova/Desktop/webserver/cmake-build-debug/Makefile&quot;  VERBOSE=1 webserver"/>
+					<CompileFile command="/usr/bin/make -j4 -f &quot;/Users/uliakulikova/Desktop/webserver/cmake-build-debug/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/make -j4 -f &quot;/Users/uliakulikova/Desktop/webserver/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/make -j4 -f &quot;/Users/uliakulikova/Desktop/webserver/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+			<Target title="webserver/fast">
+				<Option output="/Users/uliakulikova/Desktop/webserver/cmake-build-debug/webserver" prefix_auto="0" extension_auto="0"/>
+				<Option working_dir="/Users/uliakulikova/Desktop/webserver/cmake-build-debug"/>
+				<Option object_output="./"/>
+				<Option type="1"/>
+				<Option compiler="gcc"/>
+				<Compiler>
+					<Add directory="/Library/Developer/CommandLineTools/usr/bin/../include/c++/v1"/>
+					<Add directory="/usr/local/include"/>
+					<Add directory="/Library/Developer/CommandLineTools/usr/lib/clang/12.0.0/include"/>
+					<Add directory="/Library/Developer/CommandLineTools/usr/include"/>
+					<Add directory="/System/Library/Frameworks"/>
+					<Add directory="/Library/Frameworks"/>
+				</Compiler>
+				<MakeCommands>
+					<Build command="/usr/bin/make -j4 -f &quot;/Users/uliakulikova/Desktop/webserver/cmake-build-debug/Makefile&quot;  VERBOSE=1 webserver/fast"/>
+					<CompileFile command="/usr/bin/make -j4 -f &quot;/Users/uliakulikova/Desktop/webserver/cmake-build-debug/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/make -j4 -f &quot;/Users/uliakulikova/Desktop/webserver/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/make -j4 -f &quot;/Users/uliakulikova/Desktop/webserver/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+		</Build>
+		<Unit filename="/Users/uliakulikova/Desktop/webserver/main.cpp">
+			<Option target="webserver"/>
+		</Unit>
+		<Unit filename="/Users/uliakulikova/Desktop/webserver/src/config/Config.cpp">
+			<Option target="webserver"/>
+		</Unit>
+		<Unit filename="/Users/uliakulikova/Desktop/webserver/src/config/Config.hpp">
+			<Option target="webserver"/>
+		</Unit>
+		<Unit filename="/Users/uliakulikova/Desktop/webserver/src/config/ConfigException.hpp">
+			<Option target="webserver"/>
+		</Unit>
+		<Unit filename="/Users/uliakulikova/Desktop/webserver/src/config/Global.cpp">
+			<Option target="webserver"/>
+		</Unit>
+		<Unit filename="/Users/uliakulikova/Desktop/webserver/src/config/Global.hpp">
+			<Option target="webserver"/>
+		</Unit>
+		<Unit filename="/Users/uliakulikova/Desktop/webserver/src/config/LocationBlock.cpp">
+			<Option target="webserver"/>
+		</Unit>
+		<Unit filename="/Users/uliakulikova/Desktop/webserver/src/config/LocationBlock.hpp">
+			<Option target="webserver"/>
+		</Unit>
+		<Unit filename="/Users/uliakulikova/Desktop/webserver/src/config/ServerBlock.cpp">
+			<Option target="webserver"/>
+		</Unit>
+		<Unit filename="/Users/uliakulikova/Desktop/webserver/src/config/ServerBlock.hpp">
+			<Option target="webserver"/>
+		</Unit>
+		<Unit filename="/Users/uliakulikova/Desktop/webserver/src/http/Request.cpp">
+			<Option target="webserver"/>
+		</Unit>
+		<Unit filename="/Users/uliakulikova/Desktop/webserver/src/http/Request.hpp">
+			<Option target="webserver"/>
+		</Unit>
+		<Unit filename="/Users/uliakulikova/Desktop/webserver/src/http/Response.cpp">
+			<Option target="webserver"/>
+		</Unit>
+		<Unit filename="/Users/uliakulikova/Desktop/webserver/src/http/Response.hpp">
+			<Option target="webserver"/>
+		</Unit>
+		<Unit filename="/Users/uliakulikova/Desktop/webserver/src/http/Status.cpp">
+			<Option target="webserver"/>
+		</Unit>
+		<Unit filename="/Users/uliakulikova/Desktop/webserver/src/http/Status.hpp">
+			<Option target="webserver"/>
+		</Unit>
+		<Unit filename="/Users/uliakulikova/Desktop/webserver/src/http/Utils.cpp">
+			<Option target="webserver"/>
+		</Unit>
+		<Unit filename="/Users/uliakulikova/Desktop/webserver/src/http/Utils.hpp">
+			<Option target="webserver"/>
+		</Unit>
+		<Unit filename="/Users/uliakulikova/Desktop/webserver/CMakeLists.txt">
+			<Option virtualFolder="CMake Files\"/>
+		</Unit>
+	</Project>
+</CodeBlocks_project_file>

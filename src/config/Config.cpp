@@ -114,9 +114,9 @@ std::string	getNextToken(const std::string& file) {
 	skipSpace(file);
 	for ( ; g_index < file.size(); ++g_index) {
 		if (isspace(file[g_index]) ||
-			file[g_index] == ';' ||
-			file[g_index] == '{' ||
-			file[g_index] == '}') {
+		file[g_index] == ';' ||
+		file[g_index] == '{' ||
+		file[g_index] == '}') {
 			if (token.empty()) {
 				token.push_back(file[g_index++]);
 			}
@@ -150,8 +150,8 @@ std::string	getLocationPath(const std::string& file) {
 	if (path.empty()) {
 		throw UnexpectedEndOfFileConfigException(g_line);
 	} else if (path == KW_SEMICOLON
-		|| path == KW_OPENING_BRACE
-		|| path == KW_CLOSING_BRACE) {
+	|| path == KW_OPENING_BRACE
+	|| path == KW_CLOSING_BRACE) {
 		throw UnexpectedTokenConfigException(path, g_line);
 	}
 
@@ -272,8 +272,8 @@ void	setServerNames(ServerBlock& server, const std::vector<std::string>& params)
 	}
 }
 
-LocationBlock	getLocationBlock(const std::string& file, ServerBlock& serverBlock) {
-	LocationBlock				location(&serverBlock);
+LocationBlock	getLocationBlock(const std::string& file) {
+	LocationBlock				location;
 	std::string					keyword;
 	std::vector<std::string>	params;
 
@@ -343,7 +343,7 @@ ServerBlock	getServerBlock(const std::string& file) {
 		}
 
 		if (keyword == KW_LOCATION) {
-			location = getLocationBlock(file, server);
+			location = getLocationBlock(file);
 			server.setLocation(location.getPath(), location);
 			continue;
 		}
@@ -378,8 +378,8 @@ std::vector<ServerBlock>	parseConfigFile(const std::string& filename) throw(Conf
 
 	while (!(keyword = getNextToken(file)).empty()) {
 		if (keyword == KW_OPENING_BRACE ||
-			keyword == KW_CLOSING_BRACE ||
-			keyword == KW_SEMICOLON) {
+		keyword == KW_CLOSING_BRACE ||
+		keyword == KW_SEMICOLON) {
 			throw UnexpectedTokenConfigException(keyword, g_line);
 		} else if (!isValidKeyword(keyword)) {
 			throw UnknownDirectiveConfigException(keyword, g_line);

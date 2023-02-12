@@ -6,7 +6,12 @@
 #include <map>
 #include <set>
 
-class ServerBlock;
+#ifndef ALLOWED_METHODS
+	# define GET		"GET"
+	# define POST		"POST"
+	# define DELETE		"DELETE"
+#endif
+
 
 class LocationBlock {
 private:
@@ -17,11 +22,10 @@ private:
 	std::set<std::string>				_limitExcept;
 	std::map<int, std::string>			_redirect;
 	std::string							_root;
-	ServerBlock*						_serverBlock;
+	std::set<std::string>				_methodsAllowed;
 
 public:
 	LocationBlock();
-	explicit LocationBlock(ServerBlock* serverBlock);
 	LocationBlock(const LocationBlock& other);
 	LocationBlock& operator=(const LocationBlock& other);
 	~LocationBlock();
@@ -71,5 +75,3 @@ public:
 };
 
 #endif
-
-#include "ServerBlock.hpp"
