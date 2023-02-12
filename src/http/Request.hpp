@@ -13,13 +13,10 @@
 #define TRANSFER_ENCODING	"Transfer-Encoding"
 
 enum State {
-	method,
-	requestTarget,
-
-	requestLine,
-	headerField,
-	emptyLine,
-	requestBody,
+	REQUEST_LINE,
+	HEADER_FIELD,
+	BODY,
+	FORMED
 };
 
 class Request {
@@ -37,12 +34,12 @@ private:
 
 	std::string		_body;
 	size_t			_status;
-	ServerConfig	_serverConfig;
+	ServerConfig*	_serverConfig;
 
 	State			_state;
 
 public:
-	Request(const ServerConfig& serverConfig, const std::string& request);
+	explicit Request(const std::string& request);
 	Request(const Request& other);
 	Request& operator=(const Request& other);
 	~Request();
@@ -58,6 +55,7 @@ public:
 	void	setContentLength(const std::string& value);
 	void	setBody(const std::string& body);
 	void	setStatus(size_t status);
+	void	setServerConfig(ServerConfig* serverConfig);
 
 	std::string		getMethod() const;
 	std::string		getRequestTarget() const;
@@ -87,9 +85,9 @@ friend std::ostream& operator<<(std::ostream& out, Request& re) {
 
 private:
 	void	parseRequest(const std::string& request);
-//	void	parseRequestLine(const std::string& request, size_t* pos);
-//	void	parseHeaderFields(const std::string& request, size_t* pos);
-//	void	parseBody(const std::string& request, size_t* pos);
+	int		parseRequestLine(const std::string& request, size_t* pos);
+	void	parseHeaderField(const std::string& str, size_t* i);
+	void	parseBody(const std::string& request, size_t* pos);
 };
 
 

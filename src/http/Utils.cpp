@@ -23,9 +23,6 @@ std::string	readToken(const std::string& request, size_t* i) {
 	while (isTchar(request[*i])) {
 		token.push_back(request[(*i)++]);
 	}
-	if (token.empty()) {
-		throw std::exception();
-	}
 	return token;
 }
 
@@ -42,7 +39,7 @@ std::string	readVersion(const std::string& request, size_t* i) {
 		isdigit(version[5]) && version[6] == '.' && isdigit(version[7])) {
 		return version;
 	} else {
-		throw std::exception();
+		return "";
 	}
 }
 
@@ -136,21 +133,21 @@ void	skipOWS(const std::string &request, size_t *i) {
 	}
 }
 
-void	skipCRLF(const std::string &request, size_t *i) {
+bool	skipCRLF(const std::string &request, size_t *i) {
 //	CRLF = \r\n
 	if (request[*i] == '\r' && request[*i + 1] == '\n') {
 		*i += 2;
-	} else {
-		throw std::exception();
+		return true;
 	}
+	return false;
 }
 
-void	skipRequiredChar(const std::string &request, size_t *i, char a) {
-	if (request[*i] == a) {
+bool	skipRequiredChar(const std::string &request, size_t *i, char c) {
+	if (request[*i] == c) {
 		++*i;
-	} else {
-		throw std::exception();
+		return true;
 	}
+	return false;
 }
 
 bool	isTchar(char a) {
@@ -255,4 +252,12 @@ bool	isHTTPMethod(const std::string& method) {
 		return true;
 	}
 	return false;
+}
+
+int	toDigit(char c) {
+	if (isdigit(c)) {
+		return c - '0';
+	} else {
+		return -1;
+	}
 }

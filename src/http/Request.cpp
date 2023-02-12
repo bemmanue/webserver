@@ -1,14 +1,14 @@
 #include "Request.hpp"
 
-Request::Request(const ServerConfig& serverConfig, const std::string& request):
-	_serverConfig(serverConfig),
+Request::Request(const std::string& request):
 	_method(""),
 	_requestTarget(""),
 	_query(""),
 	_host(""),
 	_chunked(false),
 	_body(""),
-	_status(OK) {
+	_status(OK),
+	_state(REQUEST_LINE) {
 	parseRequest(request);
 }
 
@@ -37,138 +37,154 @@ Request::~Request() {}
 
 void	Request::parseRequest(const std::string& str) {
 	size_t	i = 0;
-	_state = requestLine;
 
-	while (i < str.size() && _status == OK) {
-		switch (_state) {
-			case requestLine: {
-				setMethod(readToken(str, &i));
-				skipRequiredChar(str, &i, ' ');
-				setURI(readAbsolutePath(str, &i));
-				if (str[i] == '?') {
-					setQuery(readQuery(str, &++(i)));
-				}
-				skipRequiredChar(str, &i, ' ');
-
-				std::string version = readVersion(str, &i);
-				setMajorVersion(version[5]);
-				setMinorVersion(version[7]);
-
-				skipCRLF(str, &i);
-				_state = headerField;
-			}
-			case headerField: {
-				std::string fieldName;
-				std::string fieldValue;
-
-				while (str[i] && !isEmptyLine(str, i)) {
-					fieldName = readToken(str, &i);
-					skipRequiredChar(str, &i, ':');
-					skipOWS(str, &i);
-					fieldValue = readFieldValue(str, &i);
-					skipOWS(str, &i);
-					skipCRLF(str, &i);
-					setHeaderField(fieldName, fieldValue);
-				}
-				_state = emptyLine;
-			}
-			case emptyLine: {
-				skipCRLF(str, &i);
-				_state = requestBody;
-			}
-			case requestBody: {
-				std::string body;
-				std::string chunkData;
-				size_t		chunkSize;
-				size_t		length;
-
-				if (isChunked()) {
-					length = 0;
-					chunkSize = readChunkSize(str, &i);
-					skipCRLF(str, &i);
-					while (chunkSize > 0) {
-						chunkData = readChunkData(str, &i, chunkSize);
-						skipCRLF(str, &i);
-						body.append(chunkData);
-						chunkSize = readChunkSize(str, &i);
-						skipCRLF(str, &i);
-						length += chunkSize;
-					}
-					setBody(body);
-				} else if (getContentLength() > 0) {
-					body = str.substr(i, getContentLength());
-					setBody(body);
-				}
-
-			}
+	while (_status == OK && i < str.size()) {
+		if (_state == REQUEST_LINE) {
+			setStatus(parseRequestLine(str, &i));
+		} else if (_state == HEADER_FIELD) {
+			parseHeaderField(str, &i);
+		} else if (_state == BODY) {
+			parseBody(str, &i);
 		}
 	}
 }
 
-//void	Request::parseRequestLine(const std::string& str, size_t* i) {
-//	setMethod(readToken(str, i));
-//	skipRequiredChar(str, i, ' ');
-//	setURI(readAbsolutePath(str, i));
-//	if (str[*i] == '?') {
-//		setQuery(readQuery(str, &++(*i)));
-//	}
-//	skipRequiredChar(str, i, ' ');
-//
-//	std::string version = readVersion(str, i);
-//	setMajorVersion(version[5]);
-//	setMinorVersion(version[7]);
-//
-//	skipCRLF(str, i);
-//}
+int	Request::parseRequestLine(const std::string& str, size_t* i) {
+	std::string method = readToken(str, i);
+	if (method.empty()) {
+		std::cerr << "missing method" << std::endl;
+		return BAD_REQUEST;
+	}
 
-//void	Request::parseHeaderFields(const std::string& str, size_t* i) {
-//	std::string fieldName;
-//	std::string fieldValue;
-//
-//	while (str[*i] && !isEmptyLine(str, *i)) {
-//		fieldName = readToken(str, i);
-//		skipRequiredChar(str, i, ':');
-//		skipOWS(str, i);
-//		fieldValue = readFieldValue(str, i);
-//		skipOWS(str, i);
-//		skipCRLF(str, i);
-//		setHeaderField(fieldName, fieldValue);
-//	}
-//}
+	setMethod(method);
+	if (!isHTTPMethod(getMethod())) {
+		std::cerr << "invalid method: " << getMethod() << std::endl;
+		return BAD_REQUEST;
+	}
 
-//void	Request::parseBody(const std::string& str, size_t* i) {
-//	std::string body;
-//	std::string chunkData;
-//	size_t		chunkSize;
-//	size_t		length;
-//
-//	if (isChunked()) {
-//		length = 0;
-//		chunkSize = readChunkSize(str, i);
-//		skipCRLF(str, i);
-//		while (chunkSize > 0) {
-//			chunkData = readChunkData(str, i, chunkSize);
-//			skipCRLF(str, i);
-//			body.append(chunkData);
-//			chunkSize = readChunkSize(str, i);
-//			skipCRLF(str, i);
-//			length += chunkSize;
-//		}
-//		setBody(body);
-//	} else if (getContentLength() > 0) {
-//		body = str.substr(*i, getContentLength());
-//		setBody(body);
-//	}
-//}
+	if (!skipRequiredChar(str, i, ' ')) {
+		std::cerr << "absent space before request target" << std::endl;
+		return BAD_REQUEST;
+	}
+
+	setURI(readAbsolutePath(str, i));
+	if (getStatus() != OK) {
+		std::cerr << "invalid request target" << std::endl;
+		return BAD_REQUEST;
+	}
+
+	if (str[*i] == '?') {
+		setQuery(readQuery(str, &++(*i)));
+	}
+
+	if (!skipRequiredChar(str, i, ' ')) {
+		std::cerr << "absent space before request target" << std::endl;
+		return BAD_REQUEST;
+	}
+
+	std::string version = readVersion(str, i);
+	if (version.empty()) {
+		std::cerr << "invalid version" << std::endl;
+		return BAD_REQUEST;
+	}
+
+	setMajorVersion(toDigit(version[5]));
+	setMinorVersion(toDigit(version[7]));
+	if (getStatus() != OK) {
+		std::cerr << "invalid version" << std::endl;
+		return BAD_REQUEST;
+	}
+
+	if (!skipCRLF(str, i)) {
+		setStatus(BAD_REQUEST);
+		return BAD_REQUEST;
+	}
+
+	_state = HEADER_FIELD;
+	return BAD_REQUEST;
+}
+
+void	Request::parseHeaderField(const std::string& str, size_t* i) {
+	if (isEmptyLine(str, *i)) {
+		_state = BODY;
+		return ;
+	}
+
+	std::string fieldName = readToken(str, i);
+	if (fieldName.empty()) {
+		setStatus(BAD_REQUEST);
+		return ;
+	}
+
+	if (!skipRequiredChar(str, i, ':')) {
+		setStatus(BAD_REQUEST);
+		return ;
+	}
+
+	skipOWS(str, i);
+
+	std::string fieldValue = readFieldValue(str, i);
+
+	skipOWS(str, i);
+
+	if (!skipCRLF(str, i)) {
+		setStatus(BAD_REQUEST);
+		return ;
+	}
+
+	setHeaderField(fieldName, fieldValue);
+}
+
+void	Request::parseBody(const std::string& str, size_t* i) {
+	std::string body;
+	std::string chunkData;
+	size_t		chunkSize;
+	size_t		length;
+
+	if (isChunked()) {
+		length = 0;
+		chunkSize = readChunkSize(str, i);
+
+		if (!skipCRLF(str, i)) {
+			setStatus(BAD_REQUEST);
+			return ;
+		}
+
+		while (chunkSize > 0) {
+			chunkData = readChunkData(str, i, chunkSize);
+
+			if (!skipCRLF(str, i)) {
+				setStatus(BAD_REQUEST);
+				return ;
+			}
+
+			body.append(chunkData);
+
+			chunkSize = readChunkSize(str, i);
+
+			if (!skipCRLF(str, i)) {
+				setStatus(BAD_REQUEST);
+				return ;
+			}
+
+			length += chunkSize;
+		}
+		setBody(body);
+
+	} else if (getContentLength() > 0) {
+
+		body = str.substr(*i, getContentLength());
+		setBody(body);
+
+	}
+}
 
 void	Request::setMethod(const std::string& method) {
-	if (_serverConfig.isMethodAllowed(method)) {
+//	if (isHTTPMethod(method)) {
 		_method = method;
-	} else if (isHTTPMethod(method)) {
-		setStatus(NOT_IMPLEMENTED);
-	} else {
-		setStatus(BAD_REQUEST);
-	}
+//	} else {
+//		setStatus(BAD_REQUEST);
+//	}
 }
 
 void	Request::setURI(const std::string& uri) {
@@ -272,4 +288,8 @@ void Request::setMajorVersion(unsigned short majorVersion) {
 
 void Request::setMinorVersion(unsigned short minorVersion) {
 	_minorVersion = minorVersion;
+}
+
+void Request::setServerConfig(ServerConfig *serverConfig) {
+	_serverConfig = serverConfig;
 }

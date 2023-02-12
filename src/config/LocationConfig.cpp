@@ -1,6 +1,7 @@
 #include "LocationConfig.hpp"
 
-LocationConfig::LocationConfig() {
+LocationConfig::LocationConfig():
+	_autoindex(false) {
 	_methodsAllowed.insert(GET);
 	_methodsAllowed.insert(POST);
 	_methodsAllowed.insert(DELETE);

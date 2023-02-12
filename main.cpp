@@ -28,11 +28,11 @@ int main(int argc, char **argv) {
 
 	ServerConfig serverConfig = config[0];
 
-	Request request(serverConfig, buffer);
+	Request request(buffer);
 	std::cout << request << std::endl;
 
-	Response response(serverConfig, request);
-	std::cout << response.toString();
+//	Response response(serverConfig, request);
+//	std::cout << response.toString();
 
     return 0;
 }
