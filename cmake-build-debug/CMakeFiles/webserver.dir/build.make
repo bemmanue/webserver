@@ -144,31 +144,31 @@ CMakeFiles/webserver.dir/src/config/Config.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/webserver.dir/src/config/Config.cpp.s"
 	/Library/Developer/CommandLineTools/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /Users/uliakulikova/Desktop/webserver/src/config/Config.cpp -o CMakeFiles/webserver.dir/src/config/Config.cpp.s
 
-CMakeFiles/webserver.dir/src/config/LocationBlock.cpp.o: CMakeFiles/webserver.dir/flags.make
-CMakeFiles/webserver.dir/src/config/LocationBlock.cpp.o: ../src/config/LocationBlock.cpp
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/Users/uliakulikova/Desktop/webserver/cmake-build-debug/CMakeFiles --progress-num=$(CMAKE_PROGRESS_7) "Building CXX object CMakeFiles/webserver.dir/src/config/LocationBlock.cpp.o"
-	/Library/Developer/CommandLineTools/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/webserver.dir/src/config/LocationBlock.cpp.o -c /Users/uliakulikova/Desktop/webserver/src/config/LocationBlock.cpp
+CMakeFiles/webserver.dir/src/config/LocationConfig.cpp.o: CMakeFiles/webserver.dir/flags.make
+CMakeFiles/webserver.dir/src/config/LocationConfig.cpp.o: ../src/config/LocationConfig.cpp
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/Users/uliakulikova/Desktop/webserver/cmake-build-debug/CMakeFiles --progress-num=$(CMAKE_PROGRESS_7) "Building CXX object CMakeFiles/webserver.dir/src/config/LocationConfig.cpp.o"
+	/Library/Developer/CommandLineTools/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/webserver.dir/src/config/LocationConfig.cpp.o -c /Users/uliakulikova/Desktop/webserver/src/config/LocationConfig.cpp
 
-CMakeFiles/webserver.dir/src/config/LocationBlock.cpp.i: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/webserver.dir/src/config/LocationBlock.cpp.i"
-	/Library/Developer/CommandLineTools/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /Users/uliakulikova/Desktop/webserver/src/config/LocationBlock.cpp > CMakeFiles/webserver.dir/src/config/LocationBlock.cpp.i
+CMakeFiles/webserver.dir/src/config/LocationConfig.cpp.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/webserver.dir/src/config/LocationConfig.cpp.i"
+	/Library/Developer/CommandLineTools/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /Users/uliakulikova/Desktop/webserver/src/config/LocationConfig.cpp > CMakeFiles/webserver.dir/src/config/LocationConfig.cpp.i
 
-CMakeFiles/webserver.dir/src/config/LocationBlock.cpp.s: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/webserver.dir/src/config/LocationBlock.cpp.s"
-	/Library/Developer/CommandLineTools/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /Users/uliakulikova/Desktop/webserver/src/config/LocationBlock.cpp -o CMakeFiles/webserver.dir/src/config/LocationBlock.cpp.s
+CMakeFiles/webserver.dir/src/config/LocationConfig.cpp.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/webserver.dir/src/config/LocationConfig.cpp.s"
+	/Library/Developer/CommandLineTools/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /Users/uliakulikova/Desktop/webserver/src/config/LocationConfig.cpp -o CMakeFiles/webserver.dir/src/config/LocationConfig.cpp.s
 
-CMakeFiles/webserver.dir/src/config/ServerBlock.cpp.o: CMakeFiles/webserver.dir/flags.make
-CMakeFiles/webserver.dir/src/config/ServerBlock.cpp.o: ../src/config/ServerBlock.cpp
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/Users/uliakulikova/Desktop/webserver/cmake-build-debug/CMakeFiles --progress-num=$(CMAKE_PROGRESS_8) "Building CXX object CMakeFiles/webserver.dir/src/config/ServerBlock.cpp.o"
-	/Library/Developer/CommandLineTools/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/webserver.dir/src/config/ServerBlock.cpp.o -c /Users/uliakulikova/Desktop/webserver/src/config/ServerBlock.cpp
+CMakeFiles/webserver.dir/src/config/ServerConfig.cpp.o: CMakeFiles/webserver.dir/flags.make
+CMakeFiles/webserver.dir/src/config/ServerConfig.cpp.o: ../src/config/ServerConfig.cpp
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/Users/uliakulikova/Desktop/webserver/cmake-build-debug/CMakeFiles --progress-num=$(CMAKE_PROGRESS_8) "Building CXX object CMakeFiles/webserver.dir/src/config/ServerConfig.cpp.o"
+	/Library/Developer/CommandLineTools/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/webserver.dir/src/config/ServerConfig.cpp.o -c /Users/uliakulikova/Desktop/webserver/src/config/ServerConfig.cpp
 
-CMakeFiles/webserver.dir/src/config/ServerBlock.cpp.i: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/webserver.dir/src/config/ServerBlock.cpp.i"
-	/Library/Developer/CommandLineTools/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /Users/uliakulikova/Desktop/webserver/src/config/ServerBlock.cpp > CMakeFiles/webserver.dir/src/config/ServerBlock.cpp.i
+CMakeFiles/webserver.dir/src/config/ServerConfig.cpp.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/webserver.dir/src/config/ServerConfig.cpp.i"
+	/Library/Developer/CommandLineTools/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /Users/uliakulikova/Desktop/webserver/src/config/ServerConfig.cpp > CMakeFiles/webserver.dir/src/config/ServerConfig.cpp.i
 
-CMakeFiles/webserver.dir/src/config/ServerBlock.cpp.s: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/webserver.dir/src/config/ServerBlock.cpp.s"
-	/Library/Developer/CommandLineTools/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /Users/uliakulikova/Desktop/webserver/src/config/ServerBlock.cpp -o CMakeFiles/webserver.dir/src/config/ServerBlock.cpp.s
+CMakeFiles/webserver.dir/src/config/ServerConfig.cpp.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/webserver.dir/src/config/ServerConfig.cpp.s"
+	/Library/Developer/CommandLineTools/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /Users/uliakulikova/Desktop/webserver/src/config/ServerConfig.cpp -o CMakeFiles/webserver.dir/src/config/ServerConfig.cpp.s
 
 # Object files for target webserver
 webserver_OBJECTS = \
@@ -178,8 +178,8 @@ webserver_OBJECTS = \
 "CMakeFiles/webserver.dir/src/http/Utils.cpp.o" \
 "CMakeFiles/webserver.dir/src/http/Response.cpp.o" \
 "CMakeFiles/webserver.dir/src/config/Config.cpp.o" \
-"CMakeFiles/webserver.dir/src/config/LocationBlock.cpp.o" \
-"CMakeFiles/webserver.dir/src/config/ServerBlock.cpp.o"
+"CMakeFiles/webserver.dir/src/config/LocationConfig.cpp.o" \
+"CMakeFiles/webserver.dir/src/config/ServerConfig.cpp.o"
 
 # External object files for target webserver
 webserver_EXTERNAL_OBJECTS =
@@ -190,8 +190,8 @@ webserver: CMakeFiles/webserver.dir/src/http/Status.cpp.o
 webserver: CMakeFiles/webserver.dir/src/http/Utils.cpp.o
 webserver: CMakeFiles/webserver.dir/src/http/Response.cpp.o
 webserver: CMakeFiles/webserver.dir/src/config/Config.cpp.o
-webserver: CMakeFiles/webserver.dir/src/config/LocationBlock.cpp.o
-webserver: CMakeFiles/webserver.dir/src/config/ServerBlock.cpp.o
+webserver: CMakeFiles/webserver.dir/src/config/LocationConfig.cpp.o
+webserver: CMakeFiles/webserver.dir/src/config/ServerConfig.cpp.o
 webserver: CMakeFiles/webserver.dir/build.make
 webserver: CMakeFiles/webserver.dir/link.txt
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --bold --progress-dir=/Users/uliakulikova/Desktop/webserver/cmake-build-debug/CMakeFiles --progress-num=$(CMAKE_PROGRESS_9) "Linking CXX executable webserver"

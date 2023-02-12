@@ -6,9 +6,9 @@ int main(int argc, char **argv) {
 
 	try {
 		config = parseConfigFile("conf/webserver.conf");
-		for (int i = 0; i < config.size(); ++i) {
-			std::cout << config[i];
-		}
+//		for (int i = 0; i < config.size(); ++i) {
+//			std::cout << config[i];
+//		}
 	} catch (const std::exception& exception) {
 		std::cout << exception.what() << std::endl;
 		exit(0);
@@ -27,6 +27,7 @@ int main(int argc, char **argv) {
 	t.read(&buffer[0], size);
 
 	ServerConfig serverConfig = config[0];
+
 	Request request(serverConfig, buffer);
 	std::cout << request << std::endl;
 

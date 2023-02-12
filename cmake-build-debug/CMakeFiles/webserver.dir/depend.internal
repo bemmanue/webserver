@@ -5,8 +5,8 @@ CMakeFiles/webserver.dir/main.cpp.o
  /Users/uliakulikova/Desktop/webserver/main.cpp
  /Users/uliakulikova/Desktop/webserver/src/config/Config.hpp
  /Users/uliakulikova/Desktop/webserver/src/config/ConfigException.hpp
- /Users/uliakulikova/Desktop/webserver/src/config/LocationBlock.hpp
- /Users/uliakulikova/Desktop/webserver/src/config/ServerBlock.hpp
+ /Users/uliakulikova/Desktop/webserver/src/config/LocationConfig.hpp
+ /Users/uliakulikova/Desktop/webserver/src/config/ServerConfig.hpp
  /Users/uliakulikova/Desktop/webserver/src/http/Request.hpp
  /Users/uliakulikova/Desktop/webserver/src/http/Response.hpp
  /Users/uliakulikova/Desktop/webserver/src/http/Status.hpp
@@ -15,25 +15,25 @@ CMakeFiles/webserver.dir/src/config/Config.cpp.o
  /Users/uliakulikova/Desktop/webserver/src/config/Config.cpp
  /Users/uliakulikova/Desktop/webserver/src/config/Config.hpp
  /Users/uliakulikova/Desktop/webserver/src/config/ConfigException.hpp
- /Users/uliakulikova/Desktop/webserver/src/config/LocationBlock.hpp
- /Users/uliakulikova/Desktop/webserver/src/config/ServerBlock.hpp
-CMakeFiles/webserver.dir/src/config/LocationBlock.cpp.o
- /Users/uliakulikova/Desktop/webserver/src/config/LocationBlock.cpp
- /Users/uliakulikova/Desktop/webserver/src/config/LocationBlock.hpp
-CMakeFiles/webserver.dir/src/config/ServerBlock.cpp.o
- /Users/uliakulikova/Desktop/webserver/src/config/LocationBlock.hpp
- /Users/uliakulikova/Desktop/webserver/src/config/ServerBlock.cpp
- /Users/uliakulikova/Desktop/webserver/src/config/ServerBlock.hpp
+ /Users/uliakulikova/Desktop/webserver/src/config/LocationConfig.hpp
+ /Users/uliakulikova/Desktop/webserver/src/config/ServerConfig.hpp
+CMakeFiles/webserver.dir/src/config/LocationConfig.cpp.o
+ /Users/uliakulikova/Desktop/webserver/src/config/LocationConfig.cpp
+ /Users/uliakulikova/Desktop/webserver/src/config/LocationConfig.hpp
+CMakeFiles/webserver.dir/src/config/ServerConfig.cpp.o
+ /Users/uliakulikova/Desktop/webserver/src/config/LocationConfig.hpp
+ /Users/uliakulikova/Desktop/webserver/src/config/ServerConfig.cpp
+ /Users/uliakulikova/Desktop/webserver/src/config/ServerConfig.hpp
 CMakeFiles/webserver.dir/src/http/Request.cpp.o
- /Users/uliakulikova/Desktop/webserver/src/config/LocationBlock.hpp
- /Users/uliakulikova/Desktop/webserver/src/config/ServerBlock.hpp
+ /Users/uliakulikova/Desktop/webserver/src/config/LocationConfig.hpp
+ /Users/uliakulikova/Desktop/webserver/src/config/ServerConfig.hpp
  /Users/uliakulikova/Desktop/webserver/src/http/Request.cpp
  /Users/uliakulikova/Desktop/webserver/src/http/Request.hpp
  /Users/uliakulikova/Desktop/webserver/src/http/Status.hpp
  /Users/uliakulikova/Desktop/webserver/src/http/Utils.hpp
 CMakeFiles/webserver.dir/src/http/Response.cpp.o
- /Users/uliakulikova/Desktop/webserver/src/config/LocationBlock.hpp
- /Users/uliakulikova/Desktop/webserver/src/config/ServerBlock.hpp
+ /Users/uliakulikova/Desktop/webserver/src/config/LocationConfig.hpp
+ /Users/uliakulikova/Desktop/webserver/src/config/ServerConfig.hpp
  /Users/uliakulikova/Desktop/webserver/src/http/Request.hpp
  /Users/uliakulikova/Desktop/webserver/src/http/Response.cpp
  /Users/uliakulikova/Desktop/webserver/src/http/Response.hpp

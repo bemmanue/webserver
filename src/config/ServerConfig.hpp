@@ -22,8 +22,8 @@
 
 class ServerConfig {
 private:
-	size_t									_majorVersion;
-	size_t									_minorVersion;
+	unsigned short							_majorVersion;
+	unsigned short							_minorVersion;
 
 	std::string     						_host;
 	size_t            						_port;
@@ -49,13 +49,13 @@ public:
 	bool	hasLocation(const std::string& location);
 	bool	isMethodAllowed(const std::string& method);
 
-	size_t 										getMajorVersion() const;
-	size_t 										getMinorVersion() const;
-	const std::string&							getHost() const;
-	size_t										getPort() const;
-	const std::set<std::string>&				getServerNames() const;
-	const std::map<int, std::string>&			getErrorPages() const;
-	uint64_t									getClientMaxBodySize() const;
+	size_t 											getMajorVersion() const;
+	size_t 											getMinorVersion() const;
+	const std::string&								getHost() const;
+	size_t											getPort() const;
+	const std::set<std::string>&					getServerNames() const;
+	const std::map<int, std::string>&				getErrorPages() const;
+	uint64_t										getClientMaxBodySize() const;
 	const std::map<std::string, LocationConfig>&	getLocations() const;
 
 

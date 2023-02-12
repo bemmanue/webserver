@@ -14,7 +14,7 @@
 class Response {
 private:
 	Request			_request;
-	ServerConfig		_serverConfig;
+	ServerConfig	_serverConfig;
 
 	std::string		_version;
 	size_t			_status;
@@ -24,7 +24,6 @@ private:
 	std::string		_body;
 
 public:
-	Response();
 	Response(const ServerConfig& serverConfig, const Request& request);
 	~Response();
 

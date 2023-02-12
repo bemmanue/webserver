@@ -21,6 +21,11 @@
 
 std::string	capitalize(const std::string& str);
 
+void		parseRequest(const std::string& request);
+void		parseRequestLine(const std::string& request, size_t* pos);
+void		parseHeaderFields(const std::string& request, size_t* pos);
+void		parseBody(const std::string& request, size_t* pos);
+
 std::string	readToken(const std::string& str, size_t* pos);
 std::string	readVersion(const std::string& str, size_t* pos);
 std::string	readQuery(const std::string& str, size_t* pos);

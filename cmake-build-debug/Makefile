@@ -177,53 +177,53 @@ src/config/Config.cpp.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/webserver.dir/build.make CMakeFiles/webserver.dir/src/config/Config.cpp.s
 .PHONY : src/config/Config.cpp.s
 
-src/config/LocationBlock.o: src/config/LocationBlock.cpp.o
-.PHONY : src/config/LocationBlock.o
+src/config/LocationConfig.o: src/config/LocationConfig.cpp.o
+.PHONY : src/config/LocationConfig.o
 
 # target to build an object file
-src/config/LocationBlock.cpp.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/webserver.dir/build.make CMakeFiles/webserver.dir/src/config/LocationBlock.cpp.o
-.PHONY : src/config/LocationBlock.cpp.o
+src/config/LocationConfig.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/webserver.dir/build.make CMakeFiles/webserver.dir/src/config/LocationConfig.cpp.o
+.PHONY : src/config/LocationConfig.cpp.o
 
-src/config/LocationBlock.i: src/config/LocationBlock.cpp.i
-.PHONY : src/config/LocationBlock.i
+src/config/LocationConfig.i: src/config/LocationConfig.cpp.i
+.PHONY : src/config/LocationConfig.i
 
 # target to preprocess a source file
-src/config/LocationBlock.cpp.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/webserver.dir/build.make CMakeFiles/webserver.dir/src/config/LocationBlock.cpp.i
-.PHONY : src/config/LocationBlock.cpp.i
+src/config/LocationConfig.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/webserver.dir/build.make CMakeFiles/webserver.dir/src/config/LocationConfig.cpp.i
+.PHONY : src/config/LocationConfig.cpp.i
 
-src/config/LocationBlock.s: src/config/LocationBlock.cpp.s
-.PHONY : src/config/LocationBlock.s
+src/config/LocationConfig.s: src/config/LocationConfig.cpp.s
+.PHONY : src/config/LocationConfig.s
 
 # target to generate assembly for a file
-src/config/LocationBlock.cpp.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/webserver.dir/build.make CMakeFiles/webserver.dir/src/config/LocationBlock.cpp.s
-.PHONY : src/config/LocationBlock.cpp.s
+src/config/LocationConfig.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/webserver.dir/build.make CMakeFiles/webserver.dir/src/config/LocationConfig.cpp.s
+.PHONY : src/config/LocationConfig.cpp.s
 
-src/config/ServerBlock.o: src/config/ServerBlock.cpp.o
-.PHONY : src/config/ServerBlock.o
+src/config/ServerConfig.o: src/config/ServerConfig.cpp.o
+.PHONY : src/config/ServerConfig.o
 
 # target to build an object file
-src/config/ServerBlock.cpp.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/webserver.dir/build.make CMakeFiles/webserver.dir/src/config/ServerBlock.cpp.o
-.PHONY : src/config/ServerBlock.cpp.o
+src/config/ServerConfig.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/webserver.dir/build.make CMakeFiles/webserver.dir/src/config/ServerConfig.cpp.o
+.PHONY : src/config/ServerConfig.cpp.o
 
-src/config/ServerBlock.i: src/config/ServerBlock.cpp.i
-.PHONY : src/config/ServerBlock.i
+src/config/ServerConfig.i: src/config/ServerConfig.cpp.i
+.PHONY : src/config/ServerConfig.i
 
 # target to preprocess a source file
-src/config/ServerBlock.cpp.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/webserver.dir/build.make CMakeFiles/webserver.dir/src/config/ServerBlock.cpp.i
-.PHONY : src/config/ServerBlock.cpp.i
+src/config/ServerConfig.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/webserver.dir/build.make CMakeFiles/webserver.dir/src/config/ServerConfig.cpp.i
+.PHONY : src/config/ServerConfig.cpp.i
 
-src/config/ServerBlock.s: src/config/ServerBlock.cpp.s
-.PHONY : src/config/ServerBlock.s
+src/config/ServerConfig.s: src/config/ServerConfig.cpp.s
+.PHONY : src/config/ServerConfig.s
 
 # target to generate assembly for a file
-src/config/ServerBlock.cpp.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/webserver.dir/build.make CMakeFiles/webserver.dir/src/config/ServerBlock.cpp.s
-.PHONY : src/config/ServerBlock.cpp.s
+src/config/ServerConfig.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/webserver.dir/build.make CMakeFiles/webserver.dir/src/config/ServerConfig.cpp.s
+.PHONY : src/config/ServerConfig.cpp.s
 
 src/http/Request.o: src/http/Request.cpp.o
 .PHONY : src/http/Request.o
@@ -336,12 +336,12 @@ help:
 	@echo "... src/config/Config.o"
 	@echo "... src/config/Config.i"
 	@echo "... src/config/Config.s"
-	@echo "... src/config/LocationBlock.o"
-	@echo "... src/config/LocationBlock.i"
-	@echo "... src/config/LocationBlock.s"
-	@echo "... src/config/ServerBlock.o"
-	@echo "... src/config/ServerBlock.i"
-	@echo "... src/config/ServerBlock.s"
+	@echo "... src/config/LocationConfig.o"
+	@echo "... src/config/LocationConfig.i"
+	@echo "... src/config/LocationConfig.s"
+	@echo "... src/config/ServerConfig.o"
+	@echo "... src/config/ServerConfig.i"
+	@echo "... src/config/ServerConfig.s"
 	@echo "... src/http/Request.o"
 	@echo "... src/http/Request.i"
 	@echo "... src/http/Request.s"

@@ -5,8 +5,8 @@ CMakeFiles/webserver.dir/main.cpp.o: \
  ../main.cpp \
  ../src/config/Config.hpp \
  ../src/config/ConfigException.hpp \
- ../src/config/LocationBlock.hpp \
- ../src/config/ServerBlock.hpp \
+ ../src/config/LocationConfig.hpp \
+ ../src/config/ServerConfig.hpp \
  ../src/http/Request.hpp \
  ../src/http/Response.hpp \
  ../src/http/Status.hpp \
@@ -15,25 +15,25 @@ CMakeFiles/webserver.dir/src/config/Config.cpp.o: \
  ../src/config/Config.cpp \
  ../src/config/Config.hpp \
  ../src/config/ConfigException.hpp \
- ../src/config/LocationBlock.hpp \
- ../src/config/ServerBlock.hpp
-CMakeFiles/webserver.dir/src/config/LocationBlock.cpp.o: \
- ../src/config/LocationBlock.cpp \
- ../src/config/LocationBlock.hpp
-CMakeFiles/webserver.dir/src/config/ServerBlock.cpp.o: \
- ../src/config/LocationBlock.hpp \
- ../src/config/ServerBlock.cpp \
- ../src/config/ServerBlock.hpp
+ ../src/config/LocationConfig.hpp \
+ ../src/config/ServerConfig.hpp
+CMakeFiles/webserver.dir/src/config/LocationConfig.cpp.o: \
+ ../src/config/LocationConfig.cpp \
+ ../src/config/LocationConfig.hpp
+CMakeFiles/webserver.dir/src/config/ServerConfig.cpp.o: \
+ ../src/config/LocationConfig.hpp \
+ ../src/config/ServerConfig.cpp \
+ ../src/config/ServerConfig.hpp
 CMakeFiles/webserver.dir/src/http/Request.cpp.o: \
- ../src/config/LocationBlock.hpp \
- ../src/config/ServerBlock.hpp \
+ ../src/config/LocationConfig.hpp \
+ ../src/config/ServerConfig.hpp \
  ../src/http/Request.cpp \
  ../src/http/Request.hpp \
  ../src/http/Status.hpp \
  ../src/http/Utils.hpp
 CMakeFiles/webserver.dir/src/http/Response.cpp.o: \
- ../src/config/LocationBlock.hpp \
- ../src/config/ServerBlock.hpp \
+ ../src/config/LocationConfig.hpp \
+ ../src/config/ServerConfig.hpp \
  ../src/http/Request.hpp \
  ../src/http/Response.cpp \
  ../src/http/Response.hpp \

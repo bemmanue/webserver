@@ -1,8 +1,8 @@
 file(REMOVE_RECURSE
   "CMakeFiles/webserver.dir/main.cpp.o"
   "CMakeFiles/webserver.dir/src/config/Config.cpp.o"
-  "CMakeFiles/webserver.dir/src/config/LocationBlock.cpp.o"
-  "CMakeFiles/webserver.dir/src/config/ServerBlock.cpp.o"
+  "CMakeFiles/webserver.dir/src/config/LocationConfig.cpp.o"
+  "CMakeFiles/webserver.dir/src/config/ServerConfig.cpp.o"
   "CMakeFiles/webserver.dir/src/http/Request.cpp.o"
   "CMakeFiles/webserver.dir/src/http/Response.cpp.o"
   "CMakeFiles/webserver.dir/src/http/Status.cpp.o"

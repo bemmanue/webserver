@@ -92,16 +92,16 @@
 		<Unit filename="/Users/uliakulikova/Desktop/webserver/src/config/ConfigException.hpp">
 			<Option target="webserver"/>
 		</Unit>
-		<Unit filename="/Users/uliakulikova/Desktop/webserver/src/config/LocationBlock.cpp">
+		<Unit filename="/Users/uliakulikova/Desktop/webserver/src/config/LocationConfig.cpp">
 			<Option target="webserver"/>
 		</Unit>
-		<Unit filename="/Users/uliakulikova/Desktop/webserver/src/config/LocationBlock.hpp">
+		<Unit filename="/Users/uliakulikova/Desktop/webserver/src/config/LocationConfig.hpp">
 			<Option target="webserver"/>
 		</Unit>
-		<Unit filename="/Users/uliakulikova/Desktop/webserver/src/config/ServerBlock.cpp">
+		<Unit filename="/Users/uliakulikova/Desktop/webserver/src/config/ServerConfig.cpp">
 			<Option target="webserver"/>
 		</Unit>
-		<Unit filename="/Users/uliakulikova/Desktop/webserver/src/config/ServerBlock.hpp">
+		<Unit filename="/Users/uliakulikova/Desktop/webserver/src/config/ServerConfig.hpp">
 			<Option target="webserver"/>
 		</Unit>
 		<Unit filename="/Users/uliakulikova/Desktop/webserver/src/http/Request.cpp">

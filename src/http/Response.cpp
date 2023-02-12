@@ -1,10 +1,5 @@
 #include "Response.hpp"
 
-Response::Response():
-	_version("HTTP/1.1"),
-	_status(OK) {
-}
-
 Response::Response(const ServerConfig& serverConfig, const Request& request):
 	_version("HTTP/1.1"),
 	_length(0),

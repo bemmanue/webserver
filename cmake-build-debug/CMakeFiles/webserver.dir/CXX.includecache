@@ -12,10 +12,6 @@ src/http/Response.hpp
 src/config/Config.hpp
 /Users/uliakulikova/Desktop/webserver/src/config/Config.hpp
 
-/Users/uliakulikova/Desktop/webserver/src/config/Config.cpp
-Config.hpp
-/Users/uliakulikova/Desktop/webserver/src/config/Config.hpp
-
 /Users/uliakulikova/Desktop/webserver/src/config/Config.hpp
 iostream
 -
@@ -27,14 +23,14 @@ map
 -
 ConfigException.hpp
 /Users/uliakulikova/Desktop/webserver/src/config/ConfigException.hpp
-LocationBlock.hpp
-/Users/uliakulikova/Desktop/webserver/src/config/LocationBlock.hpp
-ServerBlock.hpp
-/Users/uliakulikova/Desktop/webserver/src/config/ServerBlock.hpp
+LocationConfig.hpp
+/Users/uliakulikova/Desktop/webserver/src/config/LocationConfig.hpp
+ServerConfig.hpp
+/Users/uliakulikova/Desktop/webserver/src/config/ServerConfig.hpp
 
 /Users/uliakulikova/Desktop/webserver/src/config/ConfigException.hpp
 
-/Users/uliakulikova/Desktop/webserver/src/config/LocationBlock.hpp
+/Users/uliakulikova/Desktop/webserver/src/config/LocationConfig.hpp
 iostream
 -
 vector
@@ -44,11 +40,7 @@ map
 set
 -
 
-/Users/uliakulikova/Desktop/webserver/src/config/ServerBlock.cpp
-ServerBlock.hpp
-/Users/uliakulikova/Desktop/webserver/src/config/ServerBlock.hpp
-
-/Users/uliakulikova/Desktop/webserver/src/config/ServerBlock.hpp
+/Users/uliakulikova/Desktop/webserver/src/config/ServerConfig.hpp
 map
 -
 set
@@ -57,8 +49,8 @@ arpa/inet.h
 -
 netdb.h
 -
-LocationBlock.hpp
-/Users/uliakulikova/Desktop/webserver/src/config/LocationBlock.hpp
+LocationConfig.hpp
+/Users/uliakulikova/Desktop/webserver/src/config/LocationConfig.hpp
 
 /Users/uliakulikova/Desktop/webserver/src/http/Request.cpp
 Request.hpp
@@ -73,8 +65,8 @@ Utils.hpp
 /Users/uliakulikova/Desktop/webserver/src/http/Utils.hpp
 Status.hpp
 /Users/uliakulikova/Desktop/webserver/src/http/Status.hpp
-../config/ServerBlock.hpp
-/Users/uliakulikova/Desktop/webserver/src/config/ServerBlock.hpp
+../config/ServerConfig.hpp
+/Users/uliakulikova/Desktop/webserver/src/config/ServerConfig.hpp
 
 /Users/uliakulikova/Desktop/webserver/src/http/Response.cpp
 Response.hpp
@@ -91,8 +83,8 @@ sys/file.h
 -
 sstream
 -
-../config/ServerBlock.hpp
-/Users/uliakulikova/Desktop/webserver/src/config/ServerBlock.hpp
+../config/ServerConfig.hpp
+/Users/uliakulikova/Desktop/webserver/src/config/ServerConfig.hpp
 Request.hpp
 /Users/uliakulikova/Desktop/webserver/src/http/Request.hpp
 
