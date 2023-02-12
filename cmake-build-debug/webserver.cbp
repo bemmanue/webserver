@@ -92,12 +92,6 @@
 		<Unit filename="/Users/uliakulikova/Desktop/webserver/src/config/ConfigException.hpp">
 			<Option target="webserver"/>
 		</Unit>
-		<Unit filename="/Users/uliakulikova/Desktop/webserver/src/config/Global.cpp">
-			<Option target="webserver"/>
-		</Unit>
-		<Unit filename="/Users/uliakulikova/Desktop/webserver/src/config/Global.hpp">
-			<Option target="webserver"/>
-		</Unit>
 		<Unit filename="/Users/uliakulikova/Desktop/webserver/src/config/LocationBlock.cpp">
 			<Option target="webserver"/>
 		</Unit>

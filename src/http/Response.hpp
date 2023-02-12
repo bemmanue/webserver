@@ -5,15 +5,16 @@
 #include <fstream>
 #include <unistd.h>
 #include <sys/file.h>
+#include <sstream>
 
-#include "../config/ServerBlock.hpp"
+#include "../config/ServerConfig.hpp"
 #include "Request.hpp"
 
 
 class Response {
 private:
 	Request			_request;
-	ServerBlock		_serverConfig;
+	ServerConfig		_serverConfig;
 
 	std::string		_version;
 	size_t			_status;
@@ -24,7 +25,7 @@ private:
 
 public:
 	Response();
-	Response(const ServerBlock& serverConfig, const Request& request);
+	Response(const ServerConfig& serverConfig, const Request& request);
 	~Response();
 
 	std::string		toString();

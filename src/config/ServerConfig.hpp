@@ -6,8 +6,7 @@
 #include <arpa/inet.h>
 #include <netdb.h>
 
-#include "LocationBlock.hpp"
-#include "Global.hpp"
+#include "LocationConfig.hpp"
 
 #ifndef ALLOWED_METHODS
 	# define GET		"GET"
@@ -15,12 +14,13 @@
 	# define DELETE		"DELETE"
 #endif
 
+#define SERVER_ROOT						"data"
 #define DEFAULT_PORT 					8080
 #define DEFAULT_HOST 					"127.0.0.1"
 #define DEFAULT_CLIENT_MAX_BODY_SIZE	1000000
 
 
-class ServerBlock {
+class ServerConfig {
 private:
 	size_t									_majorVersion;
 	size_t									_minorVersion;
@@ -30,21 +30,21 @@ private:
 	std::set<std::string>					_server_names;
 	std::map<int, std::string>				_error_pages;
 	uint64_t 								_client_max_body_size;
-	std::map<std::string, LocationBlock>	_locations;
+	std::map<std::string, LocationConfig>	_locations;
 	std::set<std::string>					_methods_allowed;
 
 public:
-	ServerBlock();
-	ServerBlock(const ServerBlock& other);
-	ServerBlock& operator=(const ServerBlock& other);
-	~ServerBlock();
+	ServerConfig();
+	ServerConfig(const ServerConfig& other);
+	ServerConfig& operator=(const ServerConfig& other);
+	~ServerConfig();
 
 	void	setHost(const std::string& addr);
 	void	setPort(size_t port);
 	void	setServerName(const std::string& name);
 	void	setErrorPages(int code, const std::string& path);
 	void	setClientMaxBodySize(uint64_t bytes);
-	void	setLocation(const std::string& path, const LocationBlock& location);
+	void	setLocation(const std::string& path, const LocationConfig& location);
 
 	bool	hasLocation(const std::string& location);
 	bool	isMethodAllowed(const std::string& method);
@@ -56,10 +56,10 @@ public:
 	const std::set<std::string>&				getServerNames() const;
 	const std::map<int, std::string>&			getErrorPages() const;
 	uint64_t									getClientMaxBodySize() const;
-	const std::map<std::string, LocationBlock>&	getLocations() const;
+	const std::map<std::string, LocationConfig>&	getLocations() const;
 
 
-	friend std::ostream& operator<<(std::ostream& out, ServerBlock& server) {
+	friend std::ostream& operator<<(std::ostream& out, ServerConfig& server) {
 		out << "Server:" << std::endl;
 		out << "\t" << "version: HTTP/" << server.getMajorVersion() << "." << server.getMinorVersion() << std::endl;
 		out << "\t" << "host: " << server.getHost() << std::endl;
@@ -73,8 +73,8 @@ public:
 			out << "\t" << "error_page: " << (*i).first << " " << (*i).second << std::endl;
 		}
 		std::cout << "\t" << "client_max_body_size: " << server.getClientMaxBodySize() << std::endl;
-		std::map<std::string, LocationBlock> locations = server.getLocations();
-		for (std::map<std::string, LocationBlock>::iterator i = locations.begin(); i != locations.end(); i++) {
+		std::map<std::string, LocationConfig> locations = server.getLocations();
+		for (std::map<std::string, LocationConfig>::iterator i = locations.begin(); i != locations.end(); i++) {
 			out << "\t" << "Location: " << (*i).first << std::endl;
 			std::cout << (*i).second;
 		}

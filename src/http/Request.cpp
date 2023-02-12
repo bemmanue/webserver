@@ -10,7 +10,8 @@ Request::Request():
 	_body(""),
 	_status(OK) {}
 
-Request::Request(const std::string& request):
+	Request::Request(const ServerConfig& serverConfig, const std::string& request):
+	_serverBlock(serverConfig),
 	_method(""),
 	_requestTarget(""),
 	_query(""),
@@ -93,9 +94,9 @@ void	Request::parseBody(const std::string& str, size_t* i) {
 }
 
 void	Request::setMethod(const std::string& method) {
-	if (global.isAllowedMethod(method)) {
+	if (_serverBlock.isMethodAllowed(method)) {
 		_method = method;
-	} else if (global.isHTTPMethod(method)) {
+	} else if (isHTTPMethod(method)) {
 		throw RequestException(NOT_IMPLEMENTED);
 	} else {
 		throw RequestException(BAD_REQUEST);
@@ -115,7 +116,7 @@ void	Request::setVersion(const std::string& version) {
 		!isdigit(version[5]) || version[6] != '.' || !isdigit(version[7])) {
 		throw RequestException(BAD_REQUEST);
 	}
-	if (!global.isSupportedVersion(version)) {
+	if (!isSupportedVersion()) {
 		throw RequestException(HTTP_VERSION_NOT_SUPPORTED);
 	}
 	_version = version;
@@ -194,4 +195,8 @@ size_t	Request::getStatus() const {
 
 bool	Request::isChunked() const {
 	return _chunked;
+}
+
+bool Request::isSupportedVersion() const {
+	return true;
 }

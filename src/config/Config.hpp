@@ -7,8 +7,8 @@
 #include <map>
 
 #include "ConfigException.hpp"
-#include "LocationBlock.hpp"
-#include "ServerBlock.hpp"
+#include "LocationConfig.hpp"
+#include "ServerConfig.hpp"
 
 #define KW_AUTOINDEX			"autoindex"
 #define KW_CGI_PASS				"cgi_pass"
@@ -37,7 +37,7 @@
 #define GB						1000 * MB
 
 
-std::vector<ServerBlock>		parseConfigFile(const std::string& filename) throw(ConfigException);
+std::vector<ServerConfig>		parseConfigFile(const std::string& filename) throw(ConfigException);
 
 
 #endif //CONFIG_HPP

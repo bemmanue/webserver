@@ -4,9 +4,9 @@
 #include <iostream>
 #include <vector>
 
-#include "../config/Global.hpp"
 #include "Utils.hpp"
 #include "Status.hpp"
+#include "../config/ServerConfig.hpp"
 
 #define HOST				"Host"
 #define TRANSFER_ENCODING	"Transfer-Encoding"
@@ -37,10 +37,11 @@ private:
 
 	std::string		_body;
 	size_t			_status;
+	ServerConfig		_serverBlock;
 
 public:
 	Request();
-	explicit Request(const std::string& request);
+	Request(const ServerConfig& serverConfig, const std::string& request);
 	~Request();
 
 	std::string		getMethod() const;
@@ -53,6 +54,7 @@ public:
 	size_t			getStatus() const;
 
 	bool			isChunked() const;
+	bool			isSupportedVersion() const;
 
 friend std::ostream& operator<<(std::ostream& out, Request& re) {
 	out << "Method: " << re.getMethod() << std::endl;

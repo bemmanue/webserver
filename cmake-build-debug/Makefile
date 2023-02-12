@@ -177,30 +177,6 @@ src/config/Config.cpp.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/webserver.dir/build.make CMakeFiles/webserver.dir/src/config/Config.cpp.s
 .PHONY : src/config/Config.cpp.s
 
-src/config/Global.o: src/config/Global.cpp.o
-.PHONY : src/config/Global.o
-
-# target to build an object file
-src/config/Global.cpp.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/webserver.dir/build.make CMakeFiles/webserver.dir/src/config/Global.cpp.o
-.PHONY : src/config/Global.cpp.o
-
-src/config/Global.i: src/config/Global.cpp.i
-.PHONY : src/config/Global.i
-
-# target to preprocess a source file
-src/config/Global.cpp.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/webserver.dir/build.make CMakeFiles/webserver.dir/src/config/Global.cpp.i
-.PHONY : src/config/Global.cpp.i
-
-src/config/Global.s: src/config/Global.cpp.s
-.PHONY : src/config/Global.s
-
-# target to generate assembly for a file
-src/config/Global.cpp.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/webserver.dir/build.make CMakeFiles/webserver.dir/src/config/Global.cpp.s
-.PHONY : src/config/Global.cpp.s
-
 src/config/LocationBlock.o: src/config/LocationBlock.cpp.o
 .PHONY : src/config/LocationBlock.o
 
@@ -360,9 +336,6 @@ help:
 	@echo "... src/config/Config.o"
 	@echo "... src/config/Config.i"
 	@echo "... src/config/Config.s"
-	@echo "... src/config/Global.o"
-	@echo "... src/config/Global.i"
-	@echo "... src/config/Global.s"
 	@echo "... src/config/LocationBlock.o"
 	@echo "... src/config/LocationBlock.i"
 	@echo "... src/config/LocationBlock.s"

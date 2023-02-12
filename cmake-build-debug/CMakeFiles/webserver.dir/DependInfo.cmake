@@ -10,7 +10,6 @@ set(CMAKE_DEPENDS_LANGUAGES
 set(CMAKE_DEPENDS_CHECK_CXX
   "/Users/uliakulikova/Desktop/webserver/main.cpp" "/Users/uliakulikova/Desktop/webserver/cmake-build-debug/CMakeFiles/webserver.dir/main.cpp.o"
   "/Users/uliakulikova/Desktop/webserver/src/config/Config.cpp" "/Users/uliakulikova/Desktop/webserver/cmake-build-debug/CMakeFiles/webserver.dir/src/config/Config.cpp.o"
-  "/Users/uliakulikova/Desktop/webserver/src/config/Global.cpp" "/Users/uliakulikova/Desktop/webserver/cmake-build-debug/CMakeFiles/webserver.dir/src/config/Global.cpp.o"
   "/Users/uliakulikova/Desktop/webserver/src/config/LocationBlock.cpp" "/Users/uliakulikova/Desktop/webserver/cmake-build-debug/CMakeFiles/webserver.dir/src/config/LocationBlock.cpp.o"
   "/Users/uliakulikova/Desktop/webserver/src/config/ServerBlock.cpp" "/Users/uliakulikova/Desktop/webserver/cmake-build-debug/CMakeFiles/webserver.dir/src/config/ServerBlock.cpp.o"
   "/Users/uliakulikova/Desktop/webserver/src/http/Request.cpp" "/Users/uliakulikova/Desktop/webserver/cmake-build-debug/CMakeFiles/webserver.dir/src/http/Request.cpp.o"

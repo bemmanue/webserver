@@ -34,12 +34,6 @@ ServerBlock.hpp
 
 /Users/uliakulikova/Desktop/webserver/src/config/ConfigException.hpp
 
-/Users/uliakulikova/Desktop/webserver/src/config/Global.hpp
-iostream
--
-set
--
-
 /Users/uliakulikova/Desktop/webserver/src/config/LocationBlock.hpp
 iostream
 -
@@ -65,24 +59,24 @@ netdb.h
 -
 LocationBlock.hpp
 /Users/uliakulikova/Desktop/webserver/src/config/LocationBlock.hpp
-Global.hpp
-/Users/uliakulikova/Desktop/webserver/src/config/Global.hpp
+
+/Users/uliakulikova/Desktop/webserver/src/http/Request.cpp
+Request.hpp
+/Users/uliakulikova/Desktop/webserver/src/http/Request.hpp
 
 /Users/uliakulikova/Desktop/webserver/src/http/Request.hpp
 iostream
 -
 vector
 -
-../config/Global.hpp
-/Users/uliakulikova/Desktop/webserver/src/config/Global.hpp
 Utils.hpp
 /Users/uliakulikova/Desktop/webserver/src/http/Utils.hpp
 Status.hpp
 /Users/uliakulikova/Desktop/webserver/src/http/Status.hpp
+../config/ServerBlock.hpp
+/Users/uliakulikova/Desktop/webserver/src/config/ServerBlock.hpp
 
 /Users/uliakulikova/Desktop/webserver/src/http/Response.cpp
-sstream
--
 Response.hpp
 /Users/uliakulikova/Desktop/webserver/src/http/Response.hpp
 
@@ -94,6 +88,8 @@ fstream
 unistd.h
 -
 sys/file.h
+-
+sstream
 -
 ../config/ServerBlock.hpp
 /Users/uliakulikova/Desktop/webserver/src/config/ServerBlock.hpp

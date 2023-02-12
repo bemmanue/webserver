@@ -4,6 +4,18 @@
 #include <iostream>
 #include <sys/stat.h>
 
+#ifndef HTTP_METHODS
+	# define GET		"GET"
+	# define POST		"POST"
+	# define PUT		"PUT"
+	# define HEAD		"HEAD"
+	# define DELETE		"DELETE"
+	# define CONNECT	"CONNECT"
+	# define OPTIONS	"OPTIONS"
+	# define TRACE		"TRACE"
+	# define PATCH		"PATCH"
+#endif
+
 #define SP		" "
 #define CRLF	"\r\n"
 
@@ -34,5 +46,7 @@ bool		isEmptyLine(const std::string& str, size_t pos);
 bool		resourceExists(const std::string& filename);
 bool		isFile(const std::string& filename);
 bool		isDirectory(const std::string& dirname);
+
+bool		isHTTPMethod(const std::string& method);
 
 #endif //UTILS_HPP
