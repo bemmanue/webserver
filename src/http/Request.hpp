@@ -13,10 +13,9 @@
 #define TRANSFER_ENCODING	"Transfer-Encoding"
 
 enum State {
-	REQUEST_LINE,
-	HEADER_FIELD,
-	BODY,
-	FORMED
+	requestLine,
+	headerField,
+	body
 };
 
 class Request {
@@ -39,6 +38,8 @@ private:
 
 	ServerConfig*							_serverConfig;
 	State									_state;
+	bool 									_formed;
+
 
 public:
 	explicit Request(const std::string& request);
@@ -71,6 +72,9 @@ public:
 
 	bool			isChunked() const;
 
+	bool			isFormed() const;
+	void			isFormed(bool);
+
 
 friend std::ostream& operator<<(std::ostream& out, Request& re) {
 	out << "Method: " << re.getMethod() << std::endl;
@@ -86,9 +90,10 @@ friend std::ostream& operator<<(std::ostream& out, Request& re) {
 
 private:
 	void	parseRequest(const std::string& request);
-	int		parseRequestLine(const std::string& request, size_t* pos);
-	int		parseHeaderField(const std::string& str, size_t* i);
+	void	parseRequestLine(const std::string& request, size_t* pos);
+	void	parseHeaderField(const std::string& str, size_t* i);
 	void	parseBody(const std::string& request, size_t* pos);
+	void	parseChunkedBody(const std::string& request, size_t* pos);
 };
 
 
