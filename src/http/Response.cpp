@@ -1,13 +1,7 @@
-#include <sstream>
 #include "Response.hpp"
 
-Response::Response():
+Response::Response(const ServerConfig& serverConfig, const Request& request):
 	_version("HTTP/1.1"),
-	_status(OK) {
-}
-
-Response::Response(const ServerBlock& serverConfig, const Request& request):
-	_version(HTTP_VERSION),
 	_length(0),
 	_serverConfig(serverConfig),
 	_request(request) {

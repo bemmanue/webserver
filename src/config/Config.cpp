@@ -114,9 +114,9 @@ std::string	getNextToken(const std::string& file) {
 	skipSpace(file);
 	for ( ; g_index < file.size(); ++g_index) {
 		if (isspace(file[g_index]) ||
-			file[g_index] == ';' ||
-			file[g_index] == '{' ||
-			file[g_index] == '}') {
+		file[g_index] == ';' ||
+		file[g_index] == '{' ||
+		file[g_index] == '}') {
 			if (token.empty()) {
 				token.push_back(file[g_index++]);
 			}
@@ -150,15 +150,15 @@ std::string	getLocationPath(const std::string& file) {
 	if (path.empty()) {
 		throw UnexpectedEndOfFileConfigException(g_line);
 	} else if (path == KW_SEMICOLON
-		|| path == KW_OPENING_BRACE
-		|| path == KW_CLOSING_BRACE) {
+	|| path == KW_OPENING_BRACE
+	|| path == KW_CLOSING_BRACE) {
 		throw UnexpectedTokenConfigException(path, g_line);
 	}
 
 	return path;
 }
 
-void	setAutoindex(LocationBlock& location, const std::vector<std::string>& params) {
+void	setAutoindex(LocationConfig& location, const std::vector<std::string>& params) {
 	if (params.size() != 1) {
 		throw InvalidNumberOfArgumentsConfigException(KW_AUTOINDEX, g_line);
 	}
@@ -172,18 +172,18 @@ void	setAutoindex(LocationBlock& location, const std::vector<std::string>& param
 	}
 }
 
-void	setCGIs(LocationBlock& location, const std::vector<std::string>& params) {
+void	setCGIs(LocationConfig& location, const std::vector<std::string>& params) {
 	if (params.size() != 2) {
 		throw InvalidNumberOfArgumentsConfigException(KW_CGI_PASS, g_line);
 	}
 	location.setCGIs(params[0], params[1]);
 }
 
-void	setIndex(LocationBlock& location, const std::vector<std::string>& params) {
+void	setIndex(LocationConfig& location, const std::vector<std::string>& params) {
 	location.setIndex(params);
 }
 
-void	setMethodsAllowed(LocationBlock& location, const std::vector<std::string>& params) {
+void	setMethodsAllowed(LocationConfig& location, const std::vector<std::string>& params) {
 	int j;
 
 	try {
@@ -195,7 +195,7 @@ void	setMethodsAllowed(LocationBlock& location, const std::vector<std::string>& 
 	}
 }
 
-void	setRedirect(LocationBlock& location, const std::vector<std::string>& params) {
+void	setRedirect(LocationConfig& location, const std::vector<std::string>& params) {
 	if (params.size() != 2) {
 		throw InvalidNumberOfArgumentsConfigException(KW_REDIRECT, g_line);
 	}
@@ -208,14 +208,14 @@ void	setRedirect(LocationBlock& location, const std::vector<std::string>& params
 	}
 }
 
-void	setRoot(LocationBlock& location, const std::vector<std::string>& params) {
+void	setRoot(LocationConfig& location, const std::vector<std::string>& params) {
 	if (params.size() != 1) {
 		throw InvalidNumberOfArgumentsConfigException(KW_ROOT, g_line);
 	}
 	location.setRoot(params[0]);
 }
 
-void	setHost(ServerBlock& server, const std::vector<std::string>& params) {
+void	setHost(ServerConfig& server, const std::vector<std::string>& params) {
 	if (params.size() != 1) {
 		throw InvalidNumberOfArgumentsConfigException(KW_HOST, g_line);
 	}
@@ -227,7 +227,7 @@ void	setHost(ServerBlock& server, const std::vector<std::string>& params) {
 	}
 }
 
-void	setPort(ServerBlock& server, const std::vector<std::string>& params) {
+void	setPort(ServerConfig& server, const std::vector<std::string>& params) {
 	if (params.size() != 1) {
 		throw InvalidNumberOfArgumentsConfigException(KW_PORT, g_line);
 	}
@@ -240,7 +240,7 @@ void	setPort(ServerBlock& server, const std::vector<std::string>& params) {
 	}
 }
 
-void	setClientMaxBodySize(ServerBlock& server, const std::vector<std::string>& params) {
+void	setClientMaxBodySize(ServerConfig& server, const std::vector<std::string>& params) {
 	if (params.size() != 1) {
 		throw InvalidNumberOfArgumentsConfigException(KW_CLIENT_MAX_BODY_SIZE, g_line);
 	}
@@ -253,7 +253,7 @@ void	setClientMaxBodySize(ServerBlock& server, const std::vector<std::string>& p
 	}
 }
 
-void	setErrorPages(ServerBlock& server, const std::vector<std::string>& params) {
+void	setErrorPages(ServerConfig& server, const std::vector<std::string>& params) {
 	if (params.size() != 2) {
 		throw InvalidNumberOfArgumentsConfigException(KW_ERROR_PAGE, g_line);
 	}
@@ -266,14 +266,14 @@ void	setErrorPages(ServerBlock& server, const std::vector<std::string>& params) 
 	}
 }
 
-void	setServerNames(ServerBlock& server, const std::vector<std::string>& params) {
+void	setServerNames(ServerConfig& server, const std::vector<std::string>& params) {
 	for (int j = 0; j < params.size(); j++) {
 		server.setServerName(params[j]);
 	}
 }
 
-LocationBlock	getLocationBlock(const std::string& file, ServerBlock& serverBlock) {
-	LocationBlock				location(&serverBlock);
+LocationConfig	getLocationBlock(const std::string& file) {
+	LocationConfig				location;
 	std::string					keyword;
 	std::vector<std::string>	params;
 
@@ -319,9 +319,9 @@ LocationBlock	getLocationBlock(const std::string& file, ServerBlock& serverBlock
 	return location;
 }
 
-ServerBlock	getServerBlock(const std::string& file) {
-	ServerBlock					server;
-	LocationBlock 				location;
+ServerConfig	getServerBlock(const std::string& file) {
+	ServerConfig					server;
+	LocationConfig 				location;
 	std::string					keyword;
 	std::vector<std::string>	params;
 
@@ -343,7 +343,7 @@ ServerBlock	getServerBlock(const std::string& file) {
 		}
 
 		if (keyword == KW_LOCATION) {
-			location = getLocationBlock(file, server);
+			location = getLocationBlock(file);
 			server.setLocation(location.getPath(), location);
 			continue;
 		}
@@ -369,8 +369,8 @@ ServerBlock	getServerBlock(const std::string& file) {
 	return server;
 }
 
-std::vector<ServerBlock>	parseConfigFile(const std::string& filename) throw(ConfigException) {
-	std::vector<ServerBlock>	config;
+std::vector<ServerConfig>	parseConfigFile(const std::string& filename) throw(ConfigException) {
+	std::vector<ServerConfig>	config;
 	std::string					keyword;
 
 	const std::string& file = readFile(filename);
@@ -378,8 +378,8 @@ std::vector<ServerBlock>	parseConfigFile(const std::string& filename) throw(Conf
 
 	while (!(keyword = getNextToken(file)).empty()) {
 		if (keyword == KW_OPENING_BRACE ||
-			keyword == KW_CLOSING_BRACE ||
-			keyword == KW_SEMICOLON) {
+		keyword == KW_CLOSING_BRACE ||
+		keyword == KW_SEMICOLON) {
 			throw UnexpectedTokenConfigException(keyword, g_line);
 		} else if (!isValidKeyword(keyword)) {
 			throw UnknownDirectiveConfigException(keyword, g_line);

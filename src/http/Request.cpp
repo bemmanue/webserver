@@ -1,25 +1,36 @@
 #include "Request.hpp"
 
-Request::Request():
-	_method(""),
-	_requestTarget(""),
-	_query(""),
-	_version(""),
-	_host(""),
-	_chunked(false),
-	_body(""),
-	_status(OK) {}
-
 Request::Request(const std::string& request):
 	_method(""),
 	_requestTarget(""),
 	_query(""),
-	_version(""),
 	_host(""),
 	_chunked(false),
 	_body(""),
-	_status(OK) {
+	_status(OK),
+	_state(REQUEST_LINE) {
 	parseRequest(request);
+}
+
+Request::Request(const Request &other) {
+	operator=(other);
+}
+
+Request& Request::operator=(const Request &other) {
+	if (this != &other) {
+		_majorVersion = other._majorVersion;
+		_minorVersion = other._minorVersion;
+		_method = other._method;
+		_requestTarget = other._requestTarget;
+		_query = other._query;
+		_host = other._host;
+		_length = other._length;
+		_chunked = other._chunked;
+		_body = other._body;
+		_status = other._status;
+		_serverConfig = other._serverConfig;
+	}
+	return *this;
 }
 
 Request::~Request() {}
@@ -27,44 +38,126 @@ Request::~Request() {}
 void	Request::parseRequest(const std::string& str) {
 	size_t	i = 0;
 
-	try {
-		parseRequestLine(str, &i);
-		parseHeaderFields(str, &i);
-		skipCRLF(str, &i);
-		parseBody(str, &i);
-	} catch (const RequestException& exception) {
-		setStatus(exception.getCode());
-	}
-	catch (const std::exception& exception) {
-		setStatus(BAD_REQUEST);
+	while (_status == OK && i < str.size()) {
+		if (_state == REQUEST_LINE) {
+			setStatus(parseRequestLine(str, &i));
+		} else if (_state == HEADER_FIELD) {
+			parseHeaderField(str, &i);
+		} else if (_state == BODY) {
+			parseBody(str, &i);
+		}
 	}
 }
 
-void	Request::parseRequestLine(const std::string& str, size_t* i) {
-	setMethod(readToken(str, i));
-	skipRequiredChar(str, i, ' ');
-	setURI(readAbsolutePath(str, i));
+int	Request::parseRequestLine(const std::string& str, size_t* i) {
+	// method
+	const std::string method = readToken(str, i);
+	if (method.empty()) {
+		std::cerr << "missing method" << std::endl;
+		return BAD_REQUEST;
+	}
+
+	if (!isHTTPMethod(method)) {
+		std::cerr << "invalid method: " << getMethod() << std::endl;
+		return BAD_REQUEST;
+	}
+
+	setMethod(method);
+
+
+	// space
+	if (!skipRequiredChar(str, i, ' ')) {
+		std::cerr << "missing space before request target" << std::endl;
+		return BAD_REQUEST;
+	}
+
+
+	// request target
+	const std::string absolutePath = readAbsolutePath(str, i);
+	if (absolutePath.empty()) {
+		std::cerr << "missing requestTarget" << std::endl;
+		return BAD_REQUEST;
+	}
+
+	setURI(absolutePath);
+
 	if (str[*i] == '?') {
 		setQuery(readQuery(str, &++(*i)));
 	}
-	skipRequiredChar(str, i, ' ');
-	setVersion(readVersion(str, i));
-	skipCRLF(str, i);
+
+
+	// space
+	if (!skipRequiredChar(str, i, ' ')) {
+		std::cerr << "missing space before HTTP version" << std::endl;
+		return BAD_REQUEST;
+	}
+
+
+	// version
+	std::string version = readVersion(str, i);
+	if (version.empty()) {
+		std::cerr << "missing or invalid version" << std::endl;
+		return BAD_REQUEST;
+	}
+
+	if (toDigit(version[5]) != 1) {
+		std::cerr << "invalid version" << std::endl;
+		return BAD_REQUEST;
+	}
+
+	setMajorVersion(toDigit(version[5]));
+	setMinorVersion(toDigit(version[7]));
+
+
+	// CRLF
+	if (!skipCRLF(str, i)) {
+		std::cerr << "missing CRLF at the end of request line" << std::endl;
+		return BAD_REQUEST;
+	}
+
+	_state = HEADER_FIELD;
+
+	return OK;
 }
 
-void	Request::parseHeaderFields(const std::string& str, size_t* i) {
-	std::string fieldName;
-	std::string fieldValue;
-
-	while (str[*i] && !isEmptyLine(str, *i)) {
-		fieldName = readToken(str, i);
-		skipRequiredChar(str, i, ':');
-		skipOWS(str, i);
-		fieldValue = readFieldValue(str, i);
-		skipOWS(str, i);
-		skipCRLF(str, i);
-		setHeaderField(fieldName, fieldValue);
+int	Request::parseHeaderField(const std::string& str, size_t* i) {
+	if (isEmptyLine(str, *i)) {
+		_state = BODY;
+		return OK;
 	}
+
+	// header name
+	std::string fieldName = readToken(str, i);
+	if (fieldName.empty()) {
+		std::cerr << "missing header name" << std::endl;
+		return BAD_REQUEST;
+	}
+
+
+	// required colon
+	if (!skipRequiredChar(str, i, ':')) {
+		std::cerr << "missing colon before header value" << std::endl;
+		return BAD_REQUEST;
+	}
+
+	skipOWS(str, i);
+
+	const std::string fieldValue = readFieldValue(str, i);
+
+	skipOWS(str, i);
+
+	if (!skipCRLF(str, i)) {
+		std::cerr << "missing CRLF at the end of request line" << std::endl;
+		return BAD_REQUEST;
+	}
+
+	setHeaderField(fieldName, fieldValue);
+	if (getStatus() != OK) {
+		std::cerr << "missing CRLF at the end of request line" << std::endl;
+		return BAD_REQUEST;
+	}
+
+	return OK;
 }
 
 void	Request::parseBody(const std::string& str, size_t* i) {
@@ -76,30 +169,43 @@ void	Request::parseBody(const std::string& str, size_t* i) {
 	if (isChunked()) {
 		length = 0;
 		chunkSize = readChunkSize(str, i);
-		skipCRLF(str, i);
+
+		if (!skipCRLF(str, i)) {
+			setStatus(BAD_REQUEST);
+			return ;
+		}
+
 		while (chunkSize > 0) {
 			chunkData = readChunkData(str, i, chunkSize);
-			skipCRLF(str, i);
+
+			if (!skipCRLF(str, i)) {
+				setStatus(BAD_REQUEST);
+				return ;
+			}
+
 			body.append(chunkData);
+
 			chunkSize = readChunkSize(str, i);
-			skipCRLF(str, i);
+
+			if (!skipCRLF(str, i)) {
+				setStatus(BAD_REQUEST);
+				return ;
+			}
+
 			length += chunkSize;
 		}
 		setBody(body);
+
 	} else if (getContentLength() > 0) {
+
 		body = str.substr(*i, getContentLength());
 		setBody(body);
+
 	}
 }
 
 void	Request::setMethod(const std::string& method) {
-	if (global.isAllowedMethod(method)) {
-		_method = method;
-	} else if (global.isHTTPMethod(method)) {
-		throw RequestException(NOT_IMPLEMENTED);
-	} else {
-		throw RequestException(BAD_REQUEST);
-	}
+	_method = method;
 }
 
 void	Request::setURI(const std::string& uri) {
@@ -110,17 +216,6 @@ void	Request::setQuery(const std::string &query) {
 	_query = query;
 }
 
-void	Request::setVersion(const std::string& version) {
-	if (version.size() != 8 || version.compare(0, 5, "HTTP/") ||
-		!isdigit(version[5]) || version[6] != '.' || !isdigit(version[7])) {
-		throw RequestException(BAD_REQUEST);
-	}
-	if (!global.isSupportedVersion(version)) {
-		throw RequestException(HTTP_VERSION_NOT_SUPPORTED);
-	}
-	_version = version;
-}
-
 void	Request::setHost(const std::string& value) {
 	_host = value;
 }
@@ -129,7 +224,7 @@ void	Request::setTransferEncoding(const std::string &value) {
 	if (value == "chunked") {
 		_chunked = true;
 	} else {
-		throw RequestException(NOT_IMPLEMENTED);
+		setStatus(NOT_IMPLEMENTED);
 	}
 }
 
@@ -172,10 +267,6 @@ std::string Request::getQuery() const {
 	return _query;
 }
 
-std::string Request::getVersion() const {
-	return _version;
-}
-
 std::string Request::getHost() const {
 	return _host;
 }
@@ -194,4 +285,24 @@ size_t	Request::getStatus() const {
 
 bool	Request::isChunked() const {
 	return _chunked;
+}
+
+size_t Request::getMajorVersion() const {
+	return _majorVersion;
+}
+
+size_t Request::getMinorVersion() const {
+	return _minorVersion;
+}
+
+void Request::setMajorVersion(unsigned short majorVersion) {
+	_majorVersion = majorVersion;
+}
+
+void Request::setMinorVersion(unsigned short minorVersion) {
+	_minorVersion = minorVersion;
+}
+
+void Request::setServerConfig(ServerConfig *serverConfig) {
+	_serverConfig = serverConfig;
 }

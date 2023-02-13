@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.21)
+cmake_minimum_required(VERSION 3.20)
 project(webserver)
 
 set(CMAKE_CXX_STANDARD 98)
@@ -15,10 +15,8 @@ add_executable(webserver main.cpp
         src/config/Config.cpp
         src/config/Config.hpp
         src/config/ConfigException.hpp
-        src/config/LocationBlock.cpp
-        src/config/LocationBlock.hpp
-        src/config/ServerBlock.cpp
-        src/config/ServerBlock.hpp
-        src/config/Global.cpp
-        src/config/Global.hpp
-)
+        src/config/LocationConfig.cpp
+        src/config/LocationConfig.hpp
+        src/config/ServerConfig.cpp
+        src/config/ServerConfig.hpp
+        )

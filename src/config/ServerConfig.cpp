@@ -1,6 +1,6 @@
-#include "ServerBlock.hpp"
+#include "ServerConfig.hpp"
 
-ServerBlock::ServerBlock():
+ServerConfig::ServerConfig():
 	_majorVersion(1),
 	_minorVersion(1),
 	_host(DEFAULT_HOST),
@@ -11,11 +11,11 @@ ServerBlock::ServerBlock():
 	_methods_allowed.insert(DELETE);
 }
 
-ServerBlock::ServerBlock(const ServerBlock &other) {
+ServerConfig::ServerConfig(const ServerConfig &other) {
 	operator=(other);
 }
 
-ServerBlock& ServerBlock::operator=(const ServerBlock &other) {
+ServerConfig& ServerConfig::operator=(const ServerConfig &other) {
 	if (this != &other) {
 		_majorVersion = other._majorVersion;
 		_minorVersion = other._minorVersion;
@@ -30,7 +30,7 @@ ServerBlock& ServerBlock::operator=(const ServerBlock &other) {
 	return *this;
 }
 
-ServerBlock::~ServerBlock() {
+ServerConfig::~ServerConfig() {
 }
 
 bool isHostAddr(const std::string& addr) {
@@ -59,7 +59,7 @@ bool isHostName(const std::string& addr) {
 	return true;
 }
 
-void ServerBlock::setHost(const std::string& addr) {
+void ServerConfig::setHost(const std::string& addr) {
 	if (isHostAddr(addr) || isHostName(addr)) {
 		_host = addr;
 	} else {
@@ -67,69 +67,69 @@ void ServerBlock::setHost(const std::string& addr) {
 	}
 }
 
-void ServerBlock::setPort(size_t port) {
+void ServerConfig::setPort(size_t port) {
 	if (port > 65535) {
 		throw std::exception();
 	}
 	_port = port;
 }
 
-void ServerBlock::setServerName(const std::string& name) {
+void ServerConfig::setServerName(const std::string& name) {
 	_server_names.insert(name);
 }
 
-void ServerBlock::setErrorPages(int code, const std::string& path) {
+void ServerConfig::setErrorPages(int code, const std::string& path) {
 	if (code < 300 || code > 599) {
 		throw std::exception();
 	}
 	_error_pages[code] = path;
 }
 
-void ServerBlock::setClientMaxBodySize(uint64_t bytes) {
+void ServerConfig::setClientMaxBodySize(uint64_t bytes) {
 	_client_max_body_size = bytes;
 }
 
-void ServerBlock::setLocation(const std::string& path, const LocationBlock& location) {
+void ServerConfig::setLocation(const std::string& path, const LocationConfig& location) {
 	_locations[path] = location;
 }
 
-const std::string& ServerBlock::getHost() const {
+const std::string& ServerConfig::getHost() const {
 	return _host;
 }
 
-size_t ServerBlock::getPort() const {
+size_t ServerConfig::getPort() const {
 	return _port;
 }
 
-size_t ServerBlock::getMajorVersion() const {
+size_t ServerConfig::getMajorVersion() const {
 	return _majorVersion;
 }
 
-size_t ServerBlock::getMinorVersion() const {
+size_t ServerConfig::getMinorVersion() const {
 	return _minorVersion;
 }
 
-const std::set<std::string>& ServerBlock::getServerNames() const {
+const std::set<std::string>& ServerConfig::getServerNames() const {
 	return _server_names;
 }
 
-const std::map<int, std::string>& ServerBlock::getErrorPages() const {
+const std::map<int, std::string>& ServerConfig::getErrorPages() const {
 	return _error_pages;
 }
 
-uint64_t ServerBlock::getClientMaxBodySize() const {
+uint64_t ServerConfig::getClientMaxBodySize() const {
 	return _client_max_body_size;
 }
 
-const std::map<std::string, LocationBlock>& ServerBlock::getLocations() const {
+const std::map<std::string, LocationConfig>& ServerConfig::getLocations() const {
 	return _locations;
 }
 
-bool ServerBlock::hasLocation(const std::string &location) {
+bool ServerConfig::hasLocation(const std::string &location) {
 	return false;
 }
 
-bool ServerBlock::isMethodAllowed(const std::string &method) {
+bool ServerConfig::isMethodAllowed(const std::string &method) {
 	std::set<std::string>::const_iterator pos = _methods_allowed.find(method);
 	if (pos == _methods_allowed.end()) {
 		return false;

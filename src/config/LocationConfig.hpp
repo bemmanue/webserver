@@ -6,9 +6,14 @@
 #include <map>
 #include <set>
 
-class ServerBlock;
+#ifndef ALLOWED_METHODS
+	# define GET		"GET"
+	# define POST		"POST"
+	# define DELETE		"DELETE"
+#endif
 
-class LocationBlock {
+
+class LocationConfig {
 private:
 	std::string							_path;
 	bool								_autoindex;
@@ -17,14 +22,13 @@ private:
 	std::set<std::string>				_limitExcept;
 	std::map<int, std::string>			_redirect;
 	std::string							_root;
-	ServerBlock*						_serverBlock;
+	std::set<std::string>				_methodsAllowed;
 
 public:
-	LocationBlock();
-	explicit LocationBlock(ServerBlock* serverBlock);
-	LocationBlock(const LocationBlock& other);
-	LocationBlock& operator=(const LocationBlock& other);
-	~LocationBlock();
+	LocationConfig();
+	LocationConfig(const LocationConfig& other);
+	LocationConfig& operator=(const LocationConfig& other);
+	~LocationConfig();
 
 	void	setPath(const std::string& parameter);
 	void	setAutoindex(bool status);
@@ -45,7 +49,7 @@ public:
 	std::string							getRoot() const;
 
 
-	friend std::ostream& operator<<(std::ostream& out, LocationBlock& l) {
+	friend std::ostream& operator<<(std::ostream& out, LocationConfig& l) {
 		out << "\t\t" << "path: " << l.getPath() << std::endl;
 		out << "\t\t" << "autoindex: " << std::boolalpha << l.getAutoindex() << std::endl;
 		std::map<std::string, std::string> cgi = l.getCGIs();
@@ -71,5 +75,3 @@ public:
 };
 
 #endif
-
-#include "ServerBlock.hpp"
