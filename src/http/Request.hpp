@@ -4,6 +4,7 @@
 #include <iostream>
 #include <vector>
 
+#include "URI.hpp"
 #include "Utils.hpp"
 #include "Status.hpp"
 #include "../config/ServerConfig.hpp"
@@ -20,25 +21,25 @@ enum State {
 
 class Request {
 private:
-	unsigned short							_majorVersion;
-	unsigned short							_minorVersion;
+	std::string							_method;
 
-	std::string								_method;
-	std::string								_requestTarget;
-	std::string								_query;
+	URI            						_requestTarget;
+	URI           						_host;
 
-	std::multimap<std::string, std::string>	_headers;
+	unsigned short						_majorVersion;
+	unsigned short						_minorVersion;
 
-	std::string								_host;
-	size_t									_length;
-	bool									_chunked;
+	std::map<std::string, std::string>	_headers;
 
-	std::string								_body;
-	size_t									_status;
+	size_t								_length;
+	bool								_chunked;
 
-	ServerConfig*							_serverConfig;
-	State									_state;
-	bool 									_formed;
+	std::string							_body;
+	size_t								_status;
+
+	ServerConfig*						_serverConfig;
+	State								_state;
+	bool 								_formed;
 
 
 public:
@@ -48,8 +49,7 @@ public:
 	~Request();
 
 	void	setMethod(const std::string& method);
-	void	setURI(const std::string& uri);
-	void	setQuery(const std::string& query);
+	void	setRequestTarget(const URI& uri);
 	void	setMajorVersion(unsigned short majorVersion);
 	void	setMinorVersion(unsigned short minorVersion);
 	void	setHeaderField(const std::string& name, const std::string& value);
@@ -61,27 +61,25 @@ public:
 	void	setServerConfig(ServerConfig* serverConfig);
 
 	std::string		getMethod() const;
-	std::string		getRequestTarget() const;
-	std::string		getQuery() const;
+	URI				getRequestTarget() const;
 	size_t			getMajorVersion() const;
 	size_t			getMinorVersion() const;
-	std::string		getHost() const;
+	URI				getHost() const;
 	std::string		getBody() const;
 	size_t			getContentLength() const;
 	size_t			getStatus() const;
 
 	bool			isChunked() const;
-
 	bool			isFormed() const;
+
 	void			isFormed(bool);
 
 
 friend std::ostream& operator<<(std::ostream& out, Request& re) {
 	out << "Method: " << re.getMethod() << std::endl;
-	out << "URI: " << re.getRequestTarget() << std::endl;
-	out << "Query: " <<  re.getQuery() << std::endl;
+	out << "URI: " << re.getRequestTarget()._path << std::endl;
 	out << "Version: HTTP/" << re.getMajorVersion() << "." << re.getMinorVersion() << std::endl;
-	out << "Host: " << re.getHost() << std::endl;
+	out << "Host: " << re.getHost()._host << std::endl;
 	out << "Transfer Encoding: " << std::endl;
 	out <<  re.getBody() << std::endl;
 	out <<  "Status: " << re.getStatus() << std::endl;

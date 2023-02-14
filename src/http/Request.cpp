@@ -2,9 +2,6 @@
 
 Request::Request(const std::string& request):
 	_method(""),
-	_requestTarget(""),
-	_query(""),
-	_host(""),
 	_chunked(false),
 	_body(""),
 	_status(OK),
@@ -22,7 +19,6 @@ Request& Request::operator=(const Request &other) {
 		_minorVersion = other._minorVersion;
 		_method = other._method;
 		_requestTarget = other._requestTarget;
-		_query = other._query;
 		_host = other._host;
 		_length = other._length;
 		_chunked = other._chunked;
@@ -65,14 +61,17 @@ void	Request::parseRequestLine(const std::string& str, size_t* i) {
 	}
 
 	// request target
-	setURI(readAbsolutePath(str, i));
-	if (getStatus() != OK) {
-		std::cerr << "missing requestTarget" << std::endl;
-		return isFormed(true);
-	}
-	if (str[*i] == '?') {
-		setQuery(readQuery(str, &++(*i)));
-	}
+	URI requestTarget;
+	requestTarget.parse(readURI(str, i));
+	setRequestTarget(requestTarget);
+//	setURI(readAbsolutePath(str, i));
+//	if (getStatus() != OK) {
+//		std::cerr << "missing requestTarget" << std::endl;
+//		return isFormed(true);
+//	}
+//	if (str[*i] == '?') {
+//		setQuery(readQuery(str, &++(*i)));
+//	}
 
 	// space
 	if (!skipRequiredChar(str, i, ' ')) {
@@ -213,16 +212,12 @@ void	Request::setMethod(const std::string& method) {
 	}
 }
 
-void	Request::setURI(const std::string& uri) {
+void	Request::setRequestTarget(const URI& uri) {
 	_requestTarget = uri;
 }
 
-void	Request::setQuery(const std::string &query) {
-	_query = query;
-}
 
 void	Request::setHost(const std::string& value) {
-	_host = value;
 }
 
 void	Request::setTransferEncoding(const std::string &value) {
@@ -264,15 +259,11 @@ std::string Request::getMethod() const {
 	return _method;
 }
 
-std::string Request::getRequestTarget() const {
+URI Request::getRequestTarget() const {
 	return _requestTarget;
 }
 
-std::string Request::getQuery() const {
-	return _query;
-}
-
-std::string Request::getHost() const {
+URI Request::getHost() const {
 	return _host;
 }
 

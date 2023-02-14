@@ -82,6 +82,24 @@ std::string readFieldValue(const std::string &request, size_t* i) {
 	return fieldValue;
 }
 
+std::string	readURI(const std::string& str, size_t* i) {
+//	uri = 1*( pct-encoded / reserved / unreserved )
+	std::string uri;
+
+	while (*i < str.size()) {
+		if (isReserved(str[*i]) || isUnreserved(str[*i])) {
+			uri.push_back(str[*i]);
+			*i += 1;
+		} else if (isPctEncoded(str.substr(*i, 3))) {
+			uri.append(str.substr(*i, 3));
+			*i += 3;
+		} else {
+			break;
+		}
+	}
+	return uri;
+}
+
 std::string	readAbsolutePath(const std::string &request, size_t* i) {
 //	absolute-path = 1*( "/" segment )
 	std::string path;
@@ -194,9 +212,25 @@ bool	isVchar(char a) {
 	return false;
 }
 
+bool	isReserved(char a) {
+	//	reserved = gen-delims / sub-delims
+	if (isGenDelim(a) || isSubDelim(a)) {
+		return true;
+	}
+	return false;
+}
+
 bool	isUnreserved(char a) {
 //	unreserved = ALPHA / DIGIT / "-" / "." / "_" / "~"
 	if (isalpha(a) || isdigit(a) || std::strchr("-._~", a)) {
+		return true;
+	}
+	return false;
+}
+
+bool	isGenDelim(char a) {
+//	gen-delims = ":" / "/" / "?" / "#" / "[" / "]" / "@"
+	if (std::strchr(":/?#[]@", a)) {
 		return true;
 	}
 	return false;
