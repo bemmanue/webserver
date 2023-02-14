@@ -29,7 +29,7 @@ std::string	readSegment(const std::string& str, size_t* pos);
 std::string	readFieldValue(const std::string& str, size_t* pos);
 std::string	readAbsolutePath(const std::string& str, size_t* pos);
 std::string	readChunkData(const std::string& str, size_t* pos, size_t chunkSize);
-size_t		readChunkSize(const std::string& str, size_t* pos);
+long 		readChunkSize(const std::string& str, size_t* pos);
 
 void		skipOWS(const std::string& str, size_t* pos);
 bool		skipCRLF(const std::string& str, size_t* pos);

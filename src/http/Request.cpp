@@ -8,7 +8,7 @@ Request::Request(const std::string& request):
 	_chunked(false),
 	_body(""),
 	_status(OK),
-	_state(REQUEST_LINE) {
+	_state(requestLine) {
 	parseRequest(request);
 }
 
@@ -38,153 +38,179 @@ Request::~Request() {}
 void	Request::parseRequest(const std::string& str) {
 	size_t	i = 0;
 
-	while (_status == OK && i < str.size()) {
-		if (_state == REQUEST_LINE) {
-			setStatus(parseRequestLine(str, &i));
-		} else if (_state == HEADER_FIELD) {
+	while (!isFormed()) {
+		if (_state == requestLine) {
+			parseRequestLine(str, &i);
+		} else if (_state == headerField) {
 			parseHeaderField(str, &i);
-		} else if (_state == BODY) {
+		} else if (_state == body) {
 			parseBody(str, &i);
 		}
 	}
 }
 
-int	Request::parseRequestLine(const std::string& str, size_t* i) {
-	std::string method = readToken(str, i);
-	if (method.empty()) {
-		std::cerr << "missing method" << std::endl;
-		return BAD_REQUEST;
+void	Request::parseRequestLine(const std::string& str, size_t* i) {
+	// method
+	setMethod(readToken(str, i));
+	if (getStatus() != OK) {
+		std::cerr << "missing or invalid method" << std::endl;
+		return isFormed(true);
 	}
 
-	setMethod(method);
-	if (!isHTTPMethod(getMethod())) {
-		std::cerr << "invalid method: " << getMethod() << std::endl;
-		return BAD_REQUEST;
-	}
-
+	// space
 	if (!skipRequiredChar(str, i, ' ')) {
-		std::cerr << "absent space before request target" << std::endl;
-		return BAD_REQUEST;
+		std::cerr << "missing space before request target" << std::endl;
+		setStatus(BAD_REQUEST);
+		return isFormed(true);
 	}
 
+	// request target
 	setURI(readAbsolutePath(str, i));
 	if (getStatus() != OK) {
-		std::cerr << "invalid request target" << std::endl;
-		return BAD_REQUEST;
+		std::cerr << "missing requestTarget" << std::endl;
+		return isFormed(true);
 	}
-
 	if (str[*i] == '?') {
 		setQuery(readQuery(str, &++(*i)));
 	}
 
+	// space
 	if (!skipRequiredChar(str, i, ' ')) {
-		std::cerr << "absent space before request target" << std::endl;
-		return BAD_REQUEST;
+		std::cerr << "missing space before HTTP version" << std::endl;
+		setStatus(BAD_REQUEST);
+		return isFormed(true);
 	}
 
+	// version
 	std::string version = readVersion(str, i);
 	if (version.empty()) {
-		std::cerr << "invalid version" << std::endl;
-		return BAD_REQUEST;
+		std::cerr << "missing or invalid HTTP version" << std::endl;
+		setStatus(BAD_REQUEST);
+		return isFormed(true);
 	}
-
 	setMajorVersion(toDigit(version[5]));
 	setMinorVersion(toDigit(version[7]));
 	if (getStatus() != OK) {
-		std::cerr << "invalid version" << std::endl;
-		return BAD_REQUEST;
+		std::cerr << "unsupported HTTP version" << std::endl;
+		return isFormed(true);
 	}
 
+	// CRLF
 	if (!skipCRLF(str, i)) {
+		std::cerr << "missing CRLF at the end of request line" << std::endl;
 		setStatus(BAD_REQUEST);
-		return BAD_REQUEST;
+		return isFormed(true);
 	}
 
-	_state = HEADER_FIELD;
-	return BAD_REQUEST;
+	_state = headerField;
 }
 
 void	Request::parseHeaderField(const std::string& str, size_t* i) {
-	if (isEmptyLine(str, *i)) {
-		_state = BODY;
-		return ;
+	// check empty line
+	if (skipCRLF(str, i)) {
+		_state = body;
+		return isFormed(false);
 	}
 
+	// header name
 	std::string fieldName = readToken(str, i);
 	if (fieldName.empty()) {
+		std::cerr << "missing header name" << std::endl;
 		setStatus(BAD_REQUEST);
-		return ;
+		return isFormed(true);
 	}
 
+	// required colon
 	if (!skipRequiredChar(str, i, ':')) {
+		std::cerr << "missing colon before header value" << std::endl;
 		setStatus(BAD_REQUEST);
-		return ;
+		return isFormed(true);
 	}
 
+	// optional whitespace
 	skipOWS(str, i);
 
-	std::string fieldValue = readFieldValue(str, i);
+	// field value
+	const std::string fieldValue = readFieldValue(str, i);
 
+	// optional whitespace
 	skipOWS(str, i);
 
+	// crlf
 	if (!skipCRLF(str, i)) {
+		std::cerr << "missing CRLF at the end of header field" << std::endl;
 		setStatus(BAD_REQUEST);
-		return ;
+		return isFormed(true);
 	}
 
+	// setting header field
 	setHeaderField(fieldName, fieldValue);
+	if (getStatus() != OK) {
+		std::cerr << "invalid header field" << std::endl;
+		return isFormed(true);
+	}
 }
 
 void	Request::parseBody(const std::string& str, size_t* i) {
 	std::string body;
 	std::string chunkData;
-	size_t		chunkSize;
-	size_t		length;
 
 	if (isChunked()) {
-		length = 0;
-		chunkSize = readChunkSize(str, i);
-
-		if (!skipCRLF(str, i)) {
-			setStatus(BAD_REQUEST);
-			return ;
-		}
-
-		while (chunkSize > 0) {
-			chunkData = readChunkData(str, i, chunkSize);
-
-			if (!skipCRLF(str, i)) {
-				setStatus(BAD_REQUEST);
-				return ;
-			}
-
-			body.append(chunkData);
-
-			chunkSize = readChunkSize(str, i);
-
-			if (!skipCRLF(str, i)) {
-				setStatus(BAD_REQUEST);
-				return ;
-			}
-
-			length += chunkSize;
-		}
-		setBody(body);
-
+		parseChunkedBody(str, i);
 	} else if (getContentLength() > 0) {
-
 		body = str.substr(*i, getContentLength());
 		setBody(body);
+		isFormed(true);
+	}
+}
 
+void Request::parseChunkedBody(const std::string& str, size_t* i) {
+	std::string body;
+	std::string chunkData;
+	long 		chunkSize;
+
+	chunkSize = readChunkSize(str, i);
+	if (chunkSize < 0) {
+		std::cerr << "invalid or missing chunk size" << std::endl;
+		setStatus(BAD_REQUEST);
+		return isFormed(true);
+	}
+
+	if (!skipCRLF(str, i)) {
+		std::cerr << "missing CRLF after chunk size" << std::endl;
+		setStatus(BAD_REQUEST);
+		return isFormed(true);
+	}
+
+	if (chunkSize > 0) {
+		chunkData = readChunkData(str, i, chunkSize);
+
+		if (!skipCRLF(str, i)) {
+			std::cerr << "missing CRLF after chunk data" << std::endl;
+			setStatus(BAD_REQUEST);
+			return isFormed(true);
+		}
+
+		_body.append(chunkData);
+
+	} else {
+
+		if (!skipCRLF(str, i)) {
+			std::cerr << "missing CRLF after chunk data2" << std::endl;
+			setStatus(BAD_REQUEST);
+			return isFormed(true);
+		}
+
+		isFormed(true);
 	}
 }
 
 void	Request::setMethod(const std::string& method) {
-//	if (isHTTPMethod(method)) {
+	if (isHTTPMethod(method)) {
 		_method = method;
-//	} else {
-//		setStatus(BAD_REQUEST);
-//	}
+	} else {
+		setStatus(BAD_REQUEST);
+	}
 }
 
 void	Request::setURI(const std::string& uri) {
@@ -246,10 +272,6 @@ std::string Request::getQuery() const {
 	return _query;
 }
 
-//std::string Request::getVersion() const {
-//	return _version;
-//}
-
 std::string Request::getHost() const {
 	return _host;
 }
@@ -270,10 +292,6 @@ bool	Request::isChunked() const {
 	return _chunked;
 }
 
-bool Request::isSupportedVersion() const {
-	return true;
-}
-
 size_t Request::getMajorVersion() const {
 	return _majorVersion;
 }
@@ -292,4 +310,12 @@ void Request::setMinorVersion(unsigned short minorVersion) {
 
 void Request::setServerConfig(ServerConfig *serverConfig) {
 	_serverConfig = serverConfig;
+}
+
+void Request::isFormed(bool status) {
+	_formed = status;
+}
+
+bool Request::isFormed() const {
+	return _formed;
 }

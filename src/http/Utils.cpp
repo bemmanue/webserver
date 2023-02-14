@@ -116,18 +116,28 @@ std::string	readChunkData(const std::string& str, size_t* i, size_t chunkSize) {
 	return data;
 }
 
-size_t	readChunkSize(const std::string& str, size_t* i) {
+long	readChunkSize(const std::string& str, size_t* i) {
 //	chunk-size = 1*HEXDIG
 	std::string size;
 
 	while (ishexnumber(str[*i])) {
 		size.push_back(str[(*i)++]);
 	}
-	return strtol(size.c_str(), NULL, 16);
+
+	long res = strtol(size.c_str(), NULL, 16);
+	if (!res && (errno == EINVAL || errno == ERANGE)) {
+		return -1;
+	}
+
+	return res;
 }
 
 void	skipOWS(const std::string &request, size_t *i) {
 //	OWS = *( SP / HTAB )
+	if (*i > request.size()) {
+		return ;
+	}
+
 	while (request[*i] == ' ' || request[*i] == '\t') {
 		++*i;
 	}
@@ -135,6 +145,10 @@ void	skipOWS(const std::string &request, size_t *i) {
 
 bool	skipCRLF(const std::string &request, size_t *i) {
 //	CRLF = \r\n
+	if (*i > request.size()) {
+		return false;
+	}
+
 	if (request[*i] == '\r' && request[*i + 1] == '\n') {
 		*i += 2;
 		return true;
@@ -143,6 +157,10 @@ bool	skipCRLF(const std::string &request, size_t *i) {
 }
 
 bool	skipRequiredChar(const std::string &request, size_t *i, char c) {
+	if (*i > request.size()) {
+		return false;
+	}
+
 	if (request[*i] == c) {
 		++*i;
 		return true;

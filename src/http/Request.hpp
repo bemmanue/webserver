@@ -13,30 +13,33 @@
 #define TRANSFER_ENCODING	"Transfer-Encoding"
 
 enum State {
-	REQUEST_LINE,
-	HEADER_FIELD,
-	BODY,
-	FORMED
+	requestLine,
+	headerField,
+	body
 };
 
 class Request {
 private:
-	unsigned short	_majorVersion;
-	unsigned short	_minorVersion;
+	unsigned short							_majorVersion;
+	unsigned short							_minorVersion;
 
-	std::string		_method;
-	std::string		_requestTarget;
-	std::string		_query;
+	std::string								_method;
+	std::string								_requestTarget;
+	std::string								_query;
 
-	std::string		_host;
-	size_t			_length;
-	bool			_chunked;
+	std::multimap<std::string, std::string>	_headers;
 
-	std::string		_body;
-	size_t			_status;
-	ServerConfig*	_serverConfig;
+	std::string								_host;
+	size_t									_length;
+	bool									_chunked;
 
-	State			_state;
+	std::string								_body;
+	size_t									_status;
+
+	ServerConfig*							_serverConfig;
+	State									_state;
+	bool 									_formed;
+
 
 public:
 	explicit Request(const std::string& request);
@@ -68,7 +71,9 @@ public:
 	size_t			getStatus() const;
 
 	bool			isChunked() const;
-	bool			isSupportedVersion() const;
+
+	bool			isFormed() const;
+	void			isFormed(bool);
 
 
 friend std::ostream& operator<<(std::ostream& out, Request& re) {
@@ -85,9 +90,10 @@ friend std::ostream& operator<<(std::ostream& out, Request& re) {
 
 private:
 	void	parseRequest(const std::string& request);
-	int		parseRequestLine(const std::string& request, size_t* pos);
+	void	parseRequestLine(const std::string& request, size_t* pos);
 	void	parseHeaderField(const std::string& str, size_t* i);
 	void	parseBody(const std::string& request, size_t* pos);
+	void	parseChunkedBody(const std::string& request, size_t* pos);
 };
 
 
