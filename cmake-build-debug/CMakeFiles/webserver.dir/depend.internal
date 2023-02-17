@@ -25,9 +25,6 @@ CMakeFiles/webserver.dir/src/config/ServerConfig.cpp.o
  /Users/uliakulikova/Desktop/webserver/src/config/LocationConfig.hpp
  /Users/uliakulikova/Desktop/webserver/src/config/ServerConfig.cpp
  /Users/uliakulikova/Desktop/webserver/src/config/ServerConfig.hpp
-CMakeFiles/webserver.dir/src/http/Headers.cpp.o
- /Users/uliakulikova/Desktop/webserver/src/http/Headers.cpp
- /Users/uliakulikova/Desktop/webserver/src/http/Headers.hpp
 CMakeFiles/webserver.dir/src/http/Request.cpp.o
  /Users/uliakulikova/Desktop/webserver/src/config/LocationConfig.hpp
  /Users/uliakulikova/Desktop/webserver/src/config/ServerConfig.hpp

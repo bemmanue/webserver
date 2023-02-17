@@ -25,9 +25,6 @@ CMakeFiles/webserver.dir/src/config/ServerConfig.cpp.o: \
  ../src/config/LocationConfig.hpp \
  ../src/config/ServerConfig.cpp \
  ../src/config/ServerConfig.hpp
-CMakeFiles/webserver.dir/src/http/Headers.cpp.o: \
- ../src/http/Headers.cpp \
- ../src/http/Headers.hpp
 CMakeFiles/webserver.dir/src/http/Request.cpp.o: \
  ../src/config/LocationConfig.hpp \
  ../src/config/ServerConfig.hpp \

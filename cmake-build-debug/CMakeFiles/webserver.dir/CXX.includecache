@@ -61,6 +61,8 @@ iostream
 -
 vector
 -
+list
+-
 URI.hpp
 /Users/uliakulikova/Desktop/webserver/src/http/URI.hpp
 Utils.hpp
