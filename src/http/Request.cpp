@@ -1,6 +1,7 @@
 #include "Request.hpp"
 
-Request::Request(const std::string& request):
+Request::Request(Client* client, const std::string& request):
+	_client(client),
 	_method(""),
 	_chunked(false),
 	_contentLength(0),
@@ -47,8 +48,8 @@ void	Request::parseRequest(const std::string& str) {
 		}
 	}
 
-//	setServerConfig(matchServerConfig());
-//	setLocationConfig(matchLocationConfig());
+	setServerConfig(_client->matchServerConfig(_host._host));
+	setLocationConfig(_serverConfig->matchLocationConfig(_requestTarget._path));
 }
 
 void	Request::parseRequestLine(const std::string& str, size_t* i) {
@@ -163,7 +164,7 @@ void	Request::parseBody(const std::string& str, size_t* i) {
 	}
 }
 
-void Request::parseChunkedBody(const std::string& str, size_t* i) {
+void	Request::parseChunkedBody(const std::string& str, size_t* i) {
 	std::string body;
 	std::string chunkData;
 	long 		chunkSize;
@@ -266,7 +267,6 @@ void	Request::setLocationConfig(LocationConfig *locationConfig) {
 	_locationConfig = locationConfig;
 }
 
-
 std::string Request::getMethod() const {
 	return _method;
 }
@@ -298,7 +298,6 @@ std::string Request::getBody() const {
 size_t	Request::getStatus() const {
 	return _status;
 }
-
 
 bool	Request::isChunked() const {
 	return _chunked;

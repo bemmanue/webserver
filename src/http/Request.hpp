@@ -20,6 +20,8 @@ enum State {
 	body
 };
 
+class Client;
+
 class Request {
 private:
 	std::string										_method;
@@ -40,8 +42,10 @@ private:
 	ServerConfig*									_serverConfig;
 	LocationConfig*									_locationConfig;
 
+	Client*											_client;
+
 public:
-	explicit Request(const std::string& request);
+	Request(Client* client, const std::string& request);
 	Request(const Request& other);
 	Request& operator=(const Request& other);
 	~Request();
@@ -94,5 +98,7 @@ friend std::ostream& operator<<(std::ostream& out, Request& re) {
 
 };
 
+
+#include "../core/Client.hpp"
 
 #endif //REQUEST_HPP

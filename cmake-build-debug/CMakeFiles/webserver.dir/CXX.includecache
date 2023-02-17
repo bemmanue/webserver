@@ -11,6 +11,12 @@ src/http/Response.hpp
 /Users/uliakulikova/Desktop/webserver/src/http/Response.hpp
 src/config/Config.hpp
 /Users/uliakulikova/Desktop/webserver/src/config/Config.hpp
+src/core/Client.hpp
+/Users/uliakulikova/Desktop/webserver/src/core/Client.hpp
+
+/Users/uliakulikova/Desktop/webserver/src/config/Config.cpp
+Config.hpp
+/Users/uliakulikova/Desktop/webserver/src/config/Config.hpp
 
 /Users/uliakulikova/Desktop/webserver/src/config/Config.hpp
 iostream
@@ -40,6 +46,10 @@ map
 set
 -
 
+/Users/uliakulikova/Desktop/webserver/src/config/ServerConfig.cpp
+ServerConfig.hpp
+/Users/uliakulikova/Desktop/webserver/src/config/ServerConfig.hpp
+
 /Users/uliakulikova/Desktop/webserver/src/config/ServerConfig.hpp
 map
 -
@@ -51,6 +61,14 @@ netdb.h
 -
 LocationConfig.hpp
 /Users/uliakulikova/Desktop/webserver/src/config/LocationConfig.hpp
+
+/Users/uliakulikova/Desktop/webserver/src/core/Client.cpp
+Client.hpp
+/Users/uliakulikova/Desktop/webserver/src/core/Client.hpp
+
+/Users/uliakulikova/Desktop/webserver/src/core/Client.hpp
+../config/ServerConfig.hpp
+/Users/uliakulikova/Desktop/webserver/src/config/ServerConfig.hpp
 
 /Users/uliakulikova/Desktop/webserver/src/http/Request.cpp
 Request.hpp
@@ -71,6 +89,8 @@ Status.hpp
 /Users/uliakulikova/Desktop/webserver/src/http/Status.hpp
 ../config/ServerConfig.hpp
 /Users/uliakulikova/Desktop/webserver/src/config/ServerConfig.hpp
+../core/Client.hpp
+/Users/uliakulikova/Desktop/webserver/src/core/Client.hpp
 
 /Users/uliakulikova/Desktop/webserver/src/http/Response.cpp
 Response.hpp

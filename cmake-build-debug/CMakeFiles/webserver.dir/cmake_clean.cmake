@@ -3,6 +3,7 @@ file(REMOVE_RECURSE
   "CMakeFiles/webserver.dir/src/config/Config.cpp.o"
   "CMakeFiles/webserver.dir/src/config/LocationConfig.cpp.o"
   "CMakeFiles/webserver.dir/src/config/ServerConfig.cpp.o"
+  "CMakeFiles/webserver.dir/src/core/Client.cpp.o"
   "CMakeFiles/webserver.dir/src/http/Request.cpp.o"
   "CMakeFiles/webserver.dir/src/http/Response.cpp.o"
   "CMakeFiles/webserver.dir/src/http/Status.cpp.o"

@@ -225,6 +225,30 @@ src/config/ServerConfig.cpp.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/webserver.dir/build.make CMakeFiles/webserver.dir/src/config/ServerConfig.cpp.s
 .PHONY : src/config/ServerConfig.cpp.s
 
+src/core/Client.o: src/core/Client.cpp.o
+.PHONY : src/core/Client.o
+
+# target to build an object file
+src/core/Client.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/webserver.dir/build.make CMakeFiles/webserver.dir/src/core/Client.cpp.o
+.PHONY : src/core/Client.cpp.o
+
+src/core/Client.i: src/core/Client.cpp.i
+.PHONY : src/core/Client.i
+
+# target to preprocess a source file
+src/core/Client.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/webserver.dir/build.make CMakeFiles/webserver.dir/src/core/Client.cpp.i
+.PHONY : src/core/Client.cpp.i
+
+src/core/Client.s: src/core/Client.cpp.s
+.PHONY : src/core/Client.s
+
+# target to generate assembly for a file
+src/core/Client.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/webserver.dir/build.make CMakeFiles/webserver.dir/src/core/Client.cpp.s
+.PHONY : src/core/Client.cpp.s
+
 src/http/Request.o: src/http/Request.cpp.o
 .PHONY : src/http/Request.o
 
@@ -366,6 +390,9 @@ help:
 	@echo "... src/config/ServerConfig.o"
 	@echo "... src/config/ServerConfig.i"
 	@echo "... src/config/ServerConfig.s"
+	@echo "... src/core/Client.o"
+	@echo "... src/core/Client.i"
+	@echo "... src/core/Client.s"
 	@echo "... src/http/Request.o"
 	@echo "... src/http/Request.i"
 	@echo "... src/http/Request.s"

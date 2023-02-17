@@ -104,6 +104,12 @@
 		<Unit filename="/Users/uliakulikova/Desktop/webserver/src/config/ServerConfig.hpp">
 			<Option target="webserver"/>
 		</Unit>
+		<Unit filename="/Users/uliakulikova/Desktop/webserver/src/core/Client.cpp">
+			<Option target="webserver"/>
+		</Unit>
+		<Unit filename="/Users/uliakulikova/Desktop/webserver/src/core/Client.hpp">
+			<Option target="webserver"/>
+		</Unit>
 		<Unit filename="/Users/uliakulikova/Desktop/webserver/src/http/Request.cpp">
 			<Option target="webserver"/>
 		</Unit>

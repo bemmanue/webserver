@@ -1,5 +1,6 @@
 #include "src/http/Response.hpp"
 #include "src/config/Config.hpp"
+#include "src/core/Client.hpp"
 
 int main(int argc, char **argv) {
 	std::vector<ServerConfig> config;
@@ -26,9 +27,10 @@ int main(int argc, char **argv) {
 	t.seekg(0);
 	t.read(&buffer[0], size);
 
+	Client client(config);
 	ServerConfig serverConfig = config[0];
 
-	Request request(buffer);
+	Request request(&client, buffer);
 	std::cout << request << std::endl;
 
 //	Response response(serverConfig, request);

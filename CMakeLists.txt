@@ -21,4 +21,6 @@ add_executable(webserver main.cpp
         src/config/LocationConfig.hpp
         src/config/ServerConfig.cpp
         src/config/ServerConfig.hpp
+        src/core/Client.cpp
+        src/core/Client.hpp
         )
