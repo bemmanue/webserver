@@ -26,6 +26,9 @@ std::string	readToken(const std::string& str, size_t* pos);
 std::string	readVersion(const std::string& str, size_t* pos);
 std::string	readQuery(const std::string& str, size_t* pos);
 std::string	readURI(const std::string& str, size_t* pos);
+std::string	readScheme(const std::string& str, size_t* pos);
+std::string	readUserInfo(const std::string& str, size_t* pos);
+std::string	readHost(const std::string& str, size_t* pos);
 std::string	readSegment(const std::string& str, size_t* pos);
 std::string	readFieldValue(const std::string& str, size_t* pos);
 std::string	readAbsolutePath(const std::string& str, size_t* pos);
@@ -46,6 +49,7 @@ bool		isReserved(char a);
 bool		isUnreserved(char a);
 bool		isPctEncoded(const std::string& str);
 bool		isEmptyLine(const std::string& str, size_t pos);
+bool		isValidHost(const std::string& str);
 
 
 bool		resourceExists(const std::string& filename);

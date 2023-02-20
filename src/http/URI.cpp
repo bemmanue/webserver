@@ -1,74 +1,93 @@
 #include "URI.hpp"
 
-URI::URI(void) : _port(0) {}
+URI::URI() {}
+
+URI::URI(const std::string &raw): _raw(raw) {
+	parse(raw);
+}
+
+URI::URI(const URI &other): _port(0) {
+	operator=(other);
+}
+
+URI &URI::operator=(const URI& other) {
+	if (this != &other) {
+		_raw = other._raw;
+		_scheme = other._scheme;
+		_host = other._host;
+		_path = other._path;
+		_query = other._query;
+		_fragment = other._fragment;
+		_port = other._port;
+	}
+	return *this;
+}
+
 URI::~URI(void) {}
 
 std::string URI::getAuthority(void) const {
-    if (_port != 0) {
-        return _host + ":" + _port_s;
-    }
-    return _host;
+	return "";
 }
 
-void URI::clear(void) {
-    _scheme = "";
-    _host = "";
-    _port_s = "";
-    _port = 0;
-    _path = "";
-    _query = "";
-    _fragment = "";
-}
+void URI::parse(const std::string& raw) {
+//	URI = scheme ":" hier-part [ "?" query ] [ "#" fragment ]
+//	hier-part = "//" authority path
+	size_t i = 0;
 
-void URI::parse(std::string uri) {
-    if (uri.length() == 0)
-        return;
+	_scheme = readScheme(raw, &i);
+	if (_scheme.empty()) {
+		_correct = false;
+		return;
+	}
 
-    // fragment
-    iter_t fragmentStart = std::find(uri.begin(), uri.end(), '#');
-    if (fragmentStart != uri.end()) {
-        _fragment = std::string(fragmentStart + 1, uri.end());
-    }
+	if (!skipRequiredChar(raw, &i, ':')) {
+		_correct = false;
+		return;
+	}
 
-    // query
-    iter_t queryStart = std::find(uri.begin(), fragmentStart, '?');
-    if (queryStart != fragmentStart) {
-        _query = std::string(queryStart + 1, fragmentStart);
-    }
+	// authority
+	if (!skipRequiredChar(raw, &i, '/') || !skipRequiredChar(raw, &i, '/')) {
+		_correct = false;
+		return;
+	}
 
-    // scheme
-    std::size_t pos = uri.find("://");
-    iter_t      schemeEnd = uri.begin();
-    if (pos != std::string::npos) {
-        std::advance(schemeEnd, pos);
-        _scheme = std::string(uri.begin(), schemeEnd);
-        std::advance(schemeEnd, 3);
-    }
+	// userinfo
+	size_t temp = i;
+	_userinfo = readUserInfo(raw, &temp);
+	if (!skipRequiredChar(raw, &temp, '@')) {
+		_userinfo = "";
+	} else {
+		i = temp;
+	}
 
-    iter_t pathStart = std::find(schemeEnd, uri.end(), '/');
-    if (pathStart != schemeEnd) {
-        // host
-        iter_t authEnd = pathStart != uri.end() ? pathStart : queryStart;
-        iter_t hostEnd = std::find(schemeEnd, authEnd, ':');
+	// host
+	_host = readHost(raw, &i);
+//	if (!isValidHost(_host)) {
+//		_correct = false;
+//		return;
+//	}
 
-        _host = std::string(schemeEnd, hostEnd);
-
-        // port
-        if (hostEnd != authEnd) {
-            std::advance(hostEnd, 1);
-            _port_s = std::string(hostEnd, authEnd);
-            char *end = NULL;
-            _port = strtoul(_port_s.c_str(), &end, 10);
-            if (!end || *end != '\0') {
-                _port = -1;
-            }
-        }
-    }
-
-    // path
-    if (pathStart != uri.end()) {
-        _path = std::string(pathStart, queryStart);
-    }
+//	// port
+//	if (skipRequiredChar(raw, &i, ':')) {
+//		_port = readPort(raw, &i);
+//	}
+//
+//	// path
+//	_path = readPath();
+//	if (_path.empty()) {
+//		_correct = false;
+//		return;
+//	}
+//
+//	// query
+//	if (skipRequiredChar(raw, &i, '?')) {
+//		_query = readQuery(raw, &i);
+//	}
+//
+//	// fragment
+//	if (skipRequiredChar(raw, &i, '#')) {
+//		_fragment = readFragment(raw, &i);
+//	}
 }
 
 std::string URI::URLencode(const std::string &s) {
@@ -117,7 +136,7 @@ std::string URI::URLdecode(const std::string &s) {
         /* 0 */ -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
         /* 1 */ -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
         /* 2 */ -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
-        /* 3 */ 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, -1, -1, -1, -1, -1, -1,
+        /* 3 */  0,  1,  2,  3,  4,  5,  6,  7,  8,  9, -1, -1, -1, -1, -1, -1,
 
         /* 4 */ -1, 10, 11, 12, 13, 14, 15, -1, -1, -1, -1, -1, -1, -1, -1, -1,
         /* 5 */ -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,

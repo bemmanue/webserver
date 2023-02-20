@@ -3,8 +3,8 @@
 
 #include <iostream>
 #include <vector>
-
 #include <list>
+
 #include "URI.hpp"
 #include "Utils.hpp"
 #include "Status.hpp"
@@ -86,9 +86,9 @@ private:
 public:
 friend std::ostream& operator<<(std::ostream& out, Request& re) {
 	out << "Method: " << re.getMethod() << std::endl;
-	out << "URI: " << re.getRequestTarget()._path << std::endl;
+//	out << "URI: " << re.getRequestTarget()._path << std::endl;
 	out << "Version: HTTP/" << re.getMajorVersion() << "." << re.getMinorVersion() << std::endl;
-	out << "Host: " << re.getHost()._host << std::endl;
+//	out << "Host: " << re.getHost()._host << std::endl;
 	out << "Content-Length: " << re.getContentLength() << std::endl;
 	out << "Chunked: " << std::boolalpha << re.isChunked() << std::endl;
 	out <<  re.getBody() << std::endl;
