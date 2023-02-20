@@ -62,10 +62,10 @@ void URI::parse(const std::string& raw) {
 
 	// host
 	_host = readHost(raw, &i);
-//	if (!isValidHost(_host)) {
-//		_correct = false;
-//		return;
-//	}
+	if (!isValidHost(_host)) {
+		_correct = false;
+		return;
+	}
 
 //	// port
 //	if (skipRequiredChar(raw, &i, ':')) {

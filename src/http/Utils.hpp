@@ -23,6 +23,7 @@ std::string	capitalize(const std::string& str);
 int			toDigit(char c);
 
 std::string	readToken(const std::string& str, size_t* pos);
+std::string	readDecNum(const std::string& str, size_t* pos);
 std::string	readVersion(const std::string& str, size_t* pos);
 std::string	readQuery(const std::string& str, size_t* pos);
 std::string	readURI(const std::string& str, size_t* pos);
@@ -48,8 +49,12 @@ bool		isFieldVchar(char a);
 bool		isReserved(char a);
 bool		isUnreserved(char a);
 bool		isPctEncoded(const std::string& str);
+bool		isDecOctet(const std::string& str);
 bool		isEmptyLine(const std::string& str, size_t pos);
 bool		isValidHost(const std::string& str);
+bool		isIPLiteral(const std::string& str);
+bool		isIPv4Address(const std::string& str);
+bool		isRegName(const std::string& str);
 
 
 bool		resourceExists(const std::string& filename);

@@ -26,6 +26,19 @@ std::string	readToken(const std::string& request, size_t* i) {
 	return token;
 }
 
+std::string	readDecNum(const std::string& str, size_t* i) {
+	std::string num;
+
+	while (*i < str.size()) {
+		if (isdigit(str[*i])) {
+			num.push_back(str[(*i)++]);
+		} else {
+			break;
+		}
+	}
+	return num;
+}
+
 std::string	readVersion(const std::string& request, size_t* i) {
 //	HTTP-version = HTTP-name "/" DIGIT "." DIGIT
 //	HTTP-name = %x48.54.54.50 ; "HTTP", case-sensitive
@@ -331,11 +344,95 @@ bool	isPctEncoded(const std::string& str) {
 	return false;
 }
 
+bool	isDecOctet(const std::string& str) {
+//	dec-octet = DIGIT ; 0-9
+//	/ %x31-39 DIGIT ; 10-99
+//	/ "1" 2DIGIT ; 100-199
+//	/ "2" %x30-34 DIGIT ; 200-249
+//	/ "25" %x30-35 ; 250-255
+
+	if ((str.size() == 1 && isdigit(str[0])) ||
+		(str.size() == 2 && str[0] >= '1' && str[0] <= '9' && isdigit(str[1])) ||
+		(str.size() == 3 && str[0] == '1' && isdigit(str[1]) && isdigit(str[2])) ||
+		(str.size() == 3 && str[0] == '2' && str[1] >= '0' && str[1] <= '4' && isdigit(str[2])) ||
+		(str.size() == 3 && str[0] == '2' && str[1] == '5' && str[2] >= '0' && str[2] <= '5')) {
+		return true;
+	}
+
+	return false;
+}
+
 bool	isEmptyLine(const std::string& request, size_t pos) {
 	if (request[pos] == '\r' && request[pos+1] == '\n') {
 		return true;
 	}
 	return false;
+}
+
+bool	isValidHost(const std::string& str) {
+//	host = IP-literal / IPv4address / reg-name
+	if (isIPLiteral(str) || isIPv4Address(str) || isRegName(str)) {
+		return true;
+	}
+
+	return false;
+}
+
+bool	isIPLiteral(const std::string& str) {
+//	IP-literal = «[» ( IPv6address / IPvFuture ) "]"
+//	IPv6address =                6( h16 ":" ) ls32
+//	/                       "::" 5( h16 ":" ) ls32
+//	/               [ h16 ] "::" 4( h16 ":" ) ls32
+//	/ [ *1( h16 ":" ) h16 ] "::" 3( h16 ":" ) ls32
+//	/ [ *2( h16 ":" ) h16 ] "::" 2( h16 ":" ) ls32
+//	/ [ *3( h16 ":" ) h16 ] "::" h16 ":" ls32
+//	/ [ *4( h16 ":" ) h16 ] "::" ls32
+//	/ [ *5( h16 ":" ) h16 ] "::" h16
+//	/ [ *6( h16 ":" ) h16 ] "::"
+//	ls32 = ( h16 ":" h16 ) / IPv4address;
+//	h16 = 1*4HEXDIG;
+//	IPvFuture = "v" 1*HEXDIG "." 1*( unreserved / sub-delims / ":" )
+
+
+	return false;
+}
+
+bool	isIPv4Address(const std::string& str) {
+//	IPv4address = dec-octet "." dec-octet "." dec-octet "." dec-octet
+	size_t i = 0;
+
+	for (int j = 0; j < 3; j++) {
+		if (!isDecOctet(readDecNum(str, &i))) {
+			return false;
+		}
+		if (!skipRequiredChar(str, &i, '.')) {
+			return false;
+		}
+	}
+	if (!isDecOctet(readDecNum(str, &i))) {
+		return false;
+	}
+	if (i != str.size()) {
+		return false;
+	}
+
+	return true;
+}
+
+bool	isRegName(const std::string& str) {
+//	reg-name = *( unreserved / pct-encoded / sub-delims )
+	size_t i = 0;
+
+	while (i < str.size()) {
+		if (isUnreserved(str[i]) || isSubDelim(str[i])) {
+			i += 1;
+		} else if (isPctEncoded(str.substr(3))) {
+			i += 3;
+		} else {
+			return false;
+		}
+	}
+	return true;
 }
 
 bool	resourceExists(const std::string& filename) {
