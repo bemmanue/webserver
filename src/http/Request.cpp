@@ -48,8 +48,8 @@ void	Request::parseRequest(const std::string& str) {
 		}
 	}
 
-	setServerConfig(_client->matchServerConfig(_host._host));
-	setLocationConfig(_serverConfig->matchLocationConfig(_requestTarget._path));
+//	setServerConfig(_client->matchServerConfig(_host._host));
+//	setLocationConfig(_serverConfig->matchLocationConfig(_requestTarget._path));
 }
 
 void	Request::parseRequestLine(const std::string& str, size_t* i) {
@@ -68,8 +68,7 @@ void	Request::parseRequestLine(const std::string& str, size_t* i) {
 	}
 
 	// request target
-	URI requestTarget;
-	requestTarget.parse(readURI(str, i));
+	URI requestTarget(readURI(str, i));
 	setRequestTarget(requestTarget);
 
 	// space
@@ -236,7 +235,7 @@ void	Request::setHeader(const std::string& name, const std::string& value) {
 }
 
 void	Request::setHost(const std::string& value) {
-	_host.parse(value);
+//	_host.parse(value);
 }
 
 void	Request::setContentLength(const std::string& value) {

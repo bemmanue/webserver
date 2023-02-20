@@ -6,7 +6,5 @@ Transfer-Encoding: chunked
 hello
 C
  Myaushenka!
-9
-yulya kek
 0
 

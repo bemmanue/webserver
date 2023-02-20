@@ -100,6 +100,77 @@ std::string	readURI(const std::string& str, size_t* i) {
 	return uri;
 }
 
+std::string readScheme(const std::string& str, size_t* i) {
+//	scheme = ALPHA *( ALPHA / DIGIT / "+" / "-" / "." )
+	std::string scheme;
+
+	if (*i < str.size() && isalpha(str[*i])) {
+		scheme.push_back(str[(*i)++]);
+	} else {
+		return scheme;
+	}
+
+	while (*i < str.size()) {
+		if (isalpha(str[*i]) || isdigit(str[*i]) || str[*i] == '+' || str[*i] == '-' || str[*i] == '.') {
+			scheme.push_back(str[(*i)++]);
+		} else {
+			break;
+		}
+	}
+	return scheme;
+}
+
+std::string readUserInfo(const std::string& str, size_t* i) {
+//	userinfo = *( unreserved / pct-encoded / sub-delims / ":" )
+	std::string userinfo;
+
+	while (*i < str.size()) {
+		if (isUnreserved(str[*i]) || isSubDelim(str[*i]) || str[*i] == ':') {
+			userinfo.push_back(str[*i]);
+			*i += 1;
+		} else if (isPctEncoded(str.substr(*i, 3))) {
+			*i += 3;
+		} else {
+			break;
+		}
+	}
+	return userinfo;
+}
+
+std::string readHost(const std::string& str, size_t* i) {
+//	host = IP-literal / IPv4address / reg-name
+//	IP-literal = «[» ( IPv6address / IPvFuture ) "]"
+//	IPv6address =                6( h16 ":" ) ls32
+//	/                       "::" 5( h16 ":" ) ls32
+//	/               [ h16 ] "::" 4( h16 ":" ) ls32
+//	/ [ *1( h16 ":" ) h16 ] "::" 3( h16 ":" ) ls32
+//	/ [ *2( h16 ":" ) h16 ] "::" 2( h16 ":" ) ls32
+//	/ [ *3( h16 ":" ) h16 ] "::" h16 ":" ls32
+//	/ [ *4( h16 ":" ) h16 ] "::" ls32
+//	/ [ *5( h16 ":" ) h16 ] "::" h16
+//	/ [ *6( h16 ":" ) h16 ] "::"
+//	ls32 = ( h16 ":" h16 ) / IPv4address;
+//	h16 = 1*4HEXDIG;
+//	IPvFuture = "v" 1*HEXDIG "." 1*( unreserved / sub-delims / ":" )
+//	IPv4address = dec-octet "." dec-octet "." dec-octet "." dec-octet
+//	reg-name = *( unreserved / pct-encoded / sub-delims )
+	std::string host;
+
+	while (*i < str.size()) {
+		if (str[*i] == '[' ||
+			str[*i] == ']' ||
+			str[*i] == ':' ||
+			isUnreserved(str[*i]) ||
+			isSubDelim(str[*i])) {
+			host.push_back(str[*i]);
+			(*i) += 1;
+		} else if (isPctEncoded(str.substr(*i, 3))) {
+			(*i) += 3;
+		}
+	}
+	return host;
+}
+
 std::string	readAbsolutePath(const std::string &request, size_t* i) {
 //	absolute-path = 1*( "/" segment )
 	std::string path;
