@@ -1,4 +1,4 @@
-GET / HTTP/1.1
+GET /?yulya=lol HTTP/1.1
 Host: bemmanue
 Transfer-Encoding: chunked
 
@@ -6,5 +6,7 @@ Transfer-Encoding: chunked
 hello
 C
  Myaushenka!
+9
+yulya kek
 0
 
