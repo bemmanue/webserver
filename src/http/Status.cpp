@@ -58,7 +58,7 @@ StatusLine::StatusLine() {
 	_statusLines[UPGRADE_REQUIRED]      			= "426 Upgrade Required";
 	_statusLines[PRECONDITION_REQUIRED] 			= "428 Precondition Required";
 	_statusLines[TOO_MANY_REQUESTS]     			= "429 Too Many Requests";
-	_statusLines[REQUEST_HEADER_FIELDS_TOO_LARGE]	= "431 Request Header Fields Too Large";
+	_statusLines[REQUEST_HEADER_FIELDS_TOO_LARGE]	= "431 Request Headers Fields Too Large";
 	_statusLines[RETRY_WITH]						= "449 Retry With";
 	_statusLines[UNAVAILABLE_FOR_LEGAL_REASONS]		= "451 Unavailable For Legal Reasons";
 	_statusLines[CLIENT_CLOSED_REQUEST]				= "499 Client Closed Request";

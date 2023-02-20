@@ -10,6 +10,8 @@ add_executable(webserver main.cpp
         src/http/Status.cpp
         src/http/Utils.cpp
         src/http/Utils.hpp
+        src/http/URI.cpp
+        src/http/URI.hpp
         src/http/Response.cpp
         src/http/Response.hpp
         src/config/Config.cpp
@@ -19,4 +21,6 @@ add_executable(webserver main.cpp
         src/config/LocationConfig.hpp
         src/config/ServerConfig.cpp
         src/config/ServerConfig.hpp
+        src/core/Client.cpp
+        src/core/Client.hpp
         )

@@ -5,7 +5,7 @@
 4	632	1676310359000000000	CMakeFiles/webserver.dir/src/http/Request.cpp.o	9dda4a3c5290d0a7
 4	888	1676286127000000000	CMakeFiles/webserver.dir/src/http/Status.cpp.o	8173bd094ed6ccfd
 9	1903	1676310029000000000	CMakeFiles/webserver.dir/main.cpp.o	477d6810ac2df33a
-0	156	1676885809000000000	build.ninja	674e2d320ef865d0
+0	156	1676886006000000000	build.ninja	674e2d320ef865d0
 5	1216	1676286128000000000	CMakeFiles/webserver.dir/src/config/Config.cpp.o	e6be51890478229c
 6	1092	1676286127000000000	CMakeFiles/webserver.dir/src/config/ServerConfig.cpp.o	5bf329c5936bc3f7
 6	1111	1676286127000000000	CMakeFiles/webserver.dir/src/config/LocationConfig.cpp.o	946a7c20a58aa408

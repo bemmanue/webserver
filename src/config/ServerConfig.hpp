@@ -27,11 +27,11 @@ private:
 
 	std::string     						_host;
 	size_t            						_port;
-	std::set<std::string>					_server_names;
-	std::map<int, std::string>				_error_pages;
-	uint64_t 								_client_max_body_size;
+	std::set<std::string>					_serverNames;
+	std::map<int, std::string>				_errorPages;
+	uint64_t 								_clientMaxBodySize;
 	std::map<std::string, LocationConfig>	_locations;
-	std::set<std::string>					_methods_allowed;
+	std::set<std::string>					_methodsAllowed;
 
 public:
 	ServerConfig();
@@ -46,8 +46,11 @@ public:
 	void	setClientMaxBodySize(uint64_t bytes);
 	void	setLocation(const std::string& path, const LocationConfig& location);
 
+	bool	hasName(const std::string& serverName);
 	bool	hasLocation(const std::string& location);
 	bool	isMethodAllowed(const std::string& method);
+
+	LocationConfig	*matchLocationConfig(const std::string& path);
 
 	size_t 											getMajorVersion() const;
 	size_t 											getMinorVersion() const;
@@ -80,7 +83,6 @@ public:
 		}
 		return out;
 	}
-
 };
 
 #endif

@@ -1,0 +1,30 @@
+#ifndef URI_HPP
+#define URI_HPP
+
+#include <algorithm>
+#include <string>
+
+
+struct URI {
+    typedef std::string::iterator iter_t;
+
+    std::string _scheme;
+    std::string _host;
+    std::string _port_s;
+    std::string _path;
+    std::string _query;
+    std::string _fragment;
+    std::size_t _port;
+
+    URI();
+    ~URI();
+
+    void               parse(std::string uri);
+    static std::string URLencode(const std::string &);
+    static std::string URLdecode(const std::string &);
+    std::string        getAuthority() const;
+    void               clear();
+};
+
+
+#endif
