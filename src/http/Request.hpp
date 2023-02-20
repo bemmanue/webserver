@@ -93,6 +93,8 @@ friend std::ostream& operator<<(std::ostream& out, Request& re) {
 	out << "Chunked: " << std::boolalpha << re.isChunked() << std::endl;
 	out <<  re.getBody() << std::endl;
 	out <<  "Status: " << re.getStatus() << std::endl;
+//	out << *re._serverConfig << std::endl;
+//	out << *re._locationConfig << std::endl;
 	return out;
 }
 
