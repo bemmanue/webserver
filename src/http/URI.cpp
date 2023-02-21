@@ -1,37 +1,48 @@
 #include "URI.hpp"
 
-URI::URI() {}
+URI::URI():
+	_port(-1),
+	_correct(true) {
+}
 
-URI::URI(const std::string &raw): _raw(raw) {
+URI::URI(const std::string &raw):
+	_raw(raw),
+	_port(-1),
+	_correct(true) {
 	parse(raw);
 }
 
-URI::URI(const URI &other): _port(0) {
+URI::URI(const URI &other):
+	_port(-1),
+	_correct(true) {
 	operator=(other);
 }
 
 URI &URI::operator=(const URI& other) {
 	if (this != &other) {
-		_raw = other._raw;
 		_scheme = other._scheme;
+		_authority = other._authority;
+		_userinfo = other._userinfo;
 		_host = other._host;
+		_port = other._port;
 		_path = other._path;
 		_query = other._query;
 		_fragment = other._fragment;
-		_port = other._port;
+		_raw = other._raw;
+		_correct = other._correct;
 	}
 	return *this;
 }
 
 URI::~URI(void) {}
 
-std::string URI::getAuthority(void) const {
-	return "";
-}
-
 void URI::parse(const std::string& raw) {
 //	URI = scheme ":" hier-part [ "?" query ] [ "#" fragment ]
-//	hier-part = "//" authority path
+//	hier-part  = "//" authority path-abempty
+//	/ path-absolute
+//	/ path-rootless
+//	/ path-empty
+//	authority = [ userinfo "@" ] host [ ":" port ]
 	size_t i = 0;
 
 	_scheme = readScheme(raw, &i);
@@ -45,49 +56,73 @@ void URI::parse(const std::string& raw) {
 		return;
 	}
 
-	// authority
-	if (!skipRequiredChar(raw, &i, '/') || !skipRequiredChar(raw, &i, '/')) {
-		_correct = false;
-		return;
-	}
+	// hier-part
+	if (skipRequiredChar(raw, &i, '/')) {
 
-	// userinfo
-	size_t temp = i;
-	_userinfo = readUserInfo(raw, &temp);
-	if (!skipRequiredChar(raw, &temp, '@')) {
-		_userinfo = "";
+		// authority path-abempty
+		if (skipRequiredChar(raw, &i, '/')) {
+
+			// userinfo
+			size_t temp = i;
+			_userinfo = readUserInfo(raw, &temp);
+			if (!skipRequiredChar(raw, &temp, '@')) {
+				_userinfo = "";
+			} else {
+				i = temp;
+				_authority.append(_userinfo);
+				_authority.push_back('@');
+			}
+
+			// host
+			_host = readHost(raw, &i);
+			if (!isValidHost(_host)) {
+				_correct = false;
+				return;
+			}
+			_authority.append(_host);
+
+			// port
+			if (skipRequiredChar(raw, &i, ':')) {
+				if (isdigit(raw[i])) {
+					_port = readPort(raw, &i);
+					if (_port < 1) {
+						_correct = false;
+						return;
+					}
+					_authority.push_back(':');
+					_authority.append(std::to_string(_port));
+				}
+			}
+
+			// path-abempty
+			_path = readPathAbempty(raw, &i);
+
+		} else {
+			// path-absolute
+			_path = readPathAbsolute(raw, &i);
+		}
+
+	} else if (isPchar(raw[i]) || isPctEncoded(raw.substr(i, 3))) {
+		// path-rootless
+		_path = readPathRootless(raw, &i);
 	} else {
-		i = temp;
+		// path-empty
+		_path = "";
 	}
 
-	// host
-	_host = readHost(raw, &i);
-	if (!isValidHost(_host)) {
+	// query
+	if (skipRequiredChar(raw, &i, '?')) {
+		_query = readQuery(raw, &i);
+	}
+
+	// fragment
+	if (skipRequiredChar(raw, &i, '#')) {
+		_fragment = readFragment(raw, &i);
+	}
+
+	if (raw[i] != '\0') {
 		_correct = false;
-		return;
 	}
-
-//	// port
-//	if (skipRequiredChar(raw, &i, ':')) {
-//		_port = readPort(raw, &i);
-//	}
-//
-//	// path
-//	_path = readPath();
-//	if (_path.empty()) {
-//		_correct = false;
-//		return;
-//	}
-//
-//	// query
-//	if (skipRequiredChar(raw, &i, '?')) {
-//		_query = readQuery(raw, &i);
-//	}
-//
-//	// fragment
-//	if (skipRequiredChar(raw, &i, '#')) {
-//		_fragment = readFragment(raw, &i);
-//	}
 }
 
 std::string URI::URLencode(const std::string &s) {
@@ -178,4 +213,24 @@ std::string URI::URLdecode(const std::string &s) {
         result += s[s.length() - 1];
     }
     return result;
+}
+
+bool	URI::isCorrect() const {
+	return _correct;
+}
+
+bool	URI::isHTTP() const {
+//	http-URI = "http:" "//" authority path-abempty [ "?" query ] [ "#" fragment ]
+	if (_scheme == "http" && !_authority.empty()) {
+		return true;
+	}
+	return false;
+}
+
+std::string	URI::getAuthority(void) const {
+	return _authority;
+}
+
+bool URI::hasPort() const {
+	return (_port >= 0);
 }
