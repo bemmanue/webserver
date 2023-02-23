@@ -9,10 +9,10 @@ class URI {
 private:
     std::string		_scheme;
 
-	// authority
+	std::string		_authority;
 	std::string		_userinfo;
     std::string		_host;
-    std::size_t		_port;
+    int				_port;
 
     std::string		_path;
     std::string		_query;
@@ -32,19 +32,24 @@ public:
     URI& operator=(const URI& other);
     ~URI();
 
-    static std::string URLencode(const std::string &);
-    static std::string URLdecode(const std::string &);
-    std::string        getAuthority() const;
+    static std::string	URLencode(const std::string &);
+    static std::string	URLdecode(const std::string &);
+    std::string			getAuthority() const;
+    bool				isCorrect() const;
+    bool				isHTTP() const;
+    bool				hasPort() const;
 
 	friend std::ostream& operator<<(std::ostream& out, URI& uri) {
-		out << "authority: " << uri.getAuthority() << std::endl;
 		out << "scheme: " << uri._scheme << std::endl;
-		out << "host: " << uri._userinfo << std::endl;
+		out << "authority: " << uri.getAuthority() << std::endl;
+		out << "userinfo: " << uri._userinfo << std::endl;
 		out << "host: " << uri._host << std::endl;
+		out << "port: " << uri._port << std::endl;
 		out << "path: " << uri._path << std::endl;
 		out << "query: " << uri._query << std::endl;
 		out << "fragment: " << uri._fragment << std::endl;
-		out << "port: " << uri._port << std::endl;
+		out << "correct: " << std::boolalpha << uri._correct << std::endl;
+		out << "HTTP: " << std::boolalpha << uri.isHTTP() << std::endl;
 		return out;
 	}
 };

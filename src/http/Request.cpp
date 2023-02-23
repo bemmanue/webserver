@@ -2,10 +2,8 @@
 
 Request::Request(Client* client, const std::string& request):
 	_client(client),
-	_method(""),
 	_chunked(false),
 	_contentLength(0),
-	_body(""),
 	_status(OK),
 	_state(requestLine) {
 	parseRequest(request);
@@ -68,8 +66,11 @@ void	Request::parseRequestLine(const std::string& str, size_t* i) {
 	}
 
 	// request target
-	URI requestTarget(readURI(str, i));
-	setRequestTarget(requestTarget);
+	setRequestTarget(readWord(str, i));
+	if (getStatus() != OK) {
+		std::cerr << "invalid request target" << std::endl;
+		return isFormed(true);
+	}
 
 	// space
 	if (!skipRequiredChar(str, i, ' ')) {
@@ -79,16 +80,9 @@ void	Request::parseRequestLine(const std::string& str, size_t* i) {
 	}
 
 	// version
-	std::string version = readVersion(str, i);
-	if (version.empty()) {
-		std::cerr << "missing or invalid HTTP version" << std::endl;
-		setStatus(BAD_REQUEST);
-		return isFormed(true);
-	}
-	setMajorVersion(toDigit(version[5]));
-	setMinorVersion(toDigit(version[7]));
+	setVersion(readWord(str, i));
 	if (getStatus() != OK) {
-		std::cerr << "unsupported HTTP version" << std::endl;
+		std::cerr << "invalid or unsupported HTTP version" << std::endl;
 		return isFormed(true);
 	}
 
@@ -212,12 +206,37 @@ void	Request::setMethod(const std::string& method) {
 	}
 }
 
-void	Request::setRequestTarget(const URI& uri) {
-	_requestTarget = uri;
+void	Request::setRequestTarget(const std::string& requestTarget) {
+	if (isOriginForm(requestTarget)) {
+		_requestTarget = requestTarget;
+	} else {
+		setStatus(BAD_REQUEST);
+	}
+}
+
+void	Request::setVersion(const std::string& version) {
+	if (version.size() == 8 &&
+		version[0] == 'H'	&&
+		version[1] == 'T'	&&
+		version[2] == 'T'	&&
+		version[3] == 'P'	&&
+		version[4] == '/'	&&
+		isdigit(version[5])	&&
+		version[6] == '.'	&&
+		isdigit(version[7])) {
+		setMajorVersion(toDigit(version[5]));
+		setMajorVersion(toDigit(version[7]));
+	} else {
+		setStatus(BAD_REQUEST);
+	}
 }
 
 void	Request::setMajorVersion(unsigned short majorVersion) {
-	_majorVersion = majorVersion;
+	if (majorVersion == _serverConfig->getMajorVersion()) {
+		_majorVersion = majorVersion;
+	} else {
+		setStatus(HTTP_VERSION_NOT_SUPPORTED);
+	}
 }
 
 void	Request::setMinorVersion(unsigned short minorVersion) {
@@ -239,6 +258,12 @@ void	Request::setHost(const std::string& value) {
 }
 
 void	Request::setContentLength(const std::string& value) {
+	if (_headers.find(CONTENT_LENGTH) == _headers.end() &&
+		_headers.find(TRANSFER_ENCODING) == _headers.end())	{
+		_headers[CONTENT_LENGTH].push_back(value);
+	} else {
+		setStatus(BAD_REQUEST);
+	}
 	_contentLength = std::stoul(value);
 }
 
@@ -246,7 +271,7 @@ void	Request::setTransferEncoding(const std::string& value) {
 	if (value == "chunked") {
 		_chunked = true;
 	} else {
-		setStatus(BAD_REQUEST);
+		setStatus(NOT_IMPLEMENTED);
 	}
 }
 
@@ -270,7 +295,7 @@ std::string Request::getMethod() const {
 	return _method;
 }
 
-URI	Request::getRequestTarget() const {
+std::string	Request::getRequestTarget() const {
 	return _requestTarget;
 }
 

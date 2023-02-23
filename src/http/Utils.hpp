@@ -3,6 +3,7 @@
 
 #include <iostream>
 #include <sys/stat.h>
+#include <arpa/inet.h>
 
 #ifndef HTTP_METHODS
 	# define GET		"GET"
@@ -23,15 +24,23 @@ std::string	capitalize(const std::string& str);
 int			toDigit(char c);
 
 std::string	readToken(const std::string& str, size_t* pos);
+std::string	readDecNum(const std::string& str, size_t* pos);
 std::string	readVersion(const std::string& str, size_t* pos);
 std::string	readQuery(const std::string& str, size_t* pos);
-std::string	readURI(const std::string& str, size_t* pos);
+std::string	readFragment(const std::string& str, size_t* pos);
+std::string	readWord(const std::string& str, size_t* pos);
 std::string	readScheme(const std::string& str, size_t* pos);
 std::string	readUserInfo(const std::string& str, size_t* pos);
 std::string	readHost(const std::string& str, size_t* pos);
+std::string readIPLiteral(const std::string& str, size_t* i);
+std::string readIPv6address(const std::string& str, size_t* i);
+std::string readIPvFuture(const std::string& str, size_t* i);
+int			readPort(const std::string& str, size_t* pos);
 std::string	readSegment(const std::string& str, size_t* pos);
 std::string	readFieldValue(const std::string& str, size_t* pos);
-std::string	readAbsolutePath(const std::string& str, size_t* pos);
+std::string	readPathAbempty(const std::string& str, size_t* pos);
+std::string	readPathAbsolute(const std::string& str, size_t* pos);
+std::string	readPathRootless(const std::string& str, size_t* pos);
 std::string	readChunkData(const std::string& str, size_t* pos, size_t chunkSize);
 long 		readChunkSize(const std::string& str, size_t* pos);
 
@@ -50,6 +59,12 @@ bool		isUnreserved(char a);
 bool		isPctEncoded(const std::string& str);
 bool		isEmptyLine(const std::string& str, size_t pos);
 bool		isValidHost(const std::string& str);
+bool		isIPLiteral(const std::string& str);
+bool		isIPv4address(const std::string& str);
+bool		isIPv6address(const std::string& str);
+bool		isIPvFuture(const std::string& str);
+bool		isRegName(const std::string& str);
+bool		isOriginForm(const std::string& str);
 
 
 bool		resourceExists(const std::string& filename);

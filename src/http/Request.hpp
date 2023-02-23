@@ -8,6 +8,7 @@
 #include "URI.hpp"
 #include "Utils.hpp"
 #include "Status.hpp"
+#include "Headers.hpp"
 #include "../config/ServerConfig.hpp"
 
 #define HOST				"Host"
@@ -24,25 +25,25 @@ class Client;
 
 class Request {
 private:
-	std::string										_method;
-	URI            									_requestTarget;
-	unsigned short									_majorVersion;
-	unsigned short									_minorVersion;
-	std::map<std::string, std::list<std::string> >	_headers;
-	std::string										_body;
+	std::string			_method;
+	std::string     	_requestTarget;
+	unsigned short		_majorVersion;
+	unsigned short		_minorVersion;
+	Headers				_headers;
+	std::string			_body;
 
-	URI           									_host;
-	size_t											_contentLength;
-	bool											_chunked;
+	URI           		_host;
+	size_t				_contentLength;
+	bool				_chunked;
 	
-	size_t											_status;
-	State											_state;
-	bool 											_formed;
+	size_t				_status;
+	State				_state;
+	bool 				_formed;
 
-	ServerConfig*									_serverConfig;
-	LocationConfig*									_locationConfig;
+	ServerConfig*		_serverConfig;
+	LocationConfig*		_locationConfig;
 
-	Client*											_client;
+	Client*				_client;
 
 public:
 	Request(Client* client, const std::string& request);
@@ -51,7 +52,8 @@ public:
 	~Request();
 
 	void	setMethod(const std::string& method);
-	void	setRequestTarget(const URI& uri);
+	void	setRequestTarget(const std::string& requestTarget);
+	void	setVersion(const std::string& version);
 	void	setMajorVersion(unsigned short majorVersion);
 	void	setMinorVersion(unsigned short minorVersion);
 	void	setHeader(const std::string& name, const std::string& value);
@@ -64,7 +66,7 @@ public:
 	void	setLocationConfig(LocationConfig* locationConfig);
 
 	std::string		getMethod() const;
-	URI				getRequestTarget() const;
+	std::string		getRequestTarget() const;
 	size_t			getMajorVersion() const;
 	size_t			getMinorVersion() const;
 	URI				getHost() const;
@@ -86,7 +88,7 @@ private:
 public:
 friend std::ostream& operator<<(std::ostream& out, Request& re) {
 	out << "Method: " << re.getMethod() << std::endl;
-//	out << "URI: " << re.getRequestTarget()._path << std::endl;
+	out << "Request target: " << re.getRequestTarget() << std::endl;
 	out << "Version: HTTP/" << re.getMajorVersion() << "." << re.getMinorVersion() << std::endl;
 //	out << "Host: " << re.getHost()._host << std::endl;
 	out << "Content-Length: " << re.getContentLength() << std::endl;

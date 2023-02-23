@@ -26,6 +26,19 @@ std::string	readToken(const std::string& request, size_t* i) {
 	return token;
 }
 
+std::string	readDecNum(const std::string& str, size_t* i) {
+	std::string num;
+
+	while (*i < str.size()) {
+		if (isdigit(str[*i])) {
+			num.push_back(str[(*i)++]);
+		} else {
+			break;
+		}
+	}
+	return num;
+}
+
 std::string	readVersion(const std::string& request, size_t* i) {
 //	HTTP-version = HTTP-name "/" DIGIT "." DIGIT
 //	HTTP-name = %x48.54.54.50 ; "HTTP", case-sensitive
@@ -82,22 +95,17 @@ std::string readFieldValue(const std::string &request, size_t* i) {
 	return fieldValue;
 }
 
-std::string	readURI(const std::string& str, size_t* i) {
-//	uri = 1*( pct-encoded / reserved / unreserved )
-	std::string uri;
+std::string	readWord(const std::string& str, size_t* i) {
+	std::string word;
 
 	while (*i < str.size()) {
-		if (isReserved(str[*i]) || isUnreserved(str[*i])) {
-			uri.push_back(str[*i]);
-			*i += 1;
-		} else if (isPctEncoded(str.substr(*i, 3))) {
-			uri.append(str.substr(*i, 3));
-			*i += 3;
+		if (isVchar(str[*i]) && str[*i] != ' ') {
+			word.push_back(str[(*i)++]);
 		} else {
 			break;
 		}
 	}
-	return uri;
+	return word;
 }
 
 std::string readScheme(const std::string& str, size_t* i) {
@@ -137,9 +145,53 @@ std::string readUserInfo(const std::string& str, size_t* i) {
 	return userinfo;
 }
 
-std::string readHost(const std::string& str, size_t* i) {
-//	host = IP-literal / IPv4address / reg-name
-//	IP-literal = «[» ( IPv6address / IPvFuture ) "]"
+std::string readIPvFuture(const std::string& str, size_t* i) {
+//	IPvFuture = "v" 1*HEXDIG "." 1*( unreserved / sub-delims / ":" )
+	std::string host;
+
+	if (str[*i] == '[') {
+		host.push_back(str[(*i)++]);
+		if (str[*i] == 'v') {
+			host.push_back(str[(*i)++]);
+			while (*i < str.size()) {
+				if (isUnreserved(str[*i]) || isSubDelim(str[*i]) || str[*i] == ':') {
+					host.push_back(str[(*i)++]);
+				} else if (str[*i] == ']') {
+					host.push_back(str[(*i)++]);
+					break;
+				} else {
+					break;
+				}
+			}
+		}
+	}
+	return host;
+}
+
+int	readPort(const std::string& str, size_t* i) {
+//	port = *DIGIT
+	std::string port_s;
+	int			port;
+
+	port_s = readDecNum(str, i);
+	if (port_s.empty()) {
+		return -1;
+	}
+
+	port_s = port_s.substr(port_s.find_first_not_of('0'));
+	if (port_s.size() > 5) {
+		return -1;
+	}
+
+	port = (int)strtol(port_s.c_str(), nullptr, 10);
+	if (port > 65536) {
+		return -1;
+	}
+
+	return port;
+}
+
+std::string readIPv6address(const std::string& str, size_t* i) {
 //	IPv6address =                6( h16 ":" ) ls32
 //	/                       "::" 5( h16 ":" ) ls32
 //	/               [ h16 ] "::" 4( h16 ":" ) ls32
@@ -151,47 +203,140 @@ std::string readHost(const std::string& str, size_t* i) {
 //	/ [ *6( h16 ":" ) h16 ] "::"
 //	ls32 = ( h16 ":" h16 ) / IPv4address;
 //	h16 = 1*4HEXDIG;
-//	IPvFuture = "v" 1*HEXDIG "." 1*( unreserved / sub-delims / ":" )
-//	IPv4address = dec-octet "." dec-octet "." dec-octet "." dec-octet
-//	reg-name = *( unreserved / pct-encoded / sub-delims )
 	std::string host;
 
-	while (*i < str.size()) {
-		if (str[*i] == '[' ||
-			str[*i] == ']' ||
-			str[*i] == ':' ||
-			isUnreserved(str[*i]) ||
-			isSubDelim(str[*i])) {
-			host.push_back(str[*i]);
-			(*i) += 1;
-		} else if (isPctEncoded(str.substr(*i, 3))) {
-			(*i) += 3;
+	if (str[*i] == '[') {
+		host.push_back(str[(*i)++]);
+		while (*i < str.size()) {
+			if (ishexnumber(str[*i]) || str[*i] == ':' || str[*i] == '.') {
+				host.push_back(str[(*i)++]);
+			} else if (str[*i] == ']') {
+				host.push_back(str[(*i)++]);
+				break;
+			} else {
+				break;
+			}
 		}
 	}
 	return host;
 }
 
-std::string	readAbsolutePath(const std::string &request, size_t* i) {
-//	absolute-path = 1*( "/" segment )
+std::string readIPLiteral(const std::string& str, size_t* i) {
+//	IP-literal = "[" ( IPv6address / IPvFuture ) "]"
+	std::string host;
+
+	if (str[*i] == '[') {
+		if (str[*i + 1] == 'v') {
+			host = readIPvFuture(str, i);
+		} else {
+			host = readIPv6address(str, i);
+		}
+	}
+	return host;
+}
+
+std::string readHost(const std::string& str, size_t* i) {
+//	host = IP-literal / IPv4address / reg-name
+//	IP-literal = "[" ( IPv6address / IPvFuture ) "]"
+//	IPv4address = dec-octet "." dec-octet "." dec-octet "." dec-octet
+//	reg-name = *( unreserved / pct-encoded / sub-delims )
+	std::string host;
+
+	// read IP-literal
+	if (str[*i] == '[') {
+		host = readIPLiteral(str, i);
+	} else {
+		// read IPv4address or reg-name
+		while (*i < str.size()) {
+			if (isUnreserved(str[*i]) || isSubDelim(str[*i])) {
+				host.push_back(str[*i]);
+				*i += 1;
+			} else if (isPctEncoded(str.substr(*i, 3))) {
+				*i += 3;
+			} else {
+				break;
+			}
+		}
+	}
+	return host;
+}
+
+std::string	readPathAbempty(const std::string& str, size_t* pos) {
+//	path-abempty  = *( "/" segment )
 	std::string path;
 	std::string segment;
 
-	while (request[*i] == '/') {
-		path.push_back(request[(*i)++]);
-		segment = readSegment(request, i);
+	while (str[*pos] == '/') {
+		path.push_back(str[(*pos)++]);
+		segment = readSegment(str, pos);
 		path.append(segment);
 	}
 	return path;
 }
 
-std::string	readQuery(const std::string &request, size_t* i) {
+std::string	readPathAbsolute(const std::string &str, size_t* pos) {
+//	absolute-path = 1*( "/" segment )
+	return readPathAbempty(str, pos);
+}
+
+std::string	readPathRootless(const std::string& str, size_t* i) {
+//	path-rootless = segment-nz *( "/" segment )
+//	segment-nz = 1*pchar
+	std::string path;
+
+	while (*i < str.size()) {
+		if (isPchar(str[*i])) {
+			path.push_back(str[*i]);
+			*i += 1;
+		} else if (isPctEncoded(str.substr(*i, 3))) {
+			path.append(str.substr(*i, 3));
+			*i += 3;
+		} else {
+			break;
+		}
+	}
+
+	if (path.empty()) {
+		return path;
+	}
+
+	return path.append(readPathAbempty(str, i));
+}
+
+std::string	readQuery(const std::string &str, size_t* i) {
 //	query = *( pchar / pct-encoded / "/" / "?" )
 	std::string query;
 
-	while (isPchar(request[*i]) || request[*i] == '/' || request[*i] == '?') {
-		query.push_back(request[(*i)++]);
+	while (*i < str.size()) {
+		if (isPchar(str[*i]) || str[*i] == '/' || str[*i] == '?') {
+			query.push_back(str[*i]);
+			*i += 1;
+		} else if (isPctEncoded(str.substr(*i, 3))) {
+			query.append(str.substr(*i, 3));
+			*i += 3;
+		} else {
+			break;
+		}
 	}
 	return query;
+}
+
+std::string	readFragment(const std::string& str, size_t* i) {
+//	fragment = *( pchar / pct-encoded / "/" / "?" )
+	std::string fragment;
+
+	while (*i < str.size()) {
+		if (isPchar(str[*i]) || str[*i] == '/' || str[*i] == '?') {
+			fragment.push_back(str[*i]);
+			*i += 1;
+		} else if (isPctEncoded(str.substr(*i, 3))) {
+			fragment.append(str.substr(*i, 3));
+			*i += 3;
+		} else {
+			break;
+		}
+	}
+	return fragment;
 }
 
 std::string	readChunkData(const std::string& str, size_t* i, size_t chunkSize) {
@@ -268,8 +413,8 @@ bool	isTchar(char a) {
 }
 
 bool	isPchar(char a) {
-//	pchar = unreserved / sub-delims / ":" / "@"
-	if (isUnreserved(a) || isSubDelim(a) || std::strchr(":@", a)) {
+//	pchar = unreserved / pct-encoded / sub-delims / ":" / "@"
+	if (isUnreserved(a) || isSubDelim(a) || a == ':' || a == '@') {
 		return true;
 	}
 	return false;
@@ -336,6 +481,103 @@ bool	isEmptyLine(const std::string& request, size_t pos) {
 		return true;
 	}
 	return false;
+}
+
+bool	isValidHost(const std::string& str) {
+//	host = IP-literal / IPv4address / reg-name
+	if (isIPLiteral(str) || isIPv4address(str) || isRegName(str)) {
+		return true;
+	}
+	return false;
+}
+
+bool	isIPLiteral(const std::string& str) {
+//	IP-literal = "[" ( IPv6address / IPvFuture ) "]"
+	std::string address;
+
+	if (str.front() == '[' && str.back() == ']') {
+		address = str.substr(1, str.size()-2);
+		if (isIPv6address(address) || isIPvFuture(address)) {
+			return true;
+		}
+	}
+	return false;
+}
+
+bool	isIPv4address(const std::string& str) {
+//	IPv4address = dec-octet "." dec-octet "." dec-octet "." dec-octet
+	struct in_addr addr = {};
+	return inet_pton(PF_INET, str.c_str(), &addr);
+}
+
+bool	isIPv6address(const std::string& str) {
+//	IPv6address =                6( h16 ":" ) ls32
+//	/                       "::" 5( h16 ":" ) ls32
+//	/               [ h16 ] "::" 4( h16 ":" ) ls32
+//	/ [ *1( h16 ":" ) h16 ] "::" 3( h16 ":" ) ls32
+//	/ [ *2( h16 ":" ) h16 ] "::" 2( h16 ":" ) ls32
+//	/ [ *3( h16 ":" ) h16 ] "::" h16 ":" ls32
+//	/ [ *4( h16 ":" ) h16 ] "::" ls32
+//	/ [ *5( h16 ":" ) h16 ] "::" h16
+//	/ [ *6( h16 ":" ) h16 ] "::"
+//	ls32 = ( h16 ":" h16 ) / IPv4address;
+//	h16 = 1*4HEXDIG;
+	struct in6_addr addr = {};
+	return inet_pton(PF_INET6, str.c_str(), &addr);
+}
+
+bool	isIPvFuture(const std::string& str) {
+//	IPvFuture = "v" 1*HEXDIG "." 1*( unreserved / sub-delims / ":" )
+	size_t i = 0;
+
+	if (!skipRequiredChar(str, &i, 'v') || !ishexnumber(str[i])) {
+		return false;
+	}
+	while (i < str.size() && ishexnumber(str[i])) {
+		i++;
+	}
+	if (!skipRequiredChar(str, &i, '.') || (!isUnreserved(str[i]) && !isSubDelim(str[i]) && str[i] != ':')) {
+		return false;
+	}
+	while (i < str.size() && (isUnreserved(str[i]) || isSubDelim(str[i]) || str[i] == ':')) {
+		i++;
+	}
+	if (str[i] != '\0') {
+		return false;
+	}
+	return true;
+}
+
+bool	isRegName(const std::string& str) {
+//	reg-name = *( unreserved / pct-encoded / sub-delims )
+	size_t i = 0;
+
+	while (i < str.size()) {
+		if (isUnreserved(str[i]) || isSubDelim(str[i])) {
+			i += 1;
+		} else if (isPctEncoded(str.substr(3))) {
+			i += 3;
+		} else {
+			return false;
+		}
+	}
+	return true;
+}
+
+bool	isOriginForm(const std::string& str) {
+//	origin-form = absolute-path [ "?" query ]
+	size_t i = 0;
+
+	if (readPathAbsolute(str, &i).empty()) {
+		return false;
+	}
+	if (skipRequiredChar(str, &i, '?')) {
+		readQuery(str, &i);
+	}
+	if (str[i] != '\0') {
+		return false;
+	}
+	return true;
 }
 
 bool	resourceExists(const std::string& filename) {
