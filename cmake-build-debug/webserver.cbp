@@ -110,6 +110,12 @@
 		<Unit filename="/Users/uliakulikova/Desktop/webserver/src/core/Client.hpp">
 			<Option target="webserver"/>
 		</Unit>
+		<Unit filename="/Users/uliakulikova/Desktop/webserver/src/http/Headers.cpp">
+			<Option target="webserver"/>
+		</Unit>
+		<Unit filename="/Users/uliakulikova/Desktop/webserver/src/http/Headers.hpp">
+			<Option target="webserver"/>
+		</Unit>
 		<Unit filename="/Users/uliakulikova/Desktop/webserver/src/http/Request.cpp">
 			<Option target="webserver"/>
 		</Unit>

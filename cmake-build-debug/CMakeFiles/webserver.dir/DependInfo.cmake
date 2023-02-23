@@ -13,6 +13,7 @@ set(CMAKE_DEPENDS_CHECK_CXX
   "/Users/uliakulikova/Desktop/webserver/src/config/LocationConfig.cpp" "/Users/uliakulikova/Desktop/webserver/cmake-build-debug/CMakeFiles/webserver.dir/src/config/LocationConfig.cpp.o"
   "/Users/uliakulikova/Desktop/webserver/src/config/ServerConfig.cpp" "/Users/uliakulikova/Desktop/webserver/cmake-build-debug/CMakeFiles/webserver.dir/src/config/ServerConfig.cpp.o"
   "/Users/uliakulikova/Desktop/webserver/src/core/Client.cpp" "/Users/uliakulikova/Desktop/webserver/cmake-build-debug/CMakeFiles/webserver.dir/src/core/Client.cpp.o"
+  "/Users/uliakulikova/Desktop/webserver/src/http/Headers.cpp" "/Users/uliakulikova/Desktop/webserver/cmake-build-debug/CMakeFiles/webserver.dir/src/http/Headers.cpp.o"
   "/Users/uliakulikova/Desktop/webserver/src/http/Request.cpp" "/Users/uliakulikova/Desktop/webserver/cmake-build-debug/CMakeFiles/webserver.dir/src/http/Request.cpp.o"
   "/Users/uliakulikova/Desktop/webserver/src/http/Response.cpp" "/Users/uliakulikova/Desktop/webserver/cmake-build-debug/CMakeFiles/webserver.dir/src/http/Response.cpp.o"
   "/Users/uliakulikova/Desktop/webserver/src/http/Status.cpp" "/Users/uliakulikova/Desktop/webserver/cmake-build-debug/CMakeFiles/webserver.dir/src/http/Status.cpp.o"

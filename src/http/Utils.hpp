@@ -28,7 +28,7 @@ std::string	readDecNum(const std::string& str, size_t* pos);
 std::string	readVersion(const std::string& str, size_t* pos);
 std::string	readQuery(const std::string& str, size_t* pos);
 std::string	readFragment(const std::string& str, size_t* pos);
-std::string	readURI(const std::string& str, size_t* pos);
+std::string	readWord(const std::string& str, size_t* pos);
 std::string	readScheme(const std::string& str, size_t* pos);
 std::string	readUserInfo(const std::string& str, size_t* pos);
 std::string	readHost(const std::string& str, size_t* pos);
@@ -64,6 +64,7 @@ bool		isIPv4address(const std::string& str);
 bool		isIPv6address(const std::string& str);
 bool		isIPvFuture(const std::string& str);
 bool		isRegName(const std::string& str);
+bool		isOriginForm(const std::string& str);
 
 
 bool		resourceExists(const std::string& filename);

@@ -95,22 +95,17 @@ std::string readFieldValue(const std::string &request, size_t* i) {
 	return fieldValue;
 }
 
-std::string	readURI(const std::string& str, size_t* i) {
-//	uri = 1*( pct-encoded / reserved / unreserved )
-	std::string uri;
+std::string	readWord(const std::string& str, size_t* i) {
+	std::string word;
 
 	while (*i < str.size()) {
-		if (isReserved(str[*i]) || isUnreserved(str[*i])) {
-			uri.push_back(str[*i]);
-			*i += 1;
-		} else if (isPctEncoded(str.substr(*i, 3))) {
-			uri.append(str.substr(*i, 3));
-			*i += 3;
+		if (isVchar(str[*i]) && str[*i] != ' ') {
+			word.push_back(str[(*i)++]);
 		} else {
 			break;
 		}
 	}
-	return uri;
+	return word;
 }
 
 std::string readScheme(const std::string& str, size_t* i) {
@@ -565,6 +560,22 @@ bool	isRegName(const std::string& str) {
 		} else {
 			return false;
 		}
+	}
+	return true;
+}
+
+bool	isOriginForm(const std::string& str) {
+//	origin-form = absolute-path [ "?" query ]
+	size_t i = 0;
+
+	if (readPathAbsolute(str, &i).empty()) {
+		return false;
+	}
+	if (skipRequiredChar(str, &i, '?')) {
+		readQuery(str, &i);
+	}
+	if (str[i] != '\0') {
+		return false;
 	}
 	return true;
 }
