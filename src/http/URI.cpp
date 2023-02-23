@@ -5,13 +5,6 @@ URI::URI():
 	_correct(true) {
 }
 
-URI::URI(const std::string &raw):
-	_raw(raw),
-	_port(-1),
-	_correct(true) {
-	parse(raw);
-}
-
 URI::URI(const URI &other):
 	_port(-1),
 	_correct(true) {
@@ -36,7 +29,7 @@ URI &URI::operator=(const URI& other) {
 
 URI::~URI(void) {}
 
-void URI::parse(const std::string& raw) {
+void URI::parseURI(const std::string& raw) {
 //	URI = scheme ":" hier-part [ "?" query ] [ "#" fragment ]
 //	hier-part  = "//" authority path-abempty
 //	/ path-absolute
@@ -44,6 +37,8 @@ void URI::parse(const std::string& raw) {
 //	/ path-empty
 //	authority = [ userinfo "@" ] host [ ":" port ]
 	size_t i = 0;
+
+	_raw = raw;
 
 	_scheme = readScheme(raw, &i);
 	if (_scheme.empty()) {
@@ -118,6 +113,36 @@ void URI::parse(const std::string& raw) {
 	// fragment
 	if (skipRequiredChar(raw, &i, '#')) {
 		_fragment = readFragment(raw, &i);
+	}
+
+	if (raw[i] != '\0') {
+		_correct = false;
+	}
+}
+
+void URI::parseHost(const std::string &raw) {
+//	host = uri-host [ ":" port ]
+	size_t i = 0;
+
+	// host
+	_host = readHost(raw, &i);
+	if (!isValidHost(_host)) {
+		_correct = false;
+		return;
+	}
+	_authority.append(_host);
+
+	// port
+	if (skipRequiredChar(raw, &i, ':')) {
+		if (isdigit(raw[i])) {
+			_port = readPort(raw, &i);
+			if (_port < 1) {
+				_correct = false;
+				return;
+			}
+			_authority.push_back(':');
+			_authority.append(std::to_string(_port));
+		}
 	}
 
 	if (raw[i] != '\0') {
@@ -217,14 +242,6 @@ std::string URI::URLdecode(const std::string &s) {
 
 bool	URI::isCorrect() const {
 	return _correct;
-}
-
-bool	URI::isHTTP() const {
-//	http-URI = "http:" "//" authority path-abempty [ "?" query ] [ "#" fragment ]
-	if (_scheme == "http" && !_authority.empty()) {
-		return true;
-	}
-	return false;
 }
 
 std::string	URI::getAuthority(void) const {

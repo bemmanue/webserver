@@ -2,8 +2,6 @@
 
 Request::Request(Client* client, const std::string& request):
 	_client(client),
-	_chunked(false),
-	_contentLength(0),
 	_status(OK),
 	_state(requestLine) {
 	parseRequest(request);
@@ -21,9 +19,6 @@ Request& Request::operator=(const Request &other) {
 		_minorVersion = other._minorVersion;
 		_headers = other._headers;
 		_body = other._body;
-		_host = other._host;
-		_contentLength = other._contentLength;
-		_chunked = other._chunked;
 		_status = other._status;
 		_serverConfig = other._serverConfig;
 		_locationConfig = other._locationConfig;
@@ -225,17 +220,17 @@ void	Request::setVersion(const std::string& version) {
 		version[6] == '.'	&&
 		isdigit(version[7])) {
 		setMajorVersion(toDigit(version[5]));
-		setMajorVersion(toDigit(version[7]));
+		setMinorVersion(toDigit(version[7]));
 	} else {
 		setStatus(BAD_REQUEST);
 	}
 }
 
 void	Request::setMajorVersion(unsigned short majorVersion) {
-	if (majorVersion == _serverConfig->getMajorVersion()) {
+	if (majorVersion == 1) {
 		_majorVersion = majorVersion;
 	} else {
-		setStatus(HTTP_VERSION_NOT_SUPPORTED);
+		_status = HTTP_VERSION_NOT_SUPPORTED;
 	}
 }
 
@@ -244,35 +239,8 @@ void	Request::setMinorVersion(unsigned short minorVersion) {
 }
 
 void	Request::setHeader(const std::string& name, const std::string& value) {
-	if (name == HOST) {
-		setHost(value);
-	} else if (name == CONTENT_LENGTH) {
-		setContentLength(value);
-	} else if (name == TRANSFER_ENCODING) {
-		setTransferEncoding(value);
-	}
-}
-
-void	Request::setHost(const std::string& value) {
-//	_host.parse(value);
-}
-
-void	Request::setContentLength(const std::string& value) {
-	if (_headers.find(CONTENT_LENGTH) == _headers.end() &&
-		_headers.find(TRANSFER_ENCODING) == _headers.end())	{
-		_headers[CONTENT_LENGTH].push_back(value);
-	} else {
-		setStatus(BAD_REQUEST);
-	}
-	_contentLength = std::stoul(value);
-}
-
-void	Request::setTransferEncoding(const std::string& value) {
-	if (value == "chunked") {
-		_chunked = true;
-	} else {
-		setStatus(NOT_IMPLEMENTED);
-	}
+	_headers.setHeader(name, value);
+	setStatus(_headers.getStatus());
 }
 
 void	Request::setBody(const std::string &body) {
@@ -307,12 +275,12 @@ size_t	Request::getMinorVersion() const {
 	return _minorVersion;
 }
 
-URI Request::getHost() const {
-	return _host;
+URI	Request::getHost() const {
+	return URI();
 }
 
 size_t	Request::getContentLength() const {
-	return _contentLength;
+	return 0;
 }
 
 std::string Request::getBody() const {
@@ -324,7 +292,7 @@ size_t	Request::getStatus() const {
 }
 
 bool	Request::isChunked() const {
-	return _chunked;
+	return true;
 }
 
 bool	Request::isFormed() const {

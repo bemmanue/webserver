@@ -23,20 +23,18 @@ private:
 
 	typedef std::string::iterator iter_t;
 
-	void	parse(const std::string& raw);
-
 public:
     URI();
-    explicit URI(const std::string& raw);
     URI(const URI& other);
     URI& operator=(const URI& other);
     ~URI();
 
+	void				parseURI(const std::string& raw);
+	void				parseHost(const std::string& raw);
     static std::string	URLencode(const std::string &);
     static std::string	URLdecode(const std::string &);
     std::string			getAuthority() const;
     bool				isCorrect() const;
-    bool				isHTTP() const;
     bool				hasPort() const;
 
 	friend std::ostream& operator<<(std::ostream& out, URI& uri) {
@@ -49,7 +47,6 @@ public:
 		out << "query: " << uri._query << std::endl;
 		out << "fragment: " << uri._fragment << std::endl;
 		out << "correct: " << std::boolalpha << uri._correct << std::endl;
-		out << "HTTP: " << std::boolalpha << uri.isHTTP() << std::endl;
 		return out;
 	}
 };

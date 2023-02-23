@@ -11,10 +11,6 @@
 #include "Headers.hpp"
 #include "../config/ServerConfig.hpp"
 
-#define HOST				"Host"
-#define CONTENT_LENGTH		"Content-Length"
-#define TRANSFER_ENCODING	"Transfer-Encoding"
-
 enum State {
 	requestLine,
 	headerField,
@@ -31,10 +27,6 @@ private:
 	unsigned short		_minorVersion;
 	Headers				_headers;
 	std::string			_body;
-
-	URI           		_host;
-	size_t				_contentLength;
-	bool				_chunked;
 	
 	size_t				_status;
 	State				_state;
@@ -57,9 +49,6 @@ public:
 	void	setMajorVersion(unsigned short majorVersion);
 	void	setMinorVersion(unsigned short minorVersion);
 	void	setHeader(const std::string& name, const std::string& value);
-	void	setHost(const std::string& value);
-	void	setContentLength(const std::string& value);
-	void	setTransferEncoding(const std::string& value);
 	void	setBody(const std::string& body);
 	void	setStatus(size_t status);
 	void	setServerConfig(ServerConfig* serverConfig);
@@ -90,7 +79,7 @@ friend std::ostream& operator<<(std::ostream& out, Request& re) {
 	out << "Method: " << re.getMethod() << std::endl;
 	out << "Request target: " << re.getRequestTarget() << std::endl;
 	out << "Version: HTTP/" << re.getMajorVersion() << "." << re.getMinorVersion() << std::endl;
-//	out << "Host: " << re.getHost()._host << std::endl;
+//	out << "Host: " <<  << std::endl;
 	out << "Content-Length: " << re.getContentLength() << std::endl;
 	out << "Chunked: " << std::boolalpha << re.isChunked() << std::endl;
 	out <<  re.getBody() << std::endl;

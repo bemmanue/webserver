@@ -26,7 +26,7 @@ void Response::handleRequest() {
 }
 
 void Response::handleGetRequest() {
-	std::string requestTarget = SERVER_ROOT + _request.getRequestTarget().getAuthority();
+	std::string requestTarget = SERVER_ROOT + _request.getRequestTarget();
 
 	if (!resourceExists(requestTarget)) {
 		setStatus(NOT_FOUND);
@@ -36,7 +36,7 @@ void Response::handleGetRequest() {
 	if (isFile(requestTarget)) {
 		makeResponseForFile(requestTarget);
 	} else if (isDirectory(requestTarget)) {
-		makeResponseForDir(_request.getRequestTarget().getAuthority());
+		makeResponseForDir(_request.getRequestTarget());
 	} else {
 		setStatus(FORBIDDEN);
 	}
