@@ -133,73 +133,6 @@ std::string readFieldValue(const std::string &request, size_t* i) {
 	return fieldValue;
 }
 
-std::string	readTransferCoding(const std::string& str, size_t* i) {
-//	transfer-coding = "chunked" / "compress" / "deflate" / "gzip" / transfer-extension
-//	transfer-extension = token *( OWS ";" OWS transfer-parameter )
-	std::string transferCoding;
-	std::string transferParameter;
-	size_t		temp;
-
-	transferCoding = readToken(str, i);
-	if (transferCoding.empty()) {
-		return "";
-	}
-
-	temp = *i;
-	while (temp < str.size()) {
-		skipOWS(str, &temp);
-
-		if (!skipRequiredChar(str, &temp, ';')) {
-			return transferCoding;
-		}
-
-		skipOWS(str, &temp);
-
-		transferParameter = readTransferParameter(str, &temp);
-		if (transferParameter.empty()) {
-			return transferCoding;
-		}
-
-		transferCoding.push_back(';');
-		transferCoding.append(transferParameter);
-		*i = temp;
-	}
-
-	return transferCoding;
-}
-
-std::string	readTransferParameter(const std::string& str, size_t* i) {
-//	transfer-parameter = token BWS "=" BWS ( token / quoted-string )
-	std::string	transferParameter;
-	size_t		temp;
-
-	temp = *i;
-	transferParameter = readToken(str, &temp);
-	if (transferParameter.empty()) {
-		return "";
-	}
-
-	skipOWS(str, &temp);
-
-	if (!skipRequiredChar(str, &temp, '=')) {
-		return "";
-	} else {
-		transferParameter.push_back('=');
-	}
-
-	skipOWS(str, &temp);
-
-	if (isTchar(str[temp])) {
-		transferParameter.append(readToken(str, &temp));
-	} else if (str[temp] == '"') {
-		transferParameter.append(readQuotedString(str, &temp));
-	}
-
-	*i = temp;
-
-	return transferParameter;
-}
-
 std::string	readWord(const std::string& str, size_t* i) {
 	std::string word;
 
@@ -600,13 +533,6 @@ bool	isQuotedPair(const std::string& str) {
 bool	isPctEncoded(const std::string& str) {
 //	pct-encoded = "%" HEXDIG HEXDIG
 	if (str.size() == 3 && str[0] == '%' && ishexnumber(str[1]) && ishexnumber(str[2])) {
-		return true;
-	}
-	return false;
-}
-
-bool	isEmptyLine(const std::string& request, size_t pos) {
-	if (request[pos] == '\r' && request[pos+1] == '\n') {
 		return true;
 	}
 	return false;

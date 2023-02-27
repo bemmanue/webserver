@@ -1,13 +1,19 @@
 #include "Request.hpp"
 
-Request::Request(Client* client, const std::string& request):
+Request::Request(Client* client):
+	_majorVersion(0),
+	_minorVersion(0),
 	_client(client),
 	_status(OK),
-	_state(requestLine) {
-	parseRequest(request);
+	_state(PARSING_REQUEST_LINE),
+	_expectedBodySize(0),
+	_formed(false),
+	_serverConfig(nullptr),
+	_locationConfig(nullptr) {
 }
 
-Request::Request(const Request &other) {
+Request::Request(const Request &other):
+	Request(nullptr) {
 	operator=(other);
 }
 
@@ -26,80 +32,102 @@ Request& Request::operator=(const Request &other) {
 	return *this;
 }
 
-Request::~Request() {}
+Request::~Request() = default;
 
-void	Request::parseRequest(const std::string& str) {
-	size_t	i = 0;
-
-	while (!isFormed()) {
-		if (_state == requestLine) {
-			parseRequestLine(str, &i);
-		} else if (_state == headerField) {
-			parseHeaderField(str, &i);
-		} else if (_state == body) {
-			parseBody(str, &i);
-		}
+void	Request::parseLine(const std::string& line) {
+	switch (_state) {
+		case PARSING_REQUEST_LINE:
+			parseRequestLine(line);
+			break;
+		case PARSING_HEADERS:
+			parseHeaderField(line);
+			break;
+		case PARSING_BODY_BY_LENGTH:
+			parseBody(line);
+			break;
+		case PARSING_CHUNK_SIZE:
+			parseChunkSize(line);
+			break;
+		case PARSING_CHUNK_DATA:
+			parseChunkData(line);
+			break;
+		case PARSING_TRAILER_PART:
+			parseTrailerPart(line);
+			break;
 	}
 
 //	setServerConfig(_client->matchServerConfig(_host._host));
 //	setLocationConfig(_serverConfig->matchLocationConfig(_requestTarget._path));
+
 }
 
-void	Request::parseRequestLine(const std::string& str, size_t* i) {
+void	Request::parseRequestLine(const std::string& line) {
+	size_t i = 0;
+
 	// method
-	setMethod(readToken(str, i));
+	setMethod(readToken(line, &i));
 	if (getStatus() != OK) {
 		std::cerr << "missing or invalid method" << std::endl;
 		return isFormed(true);
 	}
 
 	// space
-	if (!skipRequiredChar(str, i, ' ')) {
+	if (!skipRequiredChar(line, &i, ' ')) {
 		std::cerr << "missing space before request target" << std::endl;
 		_status = BAD_REQUEST;
 		return isFormed(true);
 	}
 
 	// request target
-	setRequestTarget(readWord(str, i));
+	setRequestTarget(readWord(line, &i));
 	if (getStatus() != OK) {
 		std::cerr << "invalid request target" << std::endl;
 		return isFormed(true);
 	}
 
 	// space
-	if (!skipRequiredChar(str, i, ' ')) {
+	if (!skipRequiredChar(line, &i, ' ')) {
 		std::cerr << "missing space before HTTP version" << std::endl;
 		_status = BAD_REQUEST;
 		return isFormed(true);
 	}
 
 	// version
-	setVersion(readWord(str, i));
+	setVersion(readWord(line, &i));
 	if (getStatus() != OK) {
 		std::cerr << "invalid or unsupported HTTP version" << std::endl;
 		return isFormed(true);
 	}
 
 	// CRLF
-	if (!skipCRLF(str, i)) {
+	if (!skipCRLF(line, &i)) {
 		std::cerr << "missing CRLF at the end of request line" << std::endl;
 		_status = BAD_REQUEST;
 		return isFormed(true);
 	}
 
-	_state = headerField;
+	_state = PARSING_HEADERS;
 }
 
-void	Request::parseHeaderField(const std::string& str, size_t* i) {
+void	Request::parseHeaderField(const std::string& str) {
+	size_t i = 0;
+
 	// check empty line
-	if (skipCRLF(str, i)) {
-		_state = body;
+	if (skipCRLF(str, &i)) {
+		if (!hasHeader(HOST)) {
+			_status = BAD_REQUEST;
+			isFormed(true);
+		}
+		if (!getTransferEncoding().empty() && getTransferEncoding().top() == "chunked") {
+			_state = PARSING_CHUNK_SIZE;
+		} else {
+			_state = PARSING_BODY_BY_LENGTH;
+		}
 		return isFormed(false);
 	}
 
 	// header name
-	std::string fieldName = readToken(str, i);
+	std::string fieldName = readToken(str, &i);
 	if (fieldName.empty()) {
 		std::cerr << "missing header name" << std::endl;
 		_status = BAD_REQUEST;
@@ -107,23 +135,23 @@ void	Request::parseHeaderField(const std::string& str, size_t* i) {
 	}
 
 	// required colon
-	if (!skipRequiredChar(str, i, ':')) {
+	if (!skipRequiredChar(str, &i, ':')) {
 		std::cerr << "missing colon before header value" << std::endl;
 		_status = BAD_REQUEST;
 		return isFormed(true);
 	}
 
 	// optional whitespace
-	skipOWS(str, i);
+	skipOWS(str, &i);
 
 	// field value
-	const std::string fieldValue = readFieldValue(str, i);
+	const std::string fieldValue = readFieldValue(str, &i);
 
 	// optional whitespace
-	skipOWS(str, i);
+	skipOWS(str, &i);
 
 	// crlf
-	if (!skipCRLF(str, i)) {
+	if (!skipCRLF(str, &i)) {
 		std::cerr << "missing CRLF at the end of header field" << std::endl;
 		_status = BAD_REQUEST;
 		return isFormed(true);
@@ -137,43 +165,34 @@ void	Request::parseHeaderField(const std::string& str, size_t* i) {
 	}
 }
 
-void	Request::parseBody(const std::string& str, size_t* i) {
-	std::string body;
-	std::string chunkData;
-
-	if (isChunked()) {
-		parseChunkedBody(str, i);
-	} else if (getContentLength() > 0) {
-		body = str.substr(*i, getContentLength());
-		setBody(body);
-		isFormed(true);
-	} else {
-		isFormed(true);
-	}
+void	Request::parseBody(const std::string& body) {
+	setBody(body);
+	isFormed(true);
 }
 
-void	Request::parseChunkedBody(const std::string& str, size_t* i) {
+void	Request::parseChunkedBody(const std::string& str) {
 	std::string body;
 	std::string chunkData;
 	long 		chunkSize;
+	size_t i = 0;
 
-	chunkSize = readChunkSize(str, i);
+	chunkSize = readChunkSize(str, &i);
 	if (chunkSize < 0) {
 		std::cerr << "invalid or missing chunk size" << std::endl;
 		_status = BAD_REQUEST;
 		return isFormed(true);
 	}
 
-	if (!skipCRLF(str, i)) {
+	if (!skipCRLF(str, &i)) {
 		std::cerr << "missing CRLF after chunk size" << std::endl;
 		_status = BAD_REQUEST;
 		return isFormed(true);
 	}
 
 	if (chunkSize > 0) {
-		chunkData = readChunkData(str, i, chunkSize);
+		chunkData = readChunkData(str, &i, chunkSize);
 
-		if (!skipCRLF(str, i)) {
+		if (!skipCRLF(str, &i)) {
 			std::cerr << "missing CRLF after chunk data" << std::endl;
 			_status = BAD_REQUEST;
 			return isFormed(true);
@@ -183,7 +202,7 @@ void	Request::parseChunkedBody(const std::string& str, size_t* i) {
 
 	} else {
 
-		if (!skipCRLF(str, i)) {
+		if (!skipCRLF(str, &i)) {
 			std::cerr << "missing CRLF after chunk data2" << std::endl;
 			_status = BAD_REQUEST;
 			return isFormed(true);
@@ -266,52 +285,73 @@ void Request::setHost(const std::string &value) {
 }
 
 void Request::setTransferEncoding(const std::string& value) {
-//	Transfer-Encoding = *( "," OWS ) transfer-coding *( OWS "," [ OWS transfer-coding ] )
-//	transfer-coding = "chunked" / "compress" / "deflate" / "gzip" / transfer-extension
-//	transfer-extension = token *( OWS ";" OWS transfer-parameter )
-//	transfer-parameter = token BWS "=" BWS ( token / quoted-string )
-	std::stack<std::string> encodings;
-	std::set<std::string>	acceptedEncodings{"chunked"};
+//	Transfer-Encoding = 1#transfer-coding
+//	transfer-coding = "chunked" / "compress" / "deflate" / "gzip"
+	std::stack<std::string>	transferCodings;
+	std::set<std::string>	acceptedCodings{"chunked"};
+	bool 					isChunked = false;
+	size_t 					i = 0;
 
-	size_t i = 0;
-	while (i < value.size()) {
-		if (value[i] == ',') {
-			skipRequiredChar(value, &i, ',');
-		} else if (value[i] == ' ') {
-			skipOWS(value, &i);
-		} else {
-			std::string transferCoding = readTransferCoding(value, &i);
-
-			if (acceptedEncodings.find(transferCoding) != acceptedEncodings.end()) {
-				encodings.push(transferCoding);
-			} else if (transferCoding.empty()) {
-				_status = BAD_REQUEST;
-				return;
-			} else {
-				_status = NOT_IMPLEMENTED;
-				return;
-			}
-			break;
-		}
-	}
-
-	if (value != "chunked") {
-		_status = NOT_IMPLEMENTED;
-		return;
-	}
-	encodings.push(value);
-
-	_headers[TRANSFER_ENCODING] = encodings;
-}
-
-void Request::setContentLength(const std::string &value) {
-	uint64_t	length;
-
-	if (hasHeader(CONTENT_LENGTH) && hasHeader(TRANSFER_ENCODING))	{
+	if (hasHeader(CONTENT_LENGTH) || hasHeader(TRANSFER_ENCODING))	{
 		_status = BAD_REQUEST;
 		return;
 	}
-	length = strtoll(value.c_str(), nullptr, 10);
+
+	while (i < value.size()) {
+		if (value[i] == ',') {
+			skipRequiredChar(value, &i, ',');
+		}
+		else if (value[i] == ' ') {
+			skipOWS(value, &i);
+		}
+		else {
+			std::string transferCoding = readToken(value, &i);
+
+			if (transferCoding.empty()) {
+				_status = BAD_REQUEST;
+				return;
+			}
+
+			if (acceptedCodings.find(transferCoding) == acceptedCodings.end()){
+				_status = NOT_IMPLEMENTED;
+				return;
+			}
+
+			if (transferCoding == "chunked") {
+				if (isChunked) {
+					_status = BAD_REQUEST;
+					return;
+				}
+				isChunked = true;
+			}
+
+			transferCodings.push(transferCoding);
+		}
+	}
+
+	if (transferCodings.empty() || transferCodings.top() != "chunked") {
+		_status = BAD_REQUEST;
+		return;
+	}
+
+	_headers[TRANSFER_ENCODING] = transferCodings;
+}
+
+void Request::setContentLength(const std::string &value) {
+	size_t	length;
+
+	if (hasHeader(CONTENT_LENGTH) || hasHeader(TRANSFER_ENCODING))	{
+		_status = BAD_REQUEST;
+		return;
+	}
+
+	try {
+		length = std::stoul(value);
+	} catch (const std::exception& exception) {
+		_status = BAD_REQUEST;
+		return;
+	}
+
 	_headers[CONTENT_LENGTH] = length;
 }
 
@@ -351,15 +391,24 @@ size_t	Request::getMinorVersion() const {
 }
 
 URI	Request::getHost(){
-	return std::any_cast<URI>(_headers[HOST]);
+	if (_headers.find(HOST) != _headers.end()) {
+		return std::any_cast<URI>(_headers[HOST]);
+	}
+	return {};
 }
 
 std::stack<std::string> Request::getTransferEncoding() {
-	return std::any_cast<std::stack<std::string>>(_headers[TRANSFER_ENCODING]);
+	if (_headers.find(TRANSFER_ENCODING) != _headers.end()) {
+		return std::any_cast<std::stack<std::string>>(_headers[TRANSFER_ENCODING]);
+	}
+	return {};
 }
 
 size_t	Request::getContentLength() {
-	return std::any_cast<size_t>(_headers[CONTENT_LENGTH]);
+	if (_headers.find(CONTENT_LENGTH) != _headers.end()) {
+		return std::any_cast<size_t>(_headers[CONTENT_LENGTH]);
+	}
+	return {};
 }
 
 std::string Request::getBody() const {
@@ -370,10 +419,6 @@ size_t	Request::getStatus() const {
 	return _status;
 }
 
-bool	Request::isChunked() const {
-	return true;
-}
-
 bool	Request::isFormed() const {
 	return _formed;
 }
@@ -381,5 +426,60 @@ bool	Request::isFormed() const {
 void	Request::isFormed(bool status) {
 	_formed = status;
 }
+
+ServerConfig *Request::getServerConfig() const {
+	return _serverConfig;
+}
+
+LocationConfig *Request::getLocationConfig() const {
+	return _locationConfig;
+}
+
+ParsingState Request::getParsingState() const {
+	return _state;
+}
+
+void Request::parseChunkSize(const std::string &line) {
+	size_t	i = 0;
+
+	_expectedBodySize = readChunkSize(line, &i);
+	if (_expectedBodySize < 0) {
+		std::cerr << "invalid or missing chunk size" << std::endl;
+		_status = BAD_REQUEST;
+		return isFormed(true);
+	}
+
+	if (!skipCRLF(line, &i)) {
+		std::cerr << "missing CRLF after chunk size" << std::endl;
+		_status = BAD_REQUEST;
+		return isFormed(true);
+	}
+
+	if (_expectedBodySize == 0) {
+		_state = PARSING_TRAILER_PART;
+	} else {
+		_state = PARSING_CHUNK_DATA;
+	}
+}
+
+void Request::parseChunkData(const std::string& line) {
+	_body.append(line);
+	_state = PARSING_CHUNK_SIZE;
+}
+
+void Request::parseTrailerPart(const std::string& line) {
+	size_t i = 0;
+
+	if (!skipCRLF(line, &i)) {
+		_status = BAD_REQUEST;
+	}
+	_formed = true;
+}
+
+size_t Request::getExpectedBodySize() const {
+	return _expectedBodySize;
+}
+
+
 
 

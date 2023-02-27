@@ -25,10 +25,8 @@ int main(int argc, char **argv) {
 	t.read(&buffer[0], size);
 
 	Client client(config);
-	ServerConfig serverConfig = config[0];
-
-	Request request(&client, buffer);
-	std::cout << request << std::endl;
+	client.setRequest(buffer);
+	client.handleRequest();
 
 //	Response response(serverConfig, request);
 //	std::cout << response.toString();

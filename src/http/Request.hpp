@@ -2,6 +2,7 @@
 #define REQUEST_HPP
 
 #include <iostream>
+#include <algorithm>
 #include <vector>
 #include <list>
 #include <stack>
@@ -16,10 +17,13 @@
 #define CONTENT_LENGTH		"Content-Length"
 #define TRANSFER_ENCODING	"Transfer-Encoding"
 
-enum State {
-	requestLine,
-	headerField,
-	body
+enum ParsingState {
+	PARSING_REQUEST_LINE,
+	PARSING_HEADERS,
+	PARSING_BODY_BY_LENGTH,
+	PARSING_CHUNK_SIZE,
+	PARSING_CHUNK_DATA,
+	PARSING_TRAILER_PART
 };
 
 class Client;
@@ -34,15 +38,16 @@ private:
 	std::string						_body;
 	
 	size_t							_status;
-	State							_state;
+	ParsingState					_state;
 	bool 							_formed;
+	size_t							_expectedBodySize;
 
 	ServerConfig*					_serverConfig;
 	LocationConfig*					_locationConfig;
 	Client*							_client;
 
 public:
-	Request(Client* client, const std::string& request);
+	Request(Client* client);
 	Request(const Request& other);
 	Request& operator=(const Request& other);
 	~Request();
@@ -60,28 +65,33 @@ public:
 	void	setServerConfig(ServerConfig* serverConfig);
 	void	setLocationConfig(LocationConfig* locationConfig);
 
-	std::string					getMethod() const;
-	std::string					getRequestTarget() const;
-	size_t						getMajorVersion() const;
-	size_t						getMinorVersion() const;
-	URI							getHost();
-	std::stack<std::string>		getTransferEncoding();
-	size_t						getContentLength();
-	std::string					getBody() const;
-	size_t						getStatus() const;
+	[[nodiscard]] std::string		getMethod() const;
+	[[nodiscard]] std::string		getRequestTarget() const;
+	[[nodiscard]] size_t			getMajorVersion() const;
+	[[nodiscard]] size_t			getMinorVersion() const;
+	URI								getHost();
+	std::stack<std::string>			getTransferEncoding();
+	size_t							getContentLength();
+	[[nodiscard]] std::string		getBody() const;
+	[[nodiscard]] size_t			getStatus() const;
+	[[nodiscard]] ServerConfig*		getServerConfig() const;
+	[[nodiscard]] LocationConfig*	getLocationConfig() const;
+	[[nodiscard]] ParsingState		getParsingState() const;
+	[[nodiscard]] size_t			getExpectedBodySize() const;
 
-	bool	isChunked() const;
 	bool	isFormed() const;
 
 	void	isFormed(bool);
 	bool	hasHeader(const std::string& headerName);
 
-private:
-	void	parseRequest(const std::string& request);
-	void	parseRequestLine(const std::string& request, size_t* pos);
-	void	parseHeaderField(const std::string& str, size_t* i);
-	void	parseBody(const std::string& request, size_t* pos);
-	void	parseChunkedBody(const std::string& request, size_t* pos);
+	void	parseLine(const std::string& line);
+	void	parseRequestLine(const std::string& line);
+	void	parseHeaderField(const std::string& line);
+	void	parseChunkSize(const std::string& line);
+	void	parseChunkData(const std::string& line);
+	void	parseTrailerPart(const std::string& line);
+	void	parseBody(const std::string& line);
+	void	parseChunkedBody(const std::string& line);
 
 public:
 friend std::ostream& operator<<(std::ostream& out, Request& re) {
@@ -89,9 +99,8 @@ friend std::ostream& operator<<(std::ostream& out, Request& re) {
 	out << "Request target: " << re.getRequestTarget() << std::endl;
 	out << "Version: HTTP/" << re.getMajorVersion() << "." << re.getMinorVersion() << std::endl;
 	out << "Host: " << re.getHost().getAuthority() << std::endl;
-	out << "Transfer-Encoding: " << re.getTransferEncoding().front() << std::endl;
+	out << "Transfer-Encoding: " << re.getTransferEncoding().top() << std::endl;
 	out << "Content-Length: " << re.getContentLength() << std::endl;
-	out << "Chunked: " << std::boolalpha << re.isChunked() << std::endl;
 	out <<  re.getBody() << std::endl;
 	out <<  "Status: " << re.getStatus() << std::endl;
 //	out << *re._serverConfig << std::endl;
