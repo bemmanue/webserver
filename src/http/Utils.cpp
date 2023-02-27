@@ -16,14 +16,52 @@ std::string	capitalize(const std::string& str) {
 	return ret;
 }
 
-std::string	readToken(const std::string& request, size_t* i) {
+std::string	readToken(const std::string& str, size_t* i) {
 //	token = 1*tchar
 	std::string token;
 
-	while (isTchar(request[*i])) {
-		token.push_back(request[(*i)++]);
+	while (*i < str.size()) {
+		if (isTchar(str[*i])) {
+			token.push_back(str[(*i)++]);
+		} else {
+			break;
+		}
 	}
 	return token;
+}
+
+std::string	readQuotedString(const std::string& str, size_t* i) {
+//	quoted-string = DQUOTE *( qdtext / quoted-pair ) DQUOTE
+//	qdtext = HTAB / SP /%x21 / %x23-5B / %x5D-7E / obs-text
+//	obs-text = %x80-FF
+//	quoted-pair = "\" ( HTAB / SP / VCHAR / obs-text )
+	std::string quotedString;
+	size_t		temp = *i;
+
+	if (!skipRequiredChar(str, &temp, '"')) {
+		return "";
+	} else {
+		quotedString.push_back('"');
+	}
+
+	while (temp < str.size()) {
+		if (isQuotedText(str[temp])) {
+			temp += 1;
+		} else if (isQuotedPair(str.substr(temp, 2))) {
+			temp += 2;
+		} else {
+			break;
+		}
+	}
+
+	if (!skipRequiredChar(str, &temp, '"')) {
+		return "";
+	} else {
+		quotedString.push_back('"');
+		*i = temp;
+	}
+
+	return quotedString;
 }
 
 std::string	readDecNum(const std::string& str, size_t* i) {
@@ -93,6 +131,73 @@ std::string readFieldValue(const std::string &request, size_t* i) {
 		}
 	}
 	return fieldValue;
+}
+
+std::string	readTransferCoding(const std::string& str, size_t* i) {
+//	transfer-coding = "chunked" / "compress" / "deflate" / "gzip" / transfer-extension
+//	transfer-extension = token *( OWS ";" OWS transfer-parameter )
+	std::string transferCoding;
+	std::string transferParameter;
+	size_t		temp;
+
+	transferCoding = readToken(str, i);
+	if (transferCoding.empty()) {
+		return "";
+	}
+
+	temp = *i;
+	while (temp < str.size()) {
+		skipOWS(str, &temp);
+
+		if (!skipRequiredChar(str, &temp, ';')) {
+			return transferCoding;
+		}
+
+		skipOWS(str, &temp);
+
+		transferParameter = readTransferParameter(str, &temp);
+		if (transferParameter.empty()) {
+			return transferCoding;
+		}
+
+		transferCoding.push_back(';');
+		transferCoding.append(transferParameter);
+		*i = temp;
+	}
+
+	return transferCoding;
+}
+
+std::string	readTransferParameter(const std::string& str, size_t* i) {
+//	transfer-parameter = token BWS "=" BWS ( token / quoted-string )
+	std::string	transferParameter;
+	size_t		temp;
+
+	temp = *i;
+	transferParameter = readToken(str, &temp);
+	if (transferParameter.empty()) {
+		return "";
+	}
+
+	skipOWS(str, &temp);
+
+	if (!skipRequiredChar(str, &temp, '=')) {
+		return "";
+	} else {
+		transferParameter.push_back('=');
+	}
+
+	skipOWS(str, &temp);
+
+	if (isTchar(str[temp])) {
+		transferParameter.append(readToken(str, &temp));
+	} else if (str[temp] == '"') {
+		transferParameter.append(readQuotedString(str, &temp));
+	}
+
+	*i = temp;
+
+	return transferParameter;
 }
 
 std::string	readWord(const std::string& str, size_t* i) {
@@ -460,9 +565,33 @@ bool	isSubDelim(char a) {
 	return false;
 }
 
+bool	isObsText(unsigned char a) {
+//	obs-text = %x80-FF
+	if (a >= 0x80 && a <= 0xFF) {
+		return true;
+	}
+	return false;
+}
+
 bool	isFieldVchar(char a) {
 //	field-vchar = vchar / obs-text
-	if (isVchar(a) || a > 127) {
+	if (isVchar(a) || isObsText(a)) {
+		return true;
+	}
+	return false;
+}
+
+bool	isQuotedText(char a) {
+//	qdtext = HTAB / SP /%x21 / %x23-5B / %x5D-7E / obs-text
+	if (a == '\t' || a == ' ' || a == 0x21 || (a >= 0x23 && a <= 0x5B) || (a >= 0x5D && a <= 0x7E) || isObsText(a)) {
+		return true;
+	}
+	return false;
+}
+
+bool	isQuotedPair(const std::string& str) {
+//	quoted-pair = "\" ( HTAB / SP / VCHAR / obs-text )
+	if (str.size() == 2 && str[0] == '\\' && (str[1] == '\t' || str[1] == ' ' || isVchar(str[1])) || isObsText(str[1])) {
 		return true;
 	}
 	return false;

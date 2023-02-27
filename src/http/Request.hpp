@@ -4,12 +4,17 @@
 #include <iostream>
 #include <vector>
 #include <list>
+#include <stack>
+#include <any>
 
 #include "URI.hpp"
 #include "Utils.hpp"
 #include "Status.hpp"
-#include "Headers.hpp"
 #include "../config/ServerConfig.hpp"
+
+#define HOST				"Host"
+#define CONTENT_LENGTH		"Content-Length"
+#define TRANSFER_ENCODING	"Transfer-Encoding"
 
 enum State {
 	requestLine,
@@ -34,7 +39,6 @@ private:
 
 	ServerConfig*					_serverConfig;
 	LocationConfig*					_locationConfig;
-
 	Client*							_client;
 
 public:
@@ -53,23 +57,24 @@ public:
 	void	setTransferEncoding(const std::string& value);
 	void	setContentLength(const std::string& value);
 	void	setBody(const std::string& body);
-	void	setStatus(size_t status);
 	void	setServerConfig(ServerConfig* serverConfig);
 	void	setLocationConfig(LocationConfig* locationConfig);
 
-	std::string		getMethod() const;
-	std::string		getRequestTarget() const;
-	size_t			getMajorVersion() const;
-	size_t			getMinorVersion() const;
-	URI				getHost() const;
-	std::string		getBody() const;
-	size_t			getContentLength() const;
-	size_t			getStatus() const;
-	bool			isChunked() const;
-	bool			isFormed() const;
+	std::string					getMethod() const;
+	std::string					getRequestTarget() const;
+	size_t						getMajorVersion() const;
+	size_t						getMinorVersion() const;
+	URI							getHost();
+	std::stack<std::string>		getTransferEncoding();
+	size_t						getContentLength();
+	std::string					getBody() const;
+	size_t						getStatus() const;
 
-	void			isFormed(bool);
-	bool			hasHeader(const std::string& headerName);
+	bool	isChunked() const;
+	bool	isFormed() const;
+
+	void	isFormed(bool);
+	bool	hasHeader(const std::string& headerName);
 
 private:
 	void	parseRequest(const std::string& request);
@@ -83,7 +88,8 @@ friend std::ostream& operator<<(std::ostream& out, Request& re) {
 	out << "Method: " << re.getMethod() << std::endl;
 	out << "Request target: " << re.getRequestTarget() << std::endl;
 	out << "Version: HTTP/" << re.getMajorVersion() << "." << re.getMinorVersion() << std::endl;
-	out << "Host: " << std::any_cast<URI>(re._headers[HOST]).getAuthority() << std::endl;
+	out << "Host: " << re.getHost().getAuthority() << std::endl;
+	out << "Transfer-Encoding: " << re.getTransferEncoding().front() << std::endl;
 	out << "Content-Length: " << re.getContentLength() << std::endl;
 	out << "Chunked: " << std::boolalpha << re.isChunked() << std::endl;
 	out <<  re.getBody() << std::endl;

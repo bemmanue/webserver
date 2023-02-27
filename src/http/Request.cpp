@@ -56,7 +56,7 @@ void	Request::parseRequestLine(const std::string& str, size_t* i) {
 	// space
 	if (!skipRequiredChar(str, i, ' ')) {
 		std::cerr << "missing space before request target" << std::endl;
-		setStatus(BAD_REQUEST);
+		_status = BAD_REQUEST;
 		return isFormed(true);
 	}
 
@@ -70,7 +70,7 @@ void	Request::parseRequestLine(const std::string& str, size_t* i) {
 	// space
 	if (!skipRequiredChar(str, i, ' ')) {
 		std::cerr << "missing space before HTTP version" << std::endl;
-		setStatus(BAD_REQUEST);
+		_status = BAD_REQUEST;
 		return isFormed(true);
 	}
 
@@ -84,7 +84,7 @@ void	Request::parseRequestLine(const std::string& str, size_t* i) {
 	// CRLF
 	if (!skipCRLF(str, i)) {
 		std::cerr << "missing CRLF at the end of request line" << std::endl;
-		setStatus(BAD_REQUEST);
+		_status = BAD_REQUEST;
 		return isFormed(true);
 	}
 
@@ -102,14 +102,14 @@ void	Request::parseHeaderField(const std::string& str, size_t* i) {
 	std::string fieldName = readToken(str, i);
 	if (fieldName.empty()) {
 		std::cerr << "missing header name" << std::endl;
-		setStatus(BAD_REQUEST);
+		_status = BAD_REQUEST;
 		return isFormed(true);
 	}
 
 	// required colon
 	if (!skipRequiredChar(str, i, ':')) {
 		std::cerr << "missing colon before header value" << std::endl;
-		setStatus(BAD_REQUEST);
+		_status = BAD_REQUEST;
 		return isFormed(true);
 	}
 
@@ -125,7 +125,7 @@ void	Request::parseHeaderField(const std::string& str, size_t* i) {
 	// crlf
 	if (!skipCRLF(str, i)) {
 		std::cerr << "missing CRLF at the end of header field" << std::endl;
-		setStatus(BAD_REQUEST);
+		_status = BAD_REQUEST;
 		return isFormed(true);
 	}
 
@@ -160,13 +160,13 @@ void	Request::parseChunkedBody(const std::string& str, size_t* i) {
 	chunkSize = readChunkSize(str, i);
 	if (chunkSize < 0) {
 		std::cerr << "invalid or missing chunk size" << std::endl;
-		setStatus(BAD_REQUEST);
+		_status = BAD_REQUEST;
 		return isFormed(true);
 	}
 
 	if (!skipCRLF(str, i)) {
 		std::cerr << "missing CRLF after chunk size" << std::endl;
-		setStatus(BAD_REQUEST);
+		_status = BAD_REQUEST;
 		return isFormed(true);
 	}
 
@@ -175,7 +175,7 @@ void	Request::parseChunkedBody(const std::string& str, size_t* i) {
 
 		if (!skipCRLF(str, i)) {
 			std::cerr << "missing CRLF after chunk data" << std::endl;
-			setStatus(BAD_REQUEST);
+			_status = BAD_REQUEST;
 			return isFormed(true);
 		}
 
@@ -185,7 +185,7 @@ void	Request::parseChunkedBody(const std::string& str, size_t* i) {
 
 		if (!skipCRLF(str, i)) {
 			std::cerr << "missing CRLF after chunk data2" << std::endl;
-			setStatus(BAD_REQUEST);
+			_status = BAD_REQUEST;
 			return isFormed(true);
 		}
 
@@ -197,7 +197,7 @@ void	Request::setMethod(const std::string& method) {
 	if (isHTTPMethod(method)) {
 		_method = method;
 	} else {
-		setStatus(BAD_REQUEST);
+		_status = BAD_REQUEST;
 	}
 }
 
@@ -205,7 +205,7 @@ void	Request::setRequestTarget(const std::string& requestTarget) {
 	if (isOriginForm(requestTarget)) {
 		_requestTarget = requestTarget;
 	} else {
-		setStatus(BAD_REQUEST);
+		_status = BAD_REQUEST;
 	}
 }
 
@@ -222,7 +222,7 @@ void	Request::setVersion(const std::string& version) {
 		setMajorVersion(toDigit(version[5]));
 		setMinorVersion(toDigit(version[7]));
 	} else {
-		setStatus(BAD_REQUEST);
+		_status = BAD_REQUEST;
 	}
 }
 
@@ -248,12 +248,82 @@ void	Request::setHeader(const std::string& name, const std::string& value) {
 	}
 }
 
-void	Request::setBody(const std::string &body) {
-	_body = body;
+void Request::setHost(const std::string &value) {
+	URI	host;
+
+	if (hasHeader(HOST)) {
+		_status = BAD_REQUEST;
+		return;
+	}
+
+	host.parseHost(value);
+	if (!host.isCorrect()) {
+		_status = BAD_REQUEST;
+		return;
+	}
+
+	_headers[HOST] = host;
 }
 
-void	Request::setStatus(size_t status) {
-	_status = status;
+void Request::setTransferEncoding(const std::string& value) {
+//	Transfer-Encoding = *( "," OWS ) transfer-coding *( OWS "," [ OWS transfer-coding ] )
+//	transfer-coding = "chunked" / "compress" / "deflate" / "gzip" / transfer-extension
+//	transfer-extension = token *( OWS ";" OWS transfer-parameter )
+//	transfer-parameter = token BWS "=" BWS ( token / quoted-string )
+	std::stack<std::string> encodings;
+	std::set<std::string>	acceptedEncodings{"chunked"};
+
+	size_t i = 0;
+	while (i < value.size()) {
+		if (value[i] == ',') {
+			skipRequiredChar(value, &i, ',');
+		} else if (value[i] == ' ') {
+			skipOWS(value, &i);
+		} else {
+			std::string transferCoding = readTransferCoding(value, &i);
+
+			if (acceptedEncodings.find(transferCoding) != acceptedEncodings.end()) {
+				encodings.push(transferCoding);
+			} else if (transferCoding.empty()) {
+				_status = BAD_REQUEST;
+				return;
+			} else {
+				_status = NOT_IMPLEMENTED;
+				return;
+			}
+			break;
+		}
+	}
+
+	if (value != "chunked") {
+		_status = NOT_IMPLEMENTED;
+		return;
+	}
+	encodings.push(value);
+
+	_headers[TRANSFER_ENCODING] = encodings;
+}
+
+void Request::setContentLength(const std::string &value) {
+	uint64_t	length;
+
+	if (hasHeader(CONTENT_LENGTH) && hasHeader(TRANSFER_ENCODING))	{
+		_status = BAD_REQUEST;
+		return;
+	}
+	length = strtoll(value.c_str(), nullptr, 10);
+	_headers[CONTENT_LENGTH] = length;
+}
+
+bool Request::hasHeader(const std::string &headerName) {
+	if (_headers.find(headerName) != _headers.end()) {
+		return true;
+	}
+	return false;
+}
+
+void	Request::setBody(const std::string &body) {
+	_body = body;
 }
 
 void	Request::setServerConfig(ServerConfig *serverConfig) {
@@ -280,12 +350,16 @@ size_t	Request::getMinorVersion() const {
 	return _minorVersion;
 }
 
-URI	Request::getHost() const {
-	return URI();
+URI	Request::getHost(){
+	return std::any_cast<URI>(_headers[HOST]);
 }
 
-size_t	Request::getContentLength() const {
-	return 0;
+std::stack<std::string> Request::getTransferEncoding() {
+	return std::any_cast<std::stack<std::string>>(_headers[TRANSFER_ENCODING]);
+}
+
+size_t	Request::getContentLength() {
+	return std::any_cast<size_t>(_headers[CONTENT_LENGTH]);
 }
 
 std::string Request::getBody() const {
@@ -308,45 +382,4 @@ void	Request::isFormed(bool status) {
 	_formed = status;
 }
 
-void Request::setHost(const std::string &value) {
-	URI	host;
 
-	if (hasHeader(HOST)) {
-		_status = BAD_REQUEST;
-		return;
-	}
-
-	host.parseHost(value);
-	if (!host.isCorrect()) {
-		_status = BAD_REQUEST;
-		return;
-	}
-
-	_headers[HOST] = host;
-}
-
-void Request::setTransferEncoding(const std::string &value) {
-	if (value != "chunked") {
-		_status = NOT_IMPLEMENTED;
-		return;
-	}
-	_headers[TRANSFER_ENCODING] = value;
-}
-
-void Request::setContentLength(const std::string &value) {
-	uint64_t	length;
-
-	if (hasHeader(CONTENT_LENGTH) && hasHeader(TRANSFER_ENCODING))	{
-		_status = BAD_REQUEST;
-		return;
-	}
-	length = strtoll(value.c_str(), nullptr, 10);
-	_headers[CONTENT_LENGTH] = length;
-}
-
-bool Request::hasHeader(const std::string &headerName) {
-	if (_headers.find(headerName) != _headers.end()) {
-		return true;
-	}
-	return false;
-}
