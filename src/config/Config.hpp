@@ -37,7 +37,7 @@
 #define GB						1000 * MB
 
 
-std::vector<ServerConfig>		parseConfigFile(const std::string& filename) throw(ConfigException);
+std::vector<ServerConfig>		parseConfigFile(const std::string& filename);
 
 
 #endif //CONFIG_HPP

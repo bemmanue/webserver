@@ -26,8 +26,7 @@ void	Headers::setHeader(const std::string &name, const std::string &value) {
 }
 
 void	Headers::setHost(const std::string &value) {
-	HeaderValue<URI>*	headerValue;
-	URI					host;
+	URI	host;
 
 	if (hasHeader(HOST)) {
 		_status = BAD_REQUEST;
@@ -40,41 +39,26 @@ void	Headers::setHost(const std::string &value) {
 		return;
 	}
 
-	headerValue = new HeaderValue<URI>;
-	headerValue->setValue(host);
-
-	_headers[HOST] = headerValue;
+	_headers[HOST] = host;
 }
 
 void	Headers::setContentLength(const std::string &value) {
-	HeaderValue<uint64_t>*	headerValue;
-	uint64_t				length;
+	uint64_t	length;
 
 	if (hasHeader(CONTENT_LENGTH) && hasHeader(TRANSFER_ENCODING))	{
 		_status = BAD_REQUEST;
 		return;
 	}
-
 	length = strtoll(value.c_str(), nullptr, 10);
-
-	headerValue = new HeaderValue<uint64_t>;
-	headerValue->setValue(length);
-
-	_headers[CONTENT_LENGTH] = headerValue;
+	_headers[CONTENT_LENGTH] = length;
 }
 
 void	Headers::setTransferEncoding(const std::string &value) {
-	HeaderValue<std::list<std::string> >*	headerValue;
-
 	if (value != "chunked") {
 		_status = NOT_IMPLEMENTED;
 		return;
 	}
-
-	headerValue = new HeaderValue<std::list<std::string> >;
-	headerValue->getValue().push_back(value);
-
-	_headers[TRANSFER_ENCODING] = headerValue;
+	_headers[TRANSFER_ENCODING] = value;
 }
 
 bool	Headers::hasHeader(const std::string& name) {
@@ -88,7 +72,7 @@ size_t	Headers::getStatus() {
 	return _status;
 }
 
-HeaderValueInterface*	Headers::operator[](const std::string& headerName) {
+std::any	Headers::operator[](const std::string& headerName) {
 	return _headers[headerName];
 }
 

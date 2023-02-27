@@ -369,7 +369,7 @@ ServerConfig	getServerBlock(const std::string& file) {
 	return server;
 }
 
-std::vector<ServerConfig>	parseConfigFile(const std::string& filename) throw(ConfigException) {
+std::vector<ServerConfig>	parseConfigFile(const std::string& filename) {
 	std::vector<ServerConfig>	config;
 	std::string					keyword;
 

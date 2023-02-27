@@ -21,21 +21,21 @@ class Client;
 
 class Request {
 private:
-	std::string			_method;
-	std::string     	_requestTarget;
-	unsigned short		_majorVersion;
-	unsigned short		_minorVersion;
-	Headers				_headers;
-	std::string			_body;
+	std::string						_method;
+	std::string     				_requestTarget;
+	unsigned short					_majorVersion;
+	unsigned short					_minorVersion;
+	std::map<std::string, std::any>	_headers;
+	std::string						_body;
 	
-	size_t				_status;
-	State				_state;
-	bool 				_formed;
+	size_t							_status;
+	State							_state;
+	bool 							_formed;
 
-	ServerConfig*		_serverConfig;
-	LocationConfig*		_locationConfig;
+	ServerConfig*					_serverConfig;
+	LocationConfig*					_locationConfig;
 
-	Client*				_client;
+	Client*							_client;
 
 public:
 	Request(Client* client, const std::string& request);
@@ -49,6 +49,9 @@ public:
 	void	setMajorVersion(unsigned short majorVersion);
 	void	setMinorVersion(unsigned short minorVersion);
 	void	setHeader(const std::string& name, const std::string& value);
+	void	setHost(const std::string& value);
+	void	setTransferEncoding(const std::string& value);
+	void	setContentLength(const std::string& value);
 	void	setBody(const std::string& body);
 	void	setStatus(size_t status);
 	void	setServerConfig(ServerConfig* serverConfig);
@@ -66,6 +69,7 @@ public:
 	bool			isFormed() const;
 
 	void			isFormed(bool);
+	bool			hasHeader(const std::string& headerName);
 
 private:
 	void	parseRequest(const std::string& request);
@@ -79,7 +83,7 @@ friend std::ostream& operator<<(std::ostream& out, Request& re) {
 	out << "Method: " << re.getMethod() << std::endl;
 	out << "Request target: " << re.getRequestTarget() << std::endl;
 	out << "Version: HTTP/" << re.getMajorVersion() << "." << re.getMinorVersion() << std::endl;
-//	out << "Host: " <<  << std::endl;
+	out << "Host: " << std::any_cast<URI>(re._headers[HOST]).getAuthority() << std::endl;
 	out << "Content-Length: " << re.getContentLength() << std::endl;
 	out << "Chunked: " << std::boolalpha << re.isChunked() << std::endl;
 	out <<  re.getBody() << std::endl;
