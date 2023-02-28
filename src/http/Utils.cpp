@@ -381,10 +381,8 @@ std::string	readChunkData(const std::string& str, size_t* i, size_t chunkSize) {
 //	chunk-data = 1*OCTET
 	std::string data;
 
-	chunkSize += *i;
-	while (str[*i] && *i < chunkSize) {
-		data.push_back(str[(*i)++]);
-	}
+	data = str.substr(*i, *i + chunkSize);
+	*i += chunkSize;
 	return data;
 }
 

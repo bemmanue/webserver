@@ -29,13 +29,22 @@ public:
     URI& operator=(const URI& other);
     ~URI();
 
-	void				parseURI(const std::string& raw);
-	void				parseHost(const std::string& raw);
-    static std::string	URLencode(const std::string &);
-    static std::string	URLdecode(const std::string &);
-    std::string			getAuthority() const;
-    bool				isCorrect() const;
-    bool				hasPort() const;
+	void						parseURI(const std::string& raw);
+	void						parseHost(const std::string& raw);
+	void						parseOriginForm(const std::string& raw);
+	void						clear();
+
+	[[nodiscard]] std::string	getAuthority() const;
+	[[nodiscard]] std::string	getHost() const;
+	[[nodiscard]] std::string	getPath() const;
+	[[nodiscard]] size_t		getPort() const;
+
+	[[nodiscard]] bool			hasPort() const;
+	[[nodiscard]] bool			isCorrect() const;
+
+    static std::string			URLencode(const std::string &);
+    static std::string			URLdecode(const std::string &);
+    static std::string			removeDotSegments(std::string path);
 
 	friend std::ostream& operator<<(std::ostream& out, URI& uri) {
 		out << "scheme: " << uri._scheme << std::endl;

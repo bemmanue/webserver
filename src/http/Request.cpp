@@ -7,7 +7,6 @@ Request::Request(Client* client):
 	_status(OK),
 	_state(PARSING_REQUEST_LINE),
 	_expectedBodySize(0),
-	_formed(false),
 	_serverConfig(nullptr),
 	_locationConfig(nullptr) {
 }
@@ -54,11 +53,9 @@ void	Request::parseLine(const std::string& line) {
 		case PARSING_TRAILER_PART:
 			parseTrailerPart(line);
 			break;
+		case FORMED:
+			break;
 	}
-
-//	setServerConfig(_client->matchServerConfig(_host._host));
-//	setLocationConfig(_serverConfig->matchLocationConfig(_requestTarget._path));
-
 }
 
 void	Request::parseRequestLine(const std::string& line) {
@@ -68,42 +65,48 @@ void	Request::parseRequestLine(const std::string& line) {
 	setMethod(readToken(line, &i));
 	if (getStatus() != OK) {
 		std::cerr << "missing or invalid method" << std::endl;
-		return isFormed(true);
+		_state = FORMED;
+		return;
 	}
 
 	// space
 	if (!skipRequiredChar(line, &i, ' ')) {
 		std::cerr << "missing space before request target" << std::endl;
 		_status = BAD_REQUEST;
-		return isFormed(true);
+		_state = FORMED;
+		return;
 	}
 
 	// request target
 	setRequestTarget(readWord(line, &i));
 	if (getStatus() != OK) {
 		std::cerr << "invalid request target" << std::endl;
-		return isFormed(true);
+		_state = FORMED;
+		return;
 	}
 
 	// space
 	if (!skipRequiredChar(line, &i, ' ')) {
 		std::cerr << "missing space before HTTP version" << std::endl;
 		_status = BAD_REQUEST;
-		return isFormed(true);
+		_state = FORMED;
+		return;
 	}
 
 	// version
 	setVersion(readWord(line, &i));
 	if (getStatus() != OK) {
 		std::cerr << "invalid or unsupported HTTP version" << std::endl;
-		return isFormed(true);
+		_state = FORMED;
+		return;
 	}
 
 	// CRLF
 	if (!skipCRLF(line, &i)) {
 		std::cerr << "missing CRLF at the end of request line" << std::endl;
 		_status = BAD_REQUEST;
-		return isFormed(true);
+		_state = FORMED;
+		return;
 	}
 
 	_state = PARSING_HEADERS;
@@ -112,18 +115,10 @@ void	Request::parseRequestLine(const std::string& line) {
 void	Request::parseHeaderField(const std::string& str) {
 	size_t i = 0;
 
-	// check empty line
+	// check end of header fields
 	if (skipCRLF(str, &i)) {
-		if (!hasHeader(HOST)) {
-			_status = BAD_REQUEST;
-			isFormed(true);
-		}
-		if (!getTransferEncoding().empty() && getTransferEncoding().top() == "chunked") {
-			_state = PARSING_CHUNK_SIZE;
-		} else {
-			_state = PARSING_BODY_BY_LENGTH;
-		}
-		return isFormed(false);
+		checkHeaderFields();
+		return;
 	}
 
 	// header name
@@ -131,14 +126,16 @@ void	Request::parseHeaderField(const std::string& str) {
 	if (fieldName.empty()) {
 		std::cerr << "missing header name" << std::endl;
 		_status = BAD_REQUEST;
-		return isFormed(true);
+		_state = FORMED;
+		return;
 	}
 
 	// required colon
 	if (!skipRequiredChar(str, &i, ':')) {
 		std::cerr << "missing colon before header value" << std::endl;
 		_status = BAD_REQUEST;
-		return isFormed(true);
+		_state = FORMED;
+		return;
 	}
 
 	// optional whitespace
@@ -154,62 +151,90 @@ void	Request::parseHeaderField(const std::string& str) {
 	if (!skipCRLF(str, &i)) {
 		std::cerr << "missing CRLF at the end of header field" << std::endl;
 		_status = BAD_REQUEST;
-		return isFormed(true);
+		_state = FORMED;
+		return;
 	}
 
 	// setting header field
 	setHeader(fieldName, fieldValue);
 	if (getStatus() != OK) {
 		std::cerr << "invalid header field" << std::endl;
-		return isFormed(true);
+		_state = FORMED;
 	}
+}
+
+void Request::checkHeaderFields() {
+	if (!hasHeader(HOST)) {
+		_status = BAD_REQUEST;
+		_state = FORMED;
+		return;
+	}
+
+	if (hasHeader(TRANSFER_ENCODING) && getTransferEncoding().top() == "chunked") {
+		_state = PARSING_CHUNK_SIZE;
+	} else {
+		_state = PARSING_BODY_BY_LENGTH;
+		if (hasHeader(CONTENT_LENGTH)) {
+			_expectedBodySize = getContentLength();
+		}
+	}
+
+	setServerConfig(_client->matchServerConfig(getHost().getHost()));
+//	setLocationConfig(_serverConfig->matchLocationConfig(_requestTarget.getPath()));
+}
+
+void Request::parseChunkSize(const std::string &line) {
+	size_t	i = 0;
+
+	_expectedBodySize = readChunkSize(line, &i);
+	if (_expectedBodySize < 0) {
+		std::cerr << "invalid or missing chunk size" << std::endl;
+		_status = BAD_REQUEST;
+		_state = FORMED;
+		return;
+	}
+
+	if (!skipCRLF(line, &i)) {
+		std::cerr << "missing CRLF after chunk size" << std::endl;
+		_status = BAD_REQUEST;
+		_state = FORMED;
+		return;
+	}
+
+	if (_expectedBodySize == 0) {
+		_state = PARSING_TRAILER_PART;
+	} else {
+		_state = PARSING_CHUNK_DATA;
+	}
+}
+
+void Request::parseChunkData(const std::string& line) {
+	size_t i = 0;
+
+	_body.append(readChunkData(line, &i, _expectedBodySize));
+
+	if (!skipCRLF(line, &i) || line[i] != '\0') {
+		_status = BAD_REQUEST;
+		_state = FORMED;
+		return;
+	}
+
+	_state = PARSING_CHUNK_SIZE;
+}
+
+void Request::parseTrailerPart(const std::string& line) {
+	size_t i = 0;
+
+	if (!skipCRLF(line, &i)) {
+		_status = BAD_REQUEST;
+	}
+
+	_state = FORMED;
 }
 
 void	Request::parseBody(const std::string& body) {
 	setBody(body);
-	isFormed(true);
-}
-
-void	Request::parseChunkedBody(const std::string& str) {
-	std::string body;
-	std::string chunkData;
-	long 		chunkSize;
-	size_t i = 0;
-
-	chunkSize = readChunkSize(str, &i);
-	if (chunkSize < 0) {
-		std::cerr << "invalid or missing chunk size" << std::endl;
-		_status = BAD_REQUEST;
-		return isFormed(true);
-	}
-
-	if (!skipCRLF(str, &i)) {
-		std::cerr << "missing CRLF after chunk size" << std::endl;
-		_status = BAD_REQUEST;
-		return isFormed(true);
-	}
-
-	if (chunkSize > 0) {
-		chunkData = readChunkData(str, &i, chunkSize);
-
-		if (!skipCRLF(str, &i)) {
-			std::cerr << "missing CRLF after chunk data" << std::endl;
-			_status = BAD_REQUEST;
-			return isFormed(true);
-		}
-
-		_body.append(chunkData);
-
-	} else {
-
-		if (!skipCRLF(str, &i)) {
-			std::cerr << "missing CRLF after chunk data2" << std::endl;
-			_status = BAD_REQUEST;
-			return isFormed(true);
-		}
-
-		isFormed(true);
-	}
+	_state = FORMED;
 }
 
 void	Request::setMethod(const std::string& method) {
@@ -221,9 +246,9 @@ void	Request::setMethod(const std::string& method) {
 }
 
 void	Request::setRequestTarget(const std::string& requestTarget) {
-	if (isOriginForm(requestTarget)) {
-		_requestTarget = requestTarget;
-	} else {
+	_requestTarget.parseOriginForm(requestTarget);
+
+	if (!_requestTarget.isCorrect()) {
 		_status = BAD_REQUEST;
 	}
 }
@@ -277,6 +302,11 @@ void Request::setHost(const std::string &value) {
 
 	host.parseHost(value);
 	if (!host.isCorrect()) {
+		_status = BAD_REQUEST;
+		return;
+	}
+
+	if (host.hasPort() && host.getPort() != _client->getPort()) {
 		_status = BAD_REQUEST;
 		return;
 	}
@@ -379,7 +409,7 @@ std::string Request::getMethod() const {
 }
 
 std::string	Request::getRequestTarget() const {
-	return _requestTarget;
+	return _requestTarget.getPath();
 }
 
 size_t	Request::getMajorVersion() const {
@@ -419,67 +449,18 @@ size_t	Request::getStatus() const {
 	return _status;
 }
 
-bool	Request::isFormed() const {
-	return _formed;
-}
-
-void	Request::isFormed(bool status) {
-	_formed = status;
-}
-
-ServerConfig *Request::getServerConfig() const {
+ServerConfig* Request::getServerConfig() const {
 	return _serverConfig;
 }
 
-LocationConfig *Request::getLocationConfig() const {
+LocationConfig* Request::getLocationConfig() const {
 	return _locationConfig;
 }
 
-ParsingState Request::getParsingState() const {
+State Request::getState() const {
 	return _state;
-}
-
-void Request::parseChunkSize(const std::string &line) {
-	size_t	i = 0;
-
-	_expectedBodySize = readChunkSize(line, &i);
-	if (_expectedBodySize < 0) {
-		std::cerr << "invalid or missing chunk size" << std::endl;
-		_status = BAD_REQUEST;
-		return isFormed(true);
-	}
-
-	if (!skipCRLF(line, &i)) {
-		std::cerr << "missing CRLF after chunk size" << std::endl;
-		_status = BAD_REQUEST;
-		return isFormed(true);
-	}
-
-	if (_expectedBodySize == 0) {
-		_state = PARSING_TRAILER_PART;
-	} else {
-		_state = PARSING_CHUNK_DATA;
-	}
-}
-
-void Request::parseChunkData(const std::string& line) {
-	_body.append(line);
-	_state = PARSING_CHUNK_SIZE;
-}
-
-void Request::parseTrailerPart(const std::string& line) {
-	size_t i = 0;
-
-	if (!skipCRLF(line, &i)) {
-		_status = BAD_REQUEST;
-	}
-	_formed = true;
 }
 
 size_t Request::getExpectedBodySize() const {
 	return _expectedBodySize;
 }
-
-
-
-

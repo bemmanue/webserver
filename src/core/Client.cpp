@@ -2,6 +2,7 @@
 
 Client::Client(const std::vector<ServerConfig>& serverConfigs) {
 	_serverConfigs = serverConfigs;
+	_port = serverConfigs[0].getPort();
 }
 
 Client::~Client() {}
@@ -53,11 +54,11 @@ void	Client::setRequest(const std::string& request) {
 
 void	Client::handleRequest() {
 	Request			request(this);
-	ParsingState	state;
+	State	state;
 	std::string		line;
 
-	while (!request.isFormed()) {
-		state = request.getParsingState();
+	while (request.getState() != FORMED) {
+		state = request.getState();
 
 		if (state == PARSING_CHUNK_DATA) {
 			line = readChunk(request.getExpectedBodySize());
@@ -70,4 +71,8 @@ void	Client::handleRequest() {
 	}
 
 	std::cout << request << std::endl;
+}
+
+size_t Client::getPort() {
+	return _port;
 }

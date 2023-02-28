@@ -27,7 +27,7 @@ URI &URI::operator=(const URI& other) {
 	return *this;
 }
 
-URI::~URI(void) {}
+URI::~URI() = default;
 
 void URI::parseURI(const std::string& raw) {
 //	URI = scheme ":" hier-part [ "?" query ] [ "#" fragment ]
@@ -38,6 +38,7 @@ void URI::parseURI(const std::string& raw) {
 //	authority = [ userinfo "@" ] host [ ":" port ]
 	size_t i = 0;
 
+	clear();
 	_raw = raw;
 
 	_scheme = readScheme(raw, &i);
@@ -120,9 +121,12 @@ void URI::parseURI(const std::string& raw) {
 	}
 }
 
-void URI::parseHost(const std::string &raw) {
+void URI::parseHost(const std::string& raw) {
 //	host = uri-host [ ":" port ]
 	size_t i = 0;
+
+	clear();
+	_raw = raw;
 
 	// host
 	_host = readHost(raw, &i);
@@ -143,6 +147,29 @@ void URI::parseHost(const std::string &raw) {
 			_authority.push_back(':');
 			_authority.append(std::to_string(_port));
 		}
+	}
+
+	if (raw[i] != '\0') {
+		_correct = false;
+	}
+}
+
+void URI::parseOriginForm(const std::string& raw) {
+//	origin-form = absolute-path [ "?" query ]
+	size_t i = 0;
+
+	clear();
+	_raw = raw;
+
+	_path = readPathAbsolute(raw, &i);
+	if (_path.empty()) {
+		_correct = false;
+		return;
+	}
+	_path = removeDotSegments(_path);
+
+	if (skipRequiredChar(raw, &i, '?')) {
+		_query = readQuery(raw, &i);
 	}
 
 	if (raw[i] != '\0') {
@@ -250,4 +277,57 @@ std::string	URI::getAuthority(void) const {
 
 bool URI::hasPort() const {
 	return (_port >= 0);
+}
+
+size_t URI::getPort() const {
+	return _port;
+}
+
+std::string URI::getHost() const {
+	return _host;
+}
+
+void URI::clear() {
+	_scheme = "";
+	_authority = "";
+	_userinfo = "";
+	_host = "";
+	_port = -1;
+	_path = "";
+	_query = "";
+	_fragment = "";
+	_raw = "";
+	_correct = true;
+}
+
+std::string URI::getPath() const {
+	return _path;
+}
+
+std::string URI::removeDotSegments(std::string input) {
+	std::string output;
+
+	while (!input.empty()) {
+		if (!input.compare(0, 3, "../")) {
+			input = input.substr(3);
+		} else if (!input.compare(0, 2, "./")) {
+			input = input.substr(2);
+		} else if (!input.compare(0, 3, "/./")) {
+			input = input.substr(2);
+		} else if (input == "/.") {
+			input = "/";
+		} else if (!input.compare(0, 4, "/../")) {
+			input = input.substr(3);
+			output.erase(output.find_last_of('/'));
+		} else if (input == "/..") {
+			input = "/";
+		} else if (input == ".." || input == ".") {
+			input = "";
+		} else {
+			std::string::size_type pos = input.find_first_of("/", 1, input.size());
+			output.append(input.substr(0, pos));
+			input.erase(0, pos);
+		}
+	}
+	return output;
 }

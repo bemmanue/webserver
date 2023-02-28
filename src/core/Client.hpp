@@ -8,6 +8,7 @@ class Client {
 private:
 	std::vector<ServerConfig>	_serverConfigs;
 	std::string					_request;
+	size_t 						_port;
 
 public:
 	explicit Client(const std::vector<ServerConfig>& serverConfigs);
@@ -19,6 +20,8 @@ public:
 	std::string		readLine();
 	void			setRequest(const std::string& request);
 	void			handleRequest();
+
+	size_t			getPort();
 };
 
 
