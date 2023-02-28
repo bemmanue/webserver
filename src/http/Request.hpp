@@ -111,10 +111,10 @@ friend std::ostream& operator<<(std::ostream& out, Request& re) {
 	out <<  re.getBody() << std::endl;
 	out <<  "Status: " << re.getStatus() << std::endl;
 	if (re.getServerConfig()) {
-//		out << *re.getServerConfig() << std::endl;
+		out << *re.getServerConfig() << std::endl;
 	}
 	if (re.getLocationConfig()) {
-//		out << std::endl << *re.getLocationConfig() << std::endl;
+		out << std::endl << *re.getLocationConfig() << std::endl;
 	}
 	return out;
 }

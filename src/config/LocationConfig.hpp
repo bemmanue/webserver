@@ -6,6 +6,8 @@
 #include <map>
 #include <set>
 
+#include "../http/URI.hpp"
+
 #ifndef ALLOWED_METHODS
 	# define GET		"GET"
 	# define POST		"POST"

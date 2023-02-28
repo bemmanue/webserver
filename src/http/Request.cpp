@@ -180,7 +180,7 @@ void Request::checkHeaderFields() {
 	}
 
 	setServerConfig(_client->matchServerConfig(getHost().getHost()));
-//	setLocationConfig(_serverConfig->matchLocationConfig(_requestTarget.getPath()));
+	setLocationConfig(_serverConfig->matchLocationConfig(_requestTarget.getPath()));
 }
 
 void Request::parseChunkSize(const std::string &line) {

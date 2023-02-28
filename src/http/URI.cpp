@@ -167,6 +167,7 @@ void URI::parseOriginForm(const std::string& raw) {
 		return;
 	}
 	_path = removeDotSegments(_path);
+	_path = normalize(_path);
 
 	if (skipRequiredChar(raw, &i, '?')) {
 		_query = readQuery(raw, &i);
@@ -328,6 +329,21 @@ std::string URI::removeDotSegments(std::string input) {
 			output.append(input.substr(0, pos));
 			input.erase(0, pos);
 		}
+	}
+	return output;
+}
+
+std::string URI::normalize(std::string input) {
+	std::string output;
+
+	if (!input.empty()) {
+		output.push_back(input[0]);
+	}
+	for (int i = 1; i < input.size(); ++i) {
+		if (input[i] == '/' && input[i-1] == '/') {
+			continue;
+		}
+		output.push_back(input[i]);
 	}
 	return output;
 }

@@ -7,7 +7,8 @@ LocationConfig::LocationConfig():
 	_methodsAllowed.insert(DELETE);
 }
 
-LocationConfig::LocationConfig(const LocationConfig &other) {
+LocationConfig::LocationConfig(const LocationConfig &other):
+	LocationConfig() {
 	operator=(other);
 }
 
@@ -24,11 +25,13 @@ LocationConfig &LocationConfig::operator=(const LocationConfig &other) {
 	return *this;
 }
 
-LocationConfig::~LocationConfig() {
-}
+LocationConfig::~LocationConfig() = default;
 
-void LocationConfig::setPath(const std::string &parameter) {
-	_path = parameter;
+void LocationConfig::setPath(const std::string& parameter) {
+	if (parameter.empty() || parameter.front() != '/' || parameter.back() != '/') {
+		throw std::exception();
+	}
+	_path = URI::normalize(URI::removeDotSegments(parameter));
 }
 
 void LocationConfig::setAutoindex(bool status) {

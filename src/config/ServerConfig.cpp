@@ -144,9 +144,19 @@ bool ServerConfig::hasName(const std::string& serverName) {
 	return false;
 }
 
-LocationConfig* ServerConfig::matchLocationConfig(const std::string& path) {
-	if (_locations.find(path) != _locations.end()) {
-		return &_locations[path];
+LocationConfig*	ServerConfig::matchLocationConfig(const std::string& requestTarget) {
+	std::string targetPath = requestTarget;
+
+	if (_locations.empty()) {
+		return new LocationConfig;
+	}
+
+	targetPath.erase(targetPath.find_last_of('/'));
+	while (!targetPath.empty()) {
+		if (_locations.find(targetPath + "/") != _locations.end()) {
+			return &_locations[targetPath + "/"];
+		}
+		targetPath.erase(targetPath.find_last_of('/'));
 	}
 	return new LocationConfig;
 }

@@ -35,7 +35,7 @@ public:
 class InvalidAutoindexValueConfigException : public ConfigException {
 public:
 	explicit InvalidAutoindexValueConfigException(const std::string& value, size_t line) :
-		ConfigException("invalid value \"" + value + " in \"autoindex\" directive, it must be \"on\" or \"off\"", line) {}
+		ConfigException("invalid value \"" + value + R"( in "autoindex" directive, it must be "on" or "off")", line) {}
 };
 
 
@@ -98,7 +98,7 @@ public:
 class NoOpeningBraceConfigException : public ConfigException {
 public:
 	explicit NoOpeningBraceConfigException(const std::string& directive, size_t line) :
-		ConfigException("directive \"" + directive + "\" has no opening \"{\"", line) {}
+		ConfigException("directive \"" + directive + R"(" has no opening "{")", line) {}
 };
 
 
@@ -106,6 +106,13 @@ class InvalidNumberOfArgumentsConfigException : public ConfigException {
 public:
 	explicit InvalidNumberOfArgumentsConfigException(const std::string& directive, size_t line) :
 		ConfigException("invalid number of arguments in \"" + directive + "\"", line) {}
+};
+
+
+class InvalidLocationPathConfigException : public ConfigException {
+public:
+	explicit InvalidLocationPathConfigException(const std::string& path, size_t line) :
+	ConfigException("invalid location path \"" + path + R"(" it must begin and end with "/" symbol)", line) {}
 };
 
 

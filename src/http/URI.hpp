@@ -45,6 +45,7 @@ public:
     static std::string			URLencode(const std::string &);
     static std::string			URLdecode(const std::string &);
     static std::string			removeDotSegments(std::string path);
+    static std::string			normalize(std::string path);
 
 	friend std::ostream& operator<<(std::ostream& out, URI& uri) {
 		out << "scheme: " << uri._scheme << std::endl;
