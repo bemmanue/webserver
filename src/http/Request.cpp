@@ -1,14 +1,19 @@
 #include "Request.hpp"
+#include "../core/Utils.hpp"
 
 Request::Request(Client* client):
 	_majorVersion(0),
 	_minorVersion(0),
-	_client(client),
 	_status(OK),
-	_state(PARSING_REQUEST_LINE),
 	_expectedBodySize(0),
+	_state(PARSING_REQUEST_LINE),
+	_client(client),
 	_serverConfig(nullptr),
 	_locationConfig(nullptr) {
+	if (_client == nullptr) {
+		_status = INTERNAL_SERVER_ERROR;
+		_state = FORMED;
+	}
 }
 
 Request::Request(const Request &other):
@@ -25,6 +30,9 @@ Request& Request::operator=(const Request &other) {
 		_headers = other._headers;
 		_body = other._body;
 		_status = other._status;
+		_expectedBodySize = other._expectedBodySize;
+		_state = other._state;
+		_client = other._client;
 		_serverConfig = other._serverConfig;
 		_locationConfig = other._locationConfig;
 	}
@@ -178,9 +186,6 @@ void Request::checkHeaderFields() {
 			_expectedBodySize = getContentLength();
 		}
 	}
-
-	setServerConfig(_client->matchServerConfig(getHost().getHost()));
-	setLocationConfig(_serverConfig->matchLocationConfig(_requestTarget.getPath()));
 }
 
 void Request::parseChunkSize(const std::string &line) {
@@ -264,7 +269,7 @@ void	Request::setVersion(const std::string& version) {
 		version[6] == '.'	&&
 		isdigit(version[7])) {
 		setMajorVersion(toDigit(version[5]));
-		setMinorVersion(toDigit(version[7]));
+		setMinorVersion((version[7]));
 	} else {
 		_status = BAD_REQUEST;
 	}
@@ -301,17 +306,33 @@ void Request::setHost(const std::string &value) {
 	}
 
 	host.parseHost(value);
-	if (!host.isCorrect()) {
-		_status = BAD_REQUEST;
-		return;
-	}
-
-	if (host.hasPort() && host.getPort() != _client->getPort()) {
+	if (!host.isCorrect() || (host.hasPort() && host.getPort() != _client->getPort())) {
 		_status = BAD_REQUEST;
 		return;
 	}
 
 	_headers[HOST] = host;
+
+	matchServerConfig();
+	matchLocationConfig();
+}
+
+void Request::matchServerConfig() {
+	if (_client == nullptr || !hasHeader(HOST)) {
+		_status = INTERNAL_SERVER_ERROR;
+		_state = FORMED;
+		return;
+	}
+	_serverConfig = _client->matchServerConfig(getHost().getHost());
+}
+
+void Request::matchLocationConfig() {
+	if (_serverConfig == nullptr) {
+		_status = INTERNAL_SERVER_ERROR;
+		_state = FORMED;
+		return;
+	}
+	_locationConfig = _serverConfig->matchLocationConfig(_requestTarget.getPath());
 }
 
 void Request::setTransferEncoding(const std::string& value) {
@@ -394,14 +415,6 @@ bool Request::hasHeader(const std::string &headerName) {
 
 void	Request::setBody(const std::string &body) {
 	_body = body;
-}
-
-void	Request::setServerConfig(ServerConfig *serverConfig) {
-	_serverConfig = serverConfig;
-}
-
-void	Request::setLocationConfig(LocationConfig *locationConfig) {
-	_locationConfig = locationConfig;
 }
 
 std::string Request::getMethod() const {

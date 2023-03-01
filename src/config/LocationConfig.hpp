@@ -7,12 +7,7 @@
 #include <set>
 
 #include "../http/URI.hpp"
-
-#ifndef ALLOWED_METHODS
-	# define GET		"GET"
-	# define POST		"POST"
-	# define DELETE		"DELETE"
-#endif
+#include "../http/Global.hpp"
 
 
 class LocationConfig {

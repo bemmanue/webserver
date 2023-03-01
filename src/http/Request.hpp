@@ -11,7 +11,10 @@
 #include "URI.hpp"
 #include "Utils.hpp"
 #include "Status.hpp"
+#include "Global.hpp"
 #include "../config/ServerConfig.hpp"
+#include "../core/Utils.hpp"
+
 
 #define HOST				"Host"
 #define CONTENT_LENGTH		"Content-Length"
@@ -62,8 +65,6 @@ public:
 	void	setTransferEncoding(const std::string& value);
 	void	setContentLength(const std::string& value);
 	void	setBody(const std::string& body);
-	void	setServerConfig(ServerConfig* serverConfig);
-	void	setLocationConfig(LocationConfig* locationConfig);
 
 	[[nodiscard]] std::string		getMethod() const;
 	[[nodiscard]] std::string		getRequestTarget() const;
@@ -89,6 +90,8 @@ public:
 	void	parseChunkData(const std::string& line);
 	void	parseTrailerPart(const std::string& line);
 	void	checkHeaderFields();
+	void	matchServerConfig();
+	void	matchLocationConfig();
 
 
 public:

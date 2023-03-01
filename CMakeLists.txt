@@ -14,6 +14,8 @@ add_executable(webserver main.cpp
         src/http/URI.hpp
         src/http/Response.cpp
         src/http/Response.hpp
+        src/http/Global.hpp
+        src/http/Global.cpp
         src/config/Config.cpp
         src/config/Config.hpp
         src/config/ConfigException.hpp
@@ -23,4 +25,6 @@ add_executable(webserver main.cpp
         src/config/ServerConfig.hpp
         src/core/Client.cpp
         src/core/Client.hpp
+        src/core/Utils.hpp
+        src/core/Utils.cpp
         )

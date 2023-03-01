@@ -8,13 +8,6 @@
 
 #include "LocationConfig.hpp"
 
-#ifndef ALLOWED_METHODS
-	# define GET		"GET"
-	# define POST		"POST"
-	# define DELETE		"DELETE"
-#endif
-
-#define SERVER_ROOT						"data"
 #define DEFAULT_PORT 					8080
 #define DEFAULT_HOST 					"127.0.0.1"
 #define DEFAULT_CLIENT_MAX_BODY_SIZE	1000000
@@ -22,8 +15,8 @@
 
 class ServerConfig {
 private:
-	unsigned short							_majorVersion;
-	unsigned short							_minorVersion;
+//	unsigned short							_majorVersion;
+//	unsigned short							_minorVersion;
 
 	std::string     						_host;
 	size_t            						_port;
@@ -47,13 +40,13 @@ public:
 	void	setLocation(const std::string& path, const LocationConfig& location);
 
 	bool	hasName(const std::string& serverName);
-	bool	hasLocation(const std::string& location);
+	bool	hasLocation(const std::string& path);
 	bool	isMethodAllowed(const std::string& method);
 
 	LocationConfig	*matchLocationConfig(const std::string& path);
 
-	size_t 											getMajorVersion() const;
-	size_t 											getMinorVersion() const;
+//	size_t 											getMajorVersion() const;
+//	size_t 											getMinorVersion() const;
 	const std::string&								getHost() const;
 	size_t											getPort() const;
 	const std::set<std::string>&					getServerNames() const;
@@ -64,7 +57,7 @@ public:
 
 	friend std::ostream& operator<<(std::ostream& out, ServerConfig& server) {
 		out << "Server:" << std::endl;
-		out << "\t" << "version: HTTP/" << server.getMajorVersion() << "." << server.getMinorVersion() << std::endl;
+//		out << "\t" << "version: HTTP/" << server.getMajorVersion() << "." << server.getMinorVersion() << std::endl;
 		out << "\t" << "host: " << server.getHost() << std::endl;
 		out << "\t" << "port: " << server.getPort() << std::endl;
 		std::set<std::string> names = server.getServerNames();

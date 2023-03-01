@@ -3,6 +3,7 @@
 
 #include "../config/ServerConfig.hpp"
 #include "../http/Request.hpp"
+#include "../http/Response.hpp"
 
 class Client {
 private:

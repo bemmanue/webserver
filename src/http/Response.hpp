@@ -13,25 +13,22 @@
 
 class Response {
 private:
-	Request			_request;
-	ServerConfig	_serverConfig;
+	unsigned short					_majorVersion;
+	unsigned short					_minorVersion;
+	unsigned short					_status;
+	std::string						_reasonPhrase;
+	std::map<std::string, std::any>	_headers;
+	std::string						_body;
 
-	std::string		_version;
-	size_t			_status;
-	std::string		_host;
-	size_t			_length;
-	bool			_chunked;
-	std::string		_body;
+	Request*						_request;
 
 public:
-	Response(const ServerConfig& serverConfig, const Request& request);
+	Response(Request* request);
+	Response(const Response& other);
+	Response& operator=(const Response& other);
 	~Response();
 
 	std::string		toString();
-
-	void	setStatus(size_t status);
-	void	setContentLength(size_t length);
-	void	setBody(const std::string& body);
 
 private:
 	void	handleRequest();
@@ -39,9 +36,10 @@ private:
 	void	handlePostRequest();
 	void	handleDeleteRequest();
 
-	void	makeResponseForFile(const std::string& requestTarget);
-	void	makeResponseForDir(const std::string& requestTarget);
-
+	void	makeResponseForFile();
+	void	makeResponseForError();
+	void	makeResponseForDir();
+	void	makeResponseForMethod();
 };
 
 

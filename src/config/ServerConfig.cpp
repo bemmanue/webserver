@@ -1,8 +1,8 @@
 #include "ServerConfig.hpp"
 
 ServerConfig::ServerConfig():
-		_majorVersion(1),
-		_minorVersion(1),
+//		_majorVersion(HTTP_MAJOR_VERSION),
+//		_minorVersion(HTTP_MINOR_VERSION),
 		_host(DEFAULT_HOST),
 		_port(DEFAULT_PORT),
 		_clientMaxBodySize(DEFAULT_CLIENT_MAX_BODY_SIZE) {
@@ -17,8 +17,8 @@ ServerConfig::ServerConfig(const ServerConfig &other) {
 
 ServerConfig& ServerConfig::operator=(const ServerConfig &other) {
 	if (this != &other) {
-		_majorVersion = other._majorVersion;
-		_minorVersion = other._minorVersion;
+//		_majorVersion = other._majorVersion;
+//		_minorVersion = other._minorVersion;
 		_host = other._host;
 		_port = other._port;
 		_serverNames = other._serverNames;
@@ -101,13 +101,13 @@ size_t ServerConfig::getPort() const {
 	return _port;
 }
 
-size_t ServerConfig::getMajorVersion() const {
-	return _majorVersion;
-}
-
-size_t ServerConfig::getMinorVersion() const {
-	return _minorVersion;
-}
+//size_t ServerConfig::getMajorVersion() const {
+//	return _majorVersion;
+//}
+//
+//size_t ServerConfig::getMinorVersion() const {
+//	return _minorVersion;
+//}
 
 const std::set<std::string>& ServerConfig::getServerNames() const {
 	return _serverNames;
@@ -125,7 +125,10 @@ const std::map<std::string, LocationConfig>& ServerConfig::getLocations() const 
 	return _locations;
 }
 
-bool ServerConfig::hasLocation(const std::string &location) {
+bool ServerConfig::hasLocation(const std::string& path) {
+	if (_locations.find(path) != _locations.end()) {
+		return true;
+	}
 	return false;
 }
 
@@ -146,17 +149,18 @@ bool ServerConfig::hasName(const std::string& serverName) {
 
 LocationConfig*	ServerConfig::matchLocationConfig(const std::string& requestTarget) {
 	std::string targetPath = requestTarget;
-
-	if (_locations.empty()) {
-		return new LocationConfig;
-	}
-
 	targetPath.erase(targetPath.find_last_of('/'));
+
 	while (!targetPath.empty()) {
-		if (_locations.find(targetPath + "/") != _locations.end()) {
+		if (hasLocation(targetPath + "/")) {
 			return &_locations[targetPath + "/"];
 		}
 		targetPath.erase(targetPath.find_last_of('/'));
 	}
+
+	if (hasLocation("/")) {
+		return &_locations["/"];
+	}
+
 	return new LocationConfig;
 }

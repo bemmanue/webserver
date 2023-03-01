@@ -53,9 +53,10 @@ void	Client::setRequest(const std::string& request) {
 }
 
 void	Client::handleRequest() {
-	Request			request(this);
-	State	state;
-	std::string		line;
+	Request		request(this);
+	Response	response(&request);
+	State		state;
+	std::string	line;
 
 	while (request.getState() != FORMED) {
 		state = request.getState();
