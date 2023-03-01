@@ -24,7 +24,7 @@
 	# define DELETE		"DELETE"
 #endif
 
-#define SERVER_ROOT 	"data"
+#define SERVER_ROOT 	"data/"
 
 
 bool	isHTTPMethod(const std::string& method);

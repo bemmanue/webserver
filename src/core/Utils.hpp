@@ -4,7 +4,6 @@
 #include <iostream>
 #include <sys/stat.h>
 
-int			toDigit(char c);
 std::string	capitalize(const std::string& str);
 
 bool		resourceExists(const std::string& filename);

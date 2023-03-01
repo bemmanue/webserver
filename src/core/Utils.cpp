@@ -16,14 +16,6 @@ std::string	capitalize(const std::string& str) {
 	return ret;
 }
 
-int	toDigit(char c) {
-	if (isdigit(c)) {
-		return c - '0';
-	} else {
-		return -1;
-	}
-}
-
 bool	resourceExists(const std::string& filename) {
 	struct stat state;
 

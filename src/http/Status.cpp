@@ -1,100 +1,152 @@
 #include "Status.hpp"
 
-StatusLine::StatusLine() {
-	// 1xx informational response
-	_statusLines[CONTINUE]           				= "100 Continue";
-	_statusLines[SWITCHING_PROTOCOLS]				= "101 Switching Protocols";
-	_statusLines[PROCESSING]         				= "102 Processing";
-	_statusLines[EARLY_HINTS]        				= "103 Early Hints";
-
-	// 2xx success
-	_statusLines[OK]      			         		= "200 OK";
-	_statusLines[CREATED] 			         		= "201 Created";
-	_statusLines[ACCEPTED]			         		= "202 Accepted";
-	_statusLines[NON_AUTHORITATIVE_INFORMATION]		= "203 Non-Authoritative Information";
-	_statusLines[NO_CONTENT]						= "204 No Content";
-	_statusLines[RESET_CONTENT]   					= "205 Reset Content";
-	_statusLines[PARTIAL_CONTENT] 					= "206 Partial Content";
-	_statusLines[MULTI_STATUS]    					= "207 Multi-Status";
-	_statusLines[ALREADY_REPORTED]					= "208 Already Reported";
-	_statusLines[IM_USED]         					= "226 IM Used";
-
-	// 3xx redirection
-	_statusLines[MULTIPLE_CHOICES]  				= "300 Multiple Choices";
-	_statusLines[MOVED_PERMANENTLY] 				= "301 Moved Permanently";
-	_statusLines[FOUND]             				= "302 Found";
-	_statusLines[SEE_OTHER]         				= "303 See Other";
-	_statusLines[NOT_MODIFIED]      				= "304 Not Modified";
-	_statusLines[USE_PROXY]         				= "305 Use Proxy";
-	_statusLines[TEMPORARY_REDIRECT]				= "307 Temporary Redirect";
-	_statusLines[PERMANENT_REDIRECT]				= "308 Permanent Redirect";
-
-	// 4xx client errors
-	_statusLines[BAD_REQUEST]						= "400 Bad Request";
-	_statusLines[UNAUTHORIZED]    					= "401 Unauthorized";
-	_statusLines[PAYMENT_REQUIRED]					= "402 Payment Required";
-	_statusLines[FORBIDDEN]       					= "403 Forbidden";
-	_statusLines[NOT_FOUND]       					= "404 Not Found";
-	_statusLines[METHOD_NOT_ALLOWED]				= "405 Method Not Allowed";
-	_statusLines[NOT_ACCEPTABLE]    				= "406 Not Acceptable";
-	_statusLines[PROXY_AUTHENTICATION_REQUIRED]		= "407 Proxy Authentication Required";
-	_statusLines[REQUEST_TIMEOUT]					= "408 Request Timeout";
-	_statusLines[CONFLICT]       					= "409 Conflict";
-	_statusLines[GONE]           					= "410 Gone";
-	_statusLines[LENGTH_REQUIRED]					= "411 Length Required";
-	_statusLines[PRECONDITION_FAILED]   			= "412 Precondition Failed";
-	_statusLines[PAYLOAD_TOO_LARGE]     			= "413 Payload Too Large";
-	_statusLines[URI_TOO_LONG]          			= "414 URI Too Long";
-	_statusLines[UNSUPPORTED_MEDIA_TYPE]			= "415 Unsupported Media Type";
-	_statusLines[RANGE_NOT_SATISFIABLE] 			= "416 Range Not Satisfiable";
-	_statusLines[EXPECTATION_FAILED]    			= "417 Expectation Failed";
-	_statusLines[IM_A_TEAPOT]           			= "418 I'm a teapot";
-	_statusLines[AUTHENTICATION_TIMEOUT]			= "419 Authentication Timeout";
-	_statusLines[MISDIRECTED_REQUEST]   			= "421 Misdirected Request";
-	_statusLines[UNPROCESSABLE_ENTITY]  			= "422 Unprocessable Entity";
-	_statusLines[LOCKED]                			= "423 Locked";
-	_statusLines[FAILED_DEPENDENCY]     			= "424 Failed Dependency";
-	_statusLines[TOO_EARLY]             			= "425 Too Early";
-	_statusLines[UPGRADE_REQUIRED]      			= "426 Upgrade Required";
-	_statusLines[PRECONDITION_REQUIRED] 			= "428 Precondition Required";
-	_statusLines[TOO_MANY_REQUESTS]     			= "429 Too Many Requests";
-	_statusLines[REQUEST_HEADER_FIELDS_TOO_LARGE]	= "431 Request Headers Fields Too Large";
-	_statusLines[RETRY_WITH]						= "449 Retry With";
-	_statusLines[UNAVAILABLE_FOR_LEGAL_REASONS]		= "451 Unavailable For Legal Reasons";
-	_statusLines[CLIENT_CLOSED_REQUEST]				= "499 Client Closed Request";
-
-	// 5xx server errors
-	_statusLines[INTERNAL_SERVER_ERROR]				= "500 Internal Server Error";
-	_statusLines[NOT_IMPLEMENTED]					= "501 Not Implemented";
-	_statusLines[BAD_GATEWAY]						= "502 Bad Gateway";
-	_statusLines[SERVICE_UNAVAILABLE]				= "503 Service Unavailable";
-	_statusLines[GATEWAY_TIMEOUT]					= "504 Gateway Timeout";
-	_statusLines[HTTP_VERSION_NOT_SUPPORTED]		= "505 HTTP Version Not Supported";
-	_statusLines[VARIANT_ALSO_NEGOTIATES]			= "506 Variant Also Negotiates";
-	_statusLines[INSUFFICIENT_STORAGE]				= "507 Insufficient Storage";
-	_statusLines[LOOP_DETECTED]						= "508 Loop Detected";
-	_statusLines[BANDWIDTH_LIMIT_EXCEEDED]			= "509 Bandwidth Limit Exceeded";
-	_statusLines[NOT_EXTENDED]						= "510 Not Extended";
-	_statusLines[NETWORK_AUTHENTICATION_REQUIRED]	= "511 Network Authentication Required";
-
-	// Cloudflare ext
-	_statusLines[UNKNOWN_ERROR]						= "520 Web Server Returned an Unknown Error";
-	_statusLines[WEB_SERVER_IS_DOWN]				= "521 Web Server Is Down";
-	_statusLines[CONNECTION_TIMED_OUT]				= "522 Connection Timed Out";
-	_statusLines[ORIGIN_IS_UNREACHABLE]				= "523 Origin Is Unreachable";
-	_statusLines[A_TIMEOUT_OCCURRED]				= "524 A Timeout Occurred";
-	_statusLines[SSL_HANDSHAKE_FAILED]				= "525 SSL Handshake Failed";
-	_statusLines[INVALID_SSL_CERTIFICATE]			= "526 Invalid SSL Certificate";
-}
-
-StatusLine::~StatusLine() {}
-
-const std::string& StatusLine::operator[](size_t code) const {
-	std::map<size_t, std::string>::const_iterator pos = _statusLines.find(code);
-	if (pos == _statusLines.end()) {
-		return _empty;
+std::string	getReasonPhrase(Status code) {
+	switch (code) {
+		case CONTINUE:
+			return "Continue";
+		case SWITCHING_PROTOCOLS:
+			return "Switching Protocols";
+		case PROCESSING:
+			return "Processing";
+		case EARLY_HINTS:
+			return "Early Hints";
+		case OK:
+			return "OK";
+		case CREATED:
+			return "Created";
+		case ACCEPTED:
+			return "Accepted";
+		case NON_AUTHORITATIVE_INFORMATION:
+			return "Non-Authoritative Information";
+		case NO_CONTENT:
+			return "No Content";
+		case RESET_CONTENT:
+			return "Reset Content";
+		case PARTIAL_CONTENT:
+			return "Partial Content";
+		case MULTI_STATUS:
+			return "Multi-Status";
+		case ALREADY_REPORTED:
+			return "Already Reported";
+		case IM_USED:
+			return "IM Used";
+		case MULTIPLE_CHOICES:
+			return "Multiple Choices";
+		case MOVED_PERMANENTLY:
+			return "Moved Permanently";
+		case FOUND:
+			return "Found";
+		case SEE_OTHER:
+			return "See Other";
+		case NOT_MODIFIED:
+			return "Not Modified";
+		case USE_PROXY:
+			return "Use Proxy";
+		case TEMPORARY_REDIRECT:
+			return "Temporary Redirect";
+		case PERMANENT_REDIRECT:
+			return "Permanent Redirect";
+		case BAD_REQUEST:
+			return "Bad Request";
+		case UNAUTHORIZED:
+			return "Unauthorized";
+		case PAYMENT_REQUIRED:
+			return "Payment Required";
+		case FORBIDDEN:
+			return "Forbidden";
+		case NOT_FOUND:
+			return "Not Found";
+		case METHOD_NOT_ALLOWED:
+			return "Method Not Allowed";
+		case NOT_ACCEPTABLE:
+			return "Not Acceptable";
+		case PROXY_AUTHENTICATION_REQUIRED:
+			return "Proxy Authentication Required";
+		case REQUEST_TIMEOUT:
+			return "Request Timeout";
+		case CONFLICT:
+			return "Conflict";
+		case GONE:
+			return "Gone";
+		case LENGTH_REQUIRED:
+			return "Length Required";
+		case PRECONDITION_FAILED:
+			return "Precondition Failed";
+		case PAYLOAD_TOO_LARGE:
+			return "Payload Too Large";
+		case URI_TOO_LONG:
+			return "URI Too Long";
+		case UNSUPPORTED_MEDIA_TYPE:
+			return "Unsupported Media Type";
+		case RANGE_NOT_SATISFIABLE:
+			return "Range Not Satisfiable";
+		case EXPECTATION_FAILED:
+			return "Expectation Failed";
+		case IM_A_TEAPOT:
+			return "I'm a teapot";
+		case AUTHENTICATION_TIMEOUT:
+			return "Authentication Timeout";
+		case MISDIRECTED_REQUEST:
+			return "Misdirected Request";
+		case UNPROCESSABLE_ENTITY:
+			return "Unprocessable Entity";
+		case LOCKED:
+			return "Locked";
+		case FAILED_DEPENDENCY:
+			return "Failed Dependency";
+		case TOO_EARLY:
+			return "Too Early";
+		case UPGRADE_REQUIRED:
+			return "Upgrade Required";
+		case PRECONDITION_REQUIRED:
+			return "Precondition Required";
+		case TOO_MANY_REQUESTS:
+			return "Too Many Requests";
+		case REQUEST_HEADER_FIELDS_TOO_LARGE:
+			return "Request Headers Fields Too Large";
+		case RETRY_WITH:
+			return "Retry With";
+		case UNAVAILABLE_FOR_LEGAL_REASONS:
+			return "Unavailable For Legal Reasons";
+		case CLIENT_CLOSED_REQUEST:
+			return "Client Closed Request";
+		case INTERNAL_SERVER_ERROR:
+			return "Internal Server Error";
+		case NOT_IMPLEMENTED:
+			return "Not Implemented";
+		case BAD_GATEWAY:
+			return "Bad Gateway";
+		case SERVICE_UNAVAILABLE:
+			return "Service Unavailable";
+		case GATEWAY_TIMEOUT:
+			return "Gateway Timeout";
+		case HTTP_VERSION_NOT_SUPPORTED:
+			return "HTTP Version Not Supported";
+		case VARIANT_ALSO_NEGOTIATES:
+			return "Variant Also Negotiates";
+		case INSUFFICIENT_STORAGE:
+			return "Insufficient Storage";
+		case LOOP_DETECTED:
+			return "Loop Detected";
+		case BANDWIDTH_LIMIT_EXCEEDED:
+			return "Bandwidth Limit Exceeded";
+		case NOT_EXTENDED:
+			return "Not Extended";
+		case NETWORK_AUTHENTICATION_REQUIRED:
+			return "Network Authentication Required";
+		case UNKNOWN_ERROR:
+			return "Web Server Returned an Unknown Error";
+		case WEB_SERVER_IS_DOWN:
+			return "Web Server Is Down";
+		case CONNECTION_TIMED_OUT:
+			return "Connection Timed Out";
+		case ORIGIN_IS_UNREACHABLE:
+			return "Origin Is Unreachable";
+		case A_TIMEOUT_OCCURRED:
+			return "A Timeout Occurred";
+		case SSL_HANDSHAKE_FAILED:
+			return "SSL Handshake Failed";
+		case INVALID_SSL_CERTIFICATE:
+			return "Invalid SSL Certificate";
 	}
-	return pos->second;
 }
-
-const StatusLine statusLines;

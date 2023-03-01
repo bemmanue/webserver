@@ -1,10 +1,6 @@
 #ifndef REQUEST_HPP
 #define REQUEST_HPP
 
-#include <iostream>
-#include <algorithm>
-#include <vector>
-#include <list>
 #include <stack>
 #include <any>
 
@@ -13,8 +9,6 @@
 #include "Status.hpp"
 #include "Global.hpp"
 #include "../config/ServerConfig.hpp"
-#include "../core/Utils.hpp"
-
 
 #define HOST				"Host"
 #define CONTENT_LENGTH		"Content-Length"
@@ -36,12 +30,13 @@ class Request {
 private:
 	std::string						_method;
 	URI 		    				_requestTarget;
+	std::string						_resolvedTarget;
 	unsigned short					_majorVersion;
 	unsigned short					_minorVersion;
 	std::map<std::string, std::any>	_headers;
 	std::string						_body;
-	
-	size_t							_status;
+
+	Status							_status;
 	size_t							_expectedBodySize;
 	State							_state;
 
@@ -68,13 +63,14 @@ public:
 
 	[[nodiscard]] std::string		getMethod() const;
 	[[nodiscard]] std::string		getRequestTarget() const;
+	[[nodiscard]] std::string		getResolvedTarget() const;
 	[[nodiscard]] size_t			getMajorVersion() const;
 	[[nodiscard]] size_t			getMinorVersion() const;
 	URI								getHost();
 	std::stack<std::string>			getTransferEncoding();
 	size_t							getContentLength();
 	[[nodiscard]] std::string		getBody() const;
-	[[nodiscard]] size_t			getStatus() const;
+	[[nodiscard]] Status			getStatus() const;
 	[[nodiscard]] ServerConfig*		getServerConfig() const;
 	[[nodiscard]] LocationConfig*	getLocationConfig() const;
 	[[nodiscard]] State				getState() const;
@@ -92,12 +88,14 @@ public:
 	void	checkHeaderFields();
 	void	matchServerConfig();
 	void	matchLocationConfig();
+	void	resolveTarget();
 
 
 public:
 friend std::ostream& operator<<(std::ostream& out, Request& re) {
 	out << "Method: " << re.getMethod() << std::endl;
 	out << "Request target: " << re.getRequestTarget() << std::endl;
+	out << "Resolved target: " << re.getResolvedTarget() << std::endl;
 	out << "Version: HTTP/" << re.getMajorVersion() << "." << re.getMinorVersion() << std::endl;
 	if (re.hasHeader(HOST)) {
 		out << "Host: " << re.getHost().getAuthority() << std::endl;

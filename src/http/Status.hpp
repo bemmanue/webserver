@@ -1,7 +1,6 @@
 #ifndef STATUS_CODE_HPP
 #define STATUS_CODE_HPP
 
-#include <map>
 #include <iostream>
 
 enum Status {
@@ -81,19 +80,7 @@ enum Status {
 };
 
 
-class StatusLine {
-public:
-	StatusLine();
-	~StatusLine();
-
-	const std::string& operator[](size_t code) const;
-
-private:
-	std::map<size_t, std::string>	_statusLines;
-	const std::string				_empty;
-};
-
-extern const StatusLine statusLines;
+std::string getReasonPhrase(Status code);
 
 
 #endif //STATUS_CODE_HPP

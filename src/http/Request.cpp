@@ -1,5 +1,4 @@
 #include "Request.hpp"
-#include "../core/Utils.hpp"
 
 Request::Request(Client* client):
 	_majorVersion(0),
@@ -178,6 +177,10 @@ void Request::checkHeaderFields() {
 		return;
 	}
 
+	matchServerConfig();
+	matchLocationConfig();
+	resolveTarget();
+
 	if (hasHeader(TRANSFER_ENCODING) && getTransferEncoding().top() == "chunked") {
 		_state = PARSING_CHUNK_SIZE;
 	} else {
@@ -268,8 +271,8 @@ void	Request::setVersion(const std::string& version) {
 		isdigit(version[5])	&&
 		version[6] == '.'	&&
 		isdigit(version[7])) {
-		setMajorVersion(toDigit(version[5]));
-		setMinorVersion((version[7]));
+		setMajorVersion(version[5] - '0');
+		setMinorVersion(version[7] - '0');
 	} else {
 		_status = BAD_REQUEST;
 	}
@@ -312,12 +315,9 @@ void Request::setHost(const std::string &value) {
 	}
 
 	_headers[HOST] = host;
-
-	matchServerConfig();
-	matchLocationConfig();
 }
 
-void Request::matchServerConfig() {
+void	Request::matchServerConfig() {
 	if (_client == nullptr || !hasHeader(HOST)) {
 		_status = INTERNAL_SERVER_ERROR;
 		_state = FORMED;
@@ -326,7 +326,7 @@ void Request::matchServerConfig() {
 	_serverConfig = _client->matchServerConfig(getHost().getHost());
 }
 
-void Request::matchLocationConfig() {
+void	Request::matchLocationConfig() {
 	if (_serverConfig == nullptr) {
 		_status = INTERNAL_SERVER_ERROR;
 		_state = FORMED;
@@ -334,6 +334,18 @@ void Request::matchLocationConfig() {
 	}
 	_locationConfig = _serverConfig->matchLocationConfig(_requestTarget.getPath());
 }
+
+void	Request::resolveTarget() {
+	std::string root = _locationConfig->getRoot();
+
+	if (root.empty() || root.front() != '/') {
+		_resolvedTarget = SERVER_ROOT + root + _requestTarget.getPath();
+	} else {
+		_resolvedTarget = root + _requestTarget.getPath();
+	}
+	_resolvedTarget = URI::URLdecode(URI::normalize(_resolvedTarget));
+}
+
 
 void Request::setTransferEncoding(const std::string& value) {
 //	Transfer-Encoding = 1#transfer-coding
@@ -458,7 +470,7 @@ std::string Request::getBody() const {
 	return _body;
 }
 
-size_t	Request::getStatus() const {
+Status	Request::getStatus() const {
 	return _status;
 }
 
@@ -470,10 +482,15 @@ LocationConfig* Request::getLocationConfig() const {
 	return _locationConfig;
 }
 
-State Request::getState() const {
+State	Request::getState() const {
 	return _state;
 }
 
-size_t Request::getExpectedBodySize() const {
+size_t	Request::getExpectedBodySize() const {
 	return _expectedBodySize;
 }
+
+std::string Request::getResolvedTarget() const {
+	return _resolvedTarget;
+}
+

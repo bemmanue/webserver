@@ -72,6 +72,7 @@ void	Client::handleRequest() {
 	}
 
 	std::cout << request << std::endl;
+	std::cout << response.toString() << std::endl;
 }
 
 size_t Client::getPort() {

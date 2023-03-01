@@ -62,7 +62,7 @@ void LocationConfig::setRedirect(int code, const std::string& uri) {
 }
 
 void LocationConfig::setRoot(const std::string& path) {
-	_root = path;
+	_root = URI::normalize(URI::removeDotSegments(path));
 }
 
 std::string LocationConfig::getPath() const {

@@ -9,13 +9,13 @@
 
 #include "../config/ServerConfig.hpp"
 #include "Request.hpp"
-
+#include "Status.hpp"
 
 class Response {
 private:
 	unsigned short					_majorVersion;
 	unsigned short					_minorVersion;
-	unsigned short					_status;
+	Status							_status;
 	std::string						_reasonPhrase;
 	std::map<std::string, std::any>	_headers;
 	std::string						_body;
@@ -32,14 +32,13 @@ public:
 
 private:
 	void	handleRequest();
-	void	handleGetRequest();
-	void	handlePostRequest();
-	void	handleDeleteRequest();
-
 	void	makeResponseForFile();
 	void	makeResponseForError();
 	void	makeResponseForDir();
 	void	makeResponseForMethod();
+	void	makeResponseForMethodGet();
+	void	makeResponseForMethodPost();
+	void	makeResponseForMethodDelete();
 };
 
 

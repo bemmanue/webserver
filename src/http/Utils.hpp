@@ -4,8 +4,6 @@
 #include <iostream>
 #include <arpa/inet.h>
 
-#define SP		" "
-#define CRLF	"\r\n"
 
 std::string	readToken(const std::string& str, size_t* pos);
 std::string	readQuotedString(const std::string& str, size_t* pos);

@@ -3,7 +3,7 @@
 Response::Response(Request* request):
 	_majorVersion(HTTP_MAJOR_VERSION),
 	_minorVersion(HTTP_MINOR_VERSION),
-	_status(OK),
+	_status(request->getStatus()),
 	_request(request) {
 	handleRequest();
 }
@@ -30,8 +30,33 @@ void	Response::handleRequest() {
 	}
 }
 
-void	Response::handleGetRequest() {
+void	Response::makeResponseForMethod() {
+	if (_request->getMethod() == GET) {
+		makeResponseForMethodGet();
+	} else if (_request->getMethod() == POST) {
+		makeResponseForMethodPost();
+	} else if (_request->getMethod() == DELETE) {
+		makeResponseForMethodDelete();
+	} else {
+		_status = NOT_IMPLEMENTED;
+		makeResponseForError();
+	}
+}
 
+void	Response::makeResponseForMethodGet() {
+	std::string target = _request->getResolvedTarget();
+}
+
+void	Response::makeResponseForMethodPost() {
+
+}
+
+void	Response::makeResponseForMethodDelete() {
+
+}
+
+void	Response::makeResponseForError() {
+	_reasonPhrase = getReasonPhrase(_status);
 }
 
 void	Response::makeResponseForFile() {
@@ -42,23 +67,14 @@ void	Response::makeResponseForDir() {
 
 }
 
-void	Response::handlePostRequest() {
-
-}
-
-void	Response::handleDeleteRequest() {
-
-}
-
 std::string Response::toString() {
-	return _body;
-}
-
-void Response::makeResponseForError() {
-
-}
-
-void Response::makeResponseForMethod() {
-
+	std::string output;
+	output += "HTTP/" + std::to_string(_majorVersion) + "." + std::to_string(_minorVersion);
+	output += " ";
+	output += std::to_string(_status);
+	output += " ";
+	output += _reasonPhrase;
+	output += "\r\n";
+	return output;
 }
 
