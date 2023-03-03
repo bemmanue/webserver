@@ -7,6 +7,7 @@
 #include <netdb.h>
 
 #include "LocationConfig.hpp"
+#include "../http/Status.hpp"
 
 #define DEFAULT_PORT 					8080
 #define DEFAULT_HOST 					"127.0.0.1"
@@ -42,6 +43,8 @@ public:
 	bool	hasName(const std::string& serverName);
 	bool	hasLocation(const std::string& path);
 	bool	isMethodAllowed(const std::string& method);
+	bool	hasErrorPage(Status status);
+
 
 	LocationConfig	*matchLocationConfig(const std::string& path);
 
@@ -53,6 +56,7 @@ public:
 	const std::map<int, std::string>&				getErrorPages() const;
 	uint64_t										getClientMaxBodySize() const;
 	const std::map<std::string, LocationConfig>&	getLocations() const;
+	std::string										getErrorPage(Status status);
 
 
 	friend std::ostream& operator<<(std::ostream& out, ServerConfig& server) {

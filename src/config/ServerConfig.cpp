@@ -164,3 +164,17 @@ LocationConfig*	ServerConfig::matchLocationConfig(const std::string& requestTarg
 
 	return new LocationConfig;
 }
+
+std::string ServerConfig::getErrorPage(Status status) {
+	if (hasErrorPage(status)) {
+		return _errorPages.at(status);
+	}
+	return "";
+}
+
+bool ServerConfig::hasErrorPage(Status status) {
+	if (_errorPages.find(status) != _errorPages.end()) {
+		return true;
+	}
+	return false;
+}

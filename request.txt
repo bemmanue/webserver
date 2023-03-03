@@ -1,9 +1,6 @@
-OPTIONS /kek/yulya.lol HTTP/1.1
+POST / HTTP/1.1
 Host: bemmanue.com
 
-5
-hello
-C
- Myaushenka!
-0
+
+hello Myaushenka!
 

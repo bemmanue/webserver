@@ -54,7 +54,6 @@ void	Client::setRequest(const std::string& request) {
 
 void	Client::handleRequest() {
 	Request		request(this);
-	Response	response(&request);
 	State		state;
 	std::string	line;
 
@@ -72,6 +71,8 @@ void	Client::handleRequest() {
 	}
 
 	std::cout << request << std::endl;
+
+	Response	response(&request);
 	std::cout << response.toString() << std::endl;
 }
 

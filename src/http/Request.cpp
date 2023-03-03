@@ -177,9 +177,14 @@ void Request::checkHeaderFields() {
 		return;
 	}
 
+	if (_method == POST && !hasHeader(CONTENT_LENGTH) && !hasHeader(TRANSFER_ENCODING)) {
+		_status = LENGTH_REQUIRED;
+		_state = FORMED;
+		return;
+	}
+
 	matchServerConfig();
 	matchLocationConfig();
-	resolveTarget();
 
 	if (hasHeader(TRANSFER_ENCODING) && getTransferEncoding().top() == "chunked") {
 		_state = PARSING_CHUNK_SIZE;
@@ -335,18 +340,6 @@ void	Request::matchLocationConfig() {
 	_locationConfig = _serverConfig->matchLocationConfig(_requestTarget.getPath());
 }
 
-void	Request::resolveTarget() {
-	std::string root = _locationConfig->getRoot();
-
-	if (root.empty() || root.front() != '/') {
-		_resolvedTarget = SERVER_ROOT + root + _requestTarget.getPath();
-	} else {
-		_resolvedTarget = root + _requestTarget.getPath();
-	}
-	_resolvedTarget = URI::URLdecode(URI::normalize(_resolvedTarget));
-}
-
-
 void Request::setTransferEncoding(const std::string& value) {
 //	Transfer-Encoding = 1#transfer-coding
 //	transfer-coding = "chunked" / "compress" / "deflate" / "gzip"
@@ -489,8 +482,3 @@ State	Request::getState() const {
 size_t	Request::getExpectedBodySize() const {
 	return _expectedBodySize;
 }
-
-std::string Request::getResolvedTarget() const {
-	return _resolvedTarget;
-}
-

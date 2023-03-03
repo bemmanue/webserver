@@ -17,13 +17,13 @@ std::string	capitalize(const std::string& str) {
 }
 
 bool	resourceExists(const std::string& filename) {
-	struct stat state;
+	struct stat state{};
 
 	return (stat(filename.c_str(), &state) == 0);
 }
 
 bool	isFile(const std::string& filename) {
-	struct stat state;
+	struct stat state{};
 
 	if (stat(filename.c_str(), &state) < 0) {
 		return false;
@@ -32,7 +32,7 @@ bool	isFile(const std::string& filename) {
 }
 
 bool	isDirectory(const std::string& dirname) {
-	struct stat state;
+	struct stat state{};
 
 	if (stat(dirname.c_str(), &state) < 0) {
 		return false;

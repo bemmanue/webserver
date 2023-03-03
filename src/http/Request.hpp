@@ -10,9 +10,6 @@
 #include "Global.hpp"
 #include "../config/ServerConfig.hpp"
 
-#define HOST				"Host"
-#define CONTENT_LENGTH		"Content-Length"
-#define TRANSFER_ENCODING	"Transfer-Encoding"
 
 enum State {
 	PARSING_REQUEST_LINE,
@@ -30,7 +27,6 @@ class Request {
 private:
 	std::string						_method;
 	URI 		    				_requestTarget;
-	std::string						_resolvedTarget;
 	unsigned short					_majorVersion;
 	unsigned short					_minorVersion;
 	std::map<std::string, std::any>	_headers;
@@ -63,7 +59,6 @@ public:
 
 	[[nodiscard]] std::string		getMethod() const;
 	[[nodiscard]] std::string		getRequestTarget() const;
-	[[nodiscard]] std::string		getResolvedTarget() const;
 	[[nodiscard]] size_t			getMajorVersion() const;
 	[[nodiscard]] size_t			getMinorVersion() const;
 	URI								getHost();
@@ -88,14 +83,12 @@ public:
 	void	checkHeaderFields();
 	void	matchServerConfig();
 	void	matchLocationConfig();
-	void	resolveTarget();
 
 
 public:
 friend std::ostream& operator<<(std::ostream& out, Request& re) {
 	out << "Method: " << re.getMethod() << std::endl;
 	out << "Request target: " << re.getRequestTarget() << std::endl;
-	out << "Resolved target: " << re.getResolvedTarget() << std::endl;
 	out << "Version: HTTP/" << re.getMajorVersion() << "." << re.getMinorVersion() << std::endl;
 	if (re.hasHeader(HOST)) {
 		out << "Host: " << re.getHost().getAuthority() << std::endl;

@@ -27,4 +27,6 @@ add_executable(webserver main.cpp
         src/core/Client.hpp
         src/core/Utils.hpp
         src/core/Utils.cpp
+        src/http/Pages.hpp
+        src/http/Pages.cpp
         )

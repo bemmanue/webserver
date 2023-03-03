@@ -9,6 +9,9 @@
 #include "../http/URI.hpp"
 #include "../http/Global.hpp"
 
+#define DEFAULT_INDEX	"index.html"
+#define DEFAULT_ROOT	"html"
+
 
 class LocationConfig {
 private:

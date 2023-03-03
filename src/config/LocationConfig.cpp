@@ -42,8 +42,12 @@ void LocationConfig::setCGIs(const std::string& extension, const std::string& pa
 	_CGIs[extension] = path;
 }
 
-void LocationConfig::setIndex(const std::vector<std::string>& parameter) {
-	_index = parameter;
+void LocationConfig::setIndex(const std::vector<std::string>& indices) {
+	_index = indices;
+
+//	for (int i = 0; i < _index.size(); i++) {
+//		_index[i] = URI::normalize(URI::removeDotSegments( _index[i]));
+//	}
 }
 
 void LocationConfig::setLimitExcept(const std::string& method) {
@@ -78,6 +82,9 @@ std::map<std::string, std::string> LocationConfig::getCGIs() const {
 }
 
 std::vector<std::string> LocationConfig::getIndices() const {
+	if (_index.empty()) {
+		return std::vector<std::string>{DEFAULT_INDEX};
+	}
 	return _index;
 }
 
@@ -90,6 +97,9 @@ std::map<int, std::string> LocationConfig::getRedirect() const {
 }
 
 std::string LocationConfig::getRoot() const {
+	if (_root.empty()) {
+		return DEFAULT_ROOT;
+	}
 	return _root;
 }
 
