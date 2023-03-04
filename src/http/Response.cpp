@@ -191,32 +191,6 @@ void	Response::makeResponseForFile() {
 	_body = buffer.str();
 }
 
-void Response::makeResponseForListing() {
-	std::string resourcePath = _locationConfig->getRoot() + _target;
-
-	static char  title[] =
-			"<html>" CRLF
-			"<head><title>Index of "
-			;
-
-	static char  header[] =
-			"</title></head>" CRLF
-			"<body>" CRLF
-			"<h1>Index of "
-			;
-
-	static char  tail[] =
-			"</body>" CRLF
-			"</html>" CRLF
-			;
-
-//	static char  *months[] = { "Jan", "Feb", "Mar", "Apr", "May", "Jun",
-//							   "Jul", "Aug", "Sep", "Oct", "Nov", "Dec" };
-
-	_body = title + _target + header + _target + tail;
-
-}
-
 std::string Response::getStatusLine() {
 	return getVersion() + SP + std::to_string(_status) + SP + getReasonPhrase(_status) + CRLF;
 }
@@ -259,3 +233,72 @@ std::string Response::toString() {
 	}
 	return output;
 }
+
+void Response::makeResponseForListing() {
+	std::string path = _locationConfig->getRoot() + _target;
+
+	static char  title[] =
+			"<html>" CRLF
+			"<head><title>Index of "
+			;
+
+	static char  header[] =
+			"</title></head>" CRLF
+			"<body>" CRLF
+			"<h1>Index of "
+			;
+
+	static char  tail[] =
+			"</body>" CRLF
+			"</html>" CRLF
+			;
+
+	_body = title + _target + header + _target;
+	_body += "</h1><hr><pre><a href=\"../\">../</a>" CRLF;
+	for (const auto & entry : std::filesystem::directory_iterator(path)) {
+		_body += "<a href=\"" + (std::string)entry.path().filename() + "\">";
+		std::string show = entry.path().filename();
+		if (show.size() > 50) {
+			show = show.substr(0, 47) + "..&gt;";
+		}
+		_body += show;
+		_body += "</a>";
+		std::string empty(51, ' ');
+		if (show.size() <= 50) {
+			_body += empty.substr(0, 51 - show.size());
+		} else {
+			_body += empty.substr(0, 1);
+		}
+		_body += timeToString(last_write_time(entry.path()));
+		std::string size;
+		if (entry.is_directory()) {
+			size = "-";
+		} else {
+			size = std::to_string(entry.file_size());
+		}
+		empty = "                    ";
+		_body += empty.substr(0, 20 - size.size());
+		_body += size;
+		_body += CRLF;
+	}
+	_body += "</pre><hr>";
+	_body += tail;
+}
+
+template <typename TP>
+std::time_t to_time_t(TP tp) {
+	auto time = tp - TP::clock::now() + std::chrono::system_clock::now();
+	auto sctp = std::chrono::time_point_cast<std::chrono::system_clock::duration>(time);
+
+	return std::chrono::system_clock::to_time_t(sctp);
+}
+
+std::string Response::timeToString(std::filesystem::file_time_type point) {
+	std::time_t			tt = to_time_t(point);
+	std::tm				*gmt = std::gmtime(&tt);
+	std::stringstream	buffer;
+
+	buffer << std::put_time(gmt, "%d-%b-%Y %H:%M");
+	return buffer.str();
+}
+

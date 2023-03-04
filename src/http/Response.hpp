@@ -50,6 +50,8 @@ private:
 	std::string getStatusLine();
 	std::string getVersion();
 	std::string getBody();
+
+	std::string timeToString(std::filesystem::file_time_type point);
 };
 
 
