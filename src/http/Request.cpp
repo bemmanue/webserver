@@ -259,6 +259,11 @@ void	Request::setMethod(const std::string& method) {
 }
 
 void	Request::setRequestTarget(const std::string& requestTarget) {
+	if (requestTarget.size() > MAX_REQUEST_TARGET_LENGTH) {
+		_status = URI_TOO_LONG;
+		return;
+	}
+
 	_requestTarget.parseOriginForm(requestTarget);
 
 	if (!_requestTarget.isCorrect()) {

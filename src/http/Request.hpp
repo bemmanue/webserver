@@ -10,6 +10,7 @@
 #include "Global.hpp"
 #include "../config/ServerConfig.hpp"
 
+#define MAX_REQUEST_TARGET_LENGTH 8000
 
 enum State {
 	PARSING_REQUEST_LINE,
