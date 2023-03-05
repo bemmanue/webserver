@@ -3,7 +3,8 @@
 #include "src/core/Client.hpp"
 
 int main(int argc, char **argv) {
-	std::vector<ServerConfig> configs;
+	std::vector<ServerConfig>	configs;
+	Server						server;
 
 	try {
 		configs = parseConfigFile("conf/webserver.conf");
@@ -12,6 +13,11 @@ int main(int argc, char **argv) {
 		exit(0);
 	}
 
+	for (int i = 0; i < configs.size(); ++i) {
+		server.setConfig(configs[i]);
+	}
+
+	server.start();
 
 
 
