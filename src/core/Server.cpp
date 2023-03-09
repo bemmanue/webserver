@@ -10,34 +10,21 @@ Server::Server(const Server &other) {
 
 Server &Server::operator=(const Server &other) {
 	if (this != &other) {
-
+		_servers = other._servers;
+		_poll_fds = other._poll_fds;
+		_server_fds = other._server_fds;
 	}
 	return *this;
 }
 
 Server::~Server() = default;
 
-void Server::setConfig(const ServerConfig &config) {
+void Server::setConfig(const ServerConfig& config) {
+	unsigned short port;
 
+	port = config.getPort();
+	_servers[port].push_back(config);
 }
-
-void Server::start() {
-
-}
-
-#include <cstdio>
-#include <cstdlib>
-#include <sys/ioctl.h>
-#include <sys/poll.h>
-#include <sys/socket.h>
-#include <ctime>
-#include <netinet/in.h>
-#include <cerrno>
-#include <unistd.h>
-#include <cstring>
-
-#define TRUE             1
-#define FALSE            0
 
 int createSocket(int port) {
 	struct sockaddr_in6   addr;
@@ -50,9 +37,6 @@ int createSocket(int port) {
 		exit(-1);
 	}
 
-	/*************************************************************/
-	/* Allow socket descriptor to be reuseable                   */
-	/*************************************************************/
 	rc = setsockopt(listen_sd, SOL_SOCKET,  SO_REUSEADDR, (char *)&on, sizeof(on));
 	if (rc < 0) {
 		perror("setsockopt() failed");
@@ -60,11 +44,6 @@ int createSocket(int port) {
 		exit(-1);
 	}
 
-	/*************************************************************/
-	/* Set socket to be nonblocking. All of the sockets for      */
-	/* the incoming connections will also be nonblocking since   */
-	/* they will inherit that state from the listening socket.   */
-	/*************************************************************/
 	rc = ioctl(listen_sd, FIONBIO, (char *)&on);
 	if (rc < 0) {
 		perror("ioctl() failed");
@@ -73,9 +52,10 @@ int createSocket(int port) {
 	}
 
 	memset(&addr, 0, sizeof(addr));
-	addr.sin6_family      = AF_INET6;
+	addr.sin6_family = AF_INET6;
 	memcpy(&addr.sin6_addr, &in6addr_any, sizeof(in6addr_any));
-	addr.sin6_port        = htons(port);
+	addr.sin6_port = htons(port);
+
 	rc = bind(listen_sd, (struct sockaddr *)&addr, sizeof(addr));
 	if (rc < 0) {
 		perror("bind() failed");
@@ -92,158 +72,122 @@ int createSocket(int port) {
 	return listen_sd;
 }
 
-//int main (int argc, char *argv[]) {
-//	int		len, rc;
-//	int		listen_sd = -1, listen_sd2 = -1, new_sd = -1;
-//	int		end_server = FALSE, compress_array = FALSE;
-//	int		close_conn;
-//	char	buffer[1000];
-//	//	struct	sockaddr_in6   addr;
-//	int		timeout;
-//	struct	pollfd fds[200];
-//	int		nfds = 2, current_size = 0, i, j;
-//	int		listen_fd;
-//
-//	memset(fds, 0 , sizeof(fds));
-//
-//	listen_sd = createSocket(12345);
-//	fds[0].fd = listen_sd;
-//	fds[0].events = POLLIN;
-//
-//	listen_sd2 = createSocket(12346);
-//	fds[1].fd = listen_sd2;
-//	fds[1].events = POLLIN;
-//
-//	timeout = (3 * 60 * 1000);
-//
-//	do {
-//		rc = poll(fds, nfds, timeout);
-//		if (rc < 0) {
-//			perror("poll() failed");
-//			break;
-//		}
-//
-//		if (rc == 0) {
-//			printf("poll() timed out. End program.\n");
-//			break;
-//		}
-//
-//		current_size = nfds;
-//		for (i = 0; i < current_size; i++) {
-//
-//			if (fds[i].revents == 0)
-//				continue;
-//
-//			if (fds[i].revents != POLLIN) {
-//				//				printf("Error! revents = %d\n", fds[i].revents);
-//				continue;
-//			}
-//
-//			if (fds[i].fd == listen_sd || fds[i].fd == listen_sd2) {
-//				listen_fd = fds[i].fd;
-//				printf("Listening socket is readable %d\n", listen_fd);
-//
-//				do {
-//					new_sd = accept(listen_fd, NULL, NULL);
-//					if (new_sd < 0) {
-//						if (errno != EWOULDBLOCK) {
-//							perror("accept() failed");
-//							end_server = TRUE;
-//						}
-//						break;
-//					}
-//
-//					printf("New incoming connection - %d\n", new_sd);
-//					fds[nfds].fd = new_sd;
-//					fds[nfds].events = POLLIN;
-//					nfds++;
-//
-//				} while (new_sd != -1);
-//
-//			} else {
-//				printf("Descriptor %d is readable\n", fds[i].fd);
-//				close_conn = FALSE;
-//
-//				do {
-//					/*****************************************************/
-//					/* Receive data on this connection until the         */
-//					/* recv fails with EWOULDBLOCK. If any other         */
-//					/* failure occurs, we will close the                 */
-//					/* connection.                                       */
-//					/*****************************************************/
-//					rc = recv(fds[i].fd, buffer, sizeof(buffer), 0);
-//					if (rc < 0) {
-//						if (errno != EWOULDBLOCK) {
-//							perror("recv() failed");
-//							close_conn = TRUE;
-//						}
-//						break;
-//					}
-//
-//					if (rc == 0) {
-//						printf("Connection closed\n");
-//						close_conn = TRUE;
-//						break;
-//					}
-//
-//					len = rc;
-//					printf("%d bytes received\n", len);
-//
-//				} while(TRUE);
-//
-//				rc = send(fds[i].fd, "HTTP/1.1 200 OK\r\nConnection: keep-alive\r\nContent-Length: 20\r\n\r\nhello from webserver", 91, 0);
-//				if (rc < 0) {
-//					perror("send() failed");
-//					close_conn = TRUE;
-//					break;
-//				}
-//
-//				/*******************************************************/
-//				/* If the close_conn flag was turned on, we need       */
-//				/* to clean up this active connection. This            */
-//				/* clean up process includes removing the              */
-//				/* descriptor.                                         */
-//				/*******************************************************/
-//				if (close_conn) {
-//					close(fds[i].fd);
-//					fds[i].fd = -1;
-//					compress_array = TRUE;
-//				}
-//
-//
-//			}  /* End of existing connection is readable             */
-//		} /* End of loop through pollable descriptors              */
-//
-//		/***********************************************************/
-//		/* If the compress_array flag was turned on, we need       */
-//		/* to squeeze together the array and decrement the number  */
-//		/* of file descriptors. We do not need to move back the    */
-//		/* events and revents fields because the events will always*/
-//		/* be POLLIN in this case, and revents is output.          */
-//		/***********************************************************/
-//		if (compress_array) {
-//			compress_array = FALSE;
-//			for (i = 0; i < nfds; i++) {
-//				if (fds[i].fd == -1) {
-//					for (j = i; j < nfds; j++) {
-//						fds[j].fd = fds[j+1].fd;
-//					}
-//					i--;
-//					nfds--;
-//				}
-//			}
-//		}
-//
-//	} while (end_server == FALSE); /* End of serving running.    */
-//
-//	/*************************************************************/
-//	/* Clean up all of the sockets that are open                 */
-//	/*************************************************************/
-//	for (i = 0; i < nfds; i++) {
-//		if (fds[i].fd >= 0) {
-//			close(fds[i].fd);
-//		}
-//	}
-//}
+void Server::start() {
+	int		rc;
+	int		timeout;
+
+	timeout = (3 * 60 * 1000);
+
+	//create server sockets
+	for (auto & _server : _servers) {
+		struct pollfd pollfd = {};
+
+		pollfd.fd = createSocket(_server.first);
+		pollfd.events = POLLIN;
+
+		_poll_fds.push_back(pollfd);
+		_server_fds.push_back(pollfd);
+		std::cout << "started server on port " << _server.first << std::endl;
+	}
+
+	// start
+	while (true) {
+		rc = poll(_poll_fds.data(), _poll_fds.size(), timeout);
+		if (rc < 0) {
+			perror("poll() failed");
+			break;
+		} else if (rc == 0) {
+			printf("poll() timed out\n");
+			break;
+		} else {
+			process();
+		}
+	}
+
+	//close fds
+	for (int i = 0; i < _poll_fds.size(); i++) {
+		if (_poll_fds[i].fd >= 0) {
+			close(_poll_fds[i].fd);
+		}
+	}
+}
+
+void Server::process() {
+	int		listen_fd, rc;
+	char	buffer[1000];
+	int		new_sd;
+
+	for (int id = 0; id < _poll_fds.size(); id++) {
+		const int fd = _poll_fds[id].fd;
+
+		if (fd < 0 || _poll_fds[id].revents & POLLNVAL) {
+			continue;
+		}
+
+		if (isServerFD(_poll_fds[id].fd)) {
+			if (_poll_fds[id].revents & POLLIN) {
+				connect(_poll_fds[id].fd);
+			}
+		}
+
+		else {
+			printf("Descriptor %d is readable\n", _poll_fds[id].fd);
+
+			// get request
+			rc = recv(_poll_fds[id].fd, buffer, sizeof(buffer), 0);
+			if (rc < 0) {
+				perror("recv() failed");
+			}
+
+			if (rc == 0) {
+				printf("Connection closed\n");
+				close(_poll_fds[id].fd);
+				_poll_fds[id].fd = -1;
+				_poll_fds.erase(_poll_fds.begin() + id);
+				break;
+			}
+
+			printf("%d bytes received\n", rc);
+
+			// send response
+			rc = send(_poll_fds[id].fd,
+					  "HTTP/1.1 200 OK\r\nConnection: keep-alive\r\nContent-Length: 20\r\n\r\nhello from webserver", 91,
+					  0);
+			if (rc < 0) {
+				perror("send() failed");
+				close(_poll_fds[id].fd);
+				_poll_fds[id].fd = -1;
+				_poll_fds.erase(_poll_fds.begin() + id);
+			}
+		}
+	}
+}
+
+bool Server::isServerFD(int fd) {
+	for (int i = 0; i < _server_fds.size(); i++) {
+		if (_server_fds[i].fd == fd) {
+			return true;
+		}
+	}
+	return false;
+}
+
+void Server::connect(int fd) {
+	int new_sd;
+
+	printf("Listening socket is readable %d\n", fd);
+
+	new_sd = accept(fd, nullptr, nullptr);
+	if (new_sd < 0) {
+		perror("connect() failed");
+	}
+
+	printf("New incoming connection - %d\n", new_sd);
+	struct pollfd pollfd = {0, 0, 0};
+	pollfd.fd = new_sd;
+	pollfd.events = POLLIN;
+	_poll_fds.push_back(pollfd);
+}
+
 
 

@@ -1,6 +1,7 @@
 #include "src/http/Response.hpp"
 #include "src/config/Config.hpp"
 #include "src/core/Client.hpp"
+#include "src/core/Server.hpp"
 
 int main(int argc, char **argv) {
 	std::vector<ServerConfig>	configs;
