@@ -1,8 +1,6 @@
 #include "Server.hpp"
 
-Server::Server() {
-
-}
+Server::Server() {}
 
 Server::Server(const Server &other) {
 	operator=(other);
@@ -20,35 +18,131 @@ Server &Server::operator=(const Server &other) {
 Server::~Server() = default;
 
 void Server::setConfig(const ServerConfig& config) {
-	unsigned short port;
-
-	port = config.getPort();
-	_servers[port].push_back(config);
+	_servers[config.getPort()].push_back(config);
 }
 
-int createSocket(int port) {
-	struct sockaddr_in6   addr;
-	int	rc;
+void Server::start() {
+
+	createServerPollFDs();
+
+	while (true) {
+		if (poll(_poll_fds.data(), _poll_fds.size(), -1) < 0) {
+			perror("poll() failed");
+			break;
+		}
+		process();
+	}
+
+	closeSockets();
+}
+
+void Server::process() {
+
+	for (int id = 0; id < _poll_fds.size(); id++) {
+		if (_poll_fds[id].revents & POLLIN) {
+			if (id < _server_fds.size()) {
+				acceptClient(id);
+			} else {
+				pollin(id);
+			}
+		}
+	}
+}
+
+void Server::acceptClient(int id) {
+	int	client_fd;
+	int	server_fd = _poll_fds[id].fd;
+	struct pollfd	pollfd = {};
+
+	client_fd = accept(server_fd, nullptr, nullptr);
+	if (client_fd < 0) {
+		perror("acceptClient() failed");
+	}
+
+	pollfd.fd = client_fd;
+	pollfd.events = POLLIN;
+
+	_poll_fds.push_back(pollfd);
+}
+
+void Server::pollin(int id) {
+	Connection	connection;
+
+	connection.setFD(_poll_fds[id].fd);
+	connection.setPort(8888);
+	connection.setServerConfigs(_servers[8888]);
+
+	if (!connection.readRequest()) {
+		printf("Connection closed\n");
+		close(_poll_fds[id].fd);
+		_poll_fds.erase(_poll_fds.begin() + id);
+		return;
+	}
+
+	if (connection.sendResponse()) {
+		perror("send() failed");
+		close(_poll_fds[id].fd);
+		_poll_fds.erase(_poll_fds.begin() + id);
+	}
+//	rc = recv(client_fd, buffer, sizeof(buffer), 0);
+//	if (rc < 0) {
+//		perror("recv() failed");
+//	}
+//
+//	if (rc == 0) {
+//		printf("Connection closed\n");
+//		close(client_fd);
+//		_poll_fds.erase(_poll_fds.begin() + id);
+//		return;
+//	}
+//
+//	printf("%d bytes received\n", rc);
+//
+//	// send response
+//	rc = send(client_fd, "HTTP/1.1 200 OK\r\nConnection: keep-alive\r\nContent-Length: 20\r\n\r\nhello from webserver", 91, 0);
+//	if (rc < 0) {
+//		perror("send() failed");
+//		close(client_fd);
+//		_poll_fds.erase(_poll_fds.begin() + id);
+//	}
+}
+
+void Server::createServerPollFDs() {
+	int				socket;
+	struct pollfd	pollfd;
+
+	for (auto & _server : _servers) {
+		socket = createServerSocket(_server.first);
+
+		bzero(&pollfd, sizeof(pollfd));
+		pollfd.fd = socket;
+		pollfd.events = POLLIN;
+
+		_poll_fds.push_back(pollfd);
+		_server_fds.push_back(pollfd);
+	}
+}
+
+int Server::createServerSocket(int port) {
+	struct sockaddr_in6	addr;
+	int	sock;
 	int	on = 1;
 
-	int listen_sd = socket(AF_INET6, SOCK_STREAM, 0);
-	if (listen_sd < 0) {
+	if ((sock = socket(AF_INET6, SOCK_STREAM, 0)) < 0) {
 		perror("socket() failed");
-		exit(-1);
+		exit(EXIT_FAILURE);
 	}
 
-	rc = setsockopt(listen_sd, SOL_SOCKET,  SO_REUSEADDR, (char *)&on, sizeof(on));
-	if (rc < 0) {
+	if ((setsockopt(sock, SOL_SOCKET,  SO_REUSEADDR, &on, sizeof(on))) < 0) {
 		perror("setsockopt() failed");
-		close(listen_sd);
-		exit(-1);
+		close(sock);
+		exit(EXIT_FAILURE);
 	}
 
-	rc = ioctl(listen_sd, FIONBIO, (char *)&on);
-	if (rc < 0) {
+	if ((ioctl(sock, FIONBIO, &on)) < 0) {
 		perror("ioctl() failed");
-		close(listen_sd);
-		exit(-1);
+		close(sock);
+		exit(EXIT_FAILURE);
 	}
 
 	memset(&addr, 0, sizeof(addr));
@@ -56,145 +150,25 @@ int createSocket(int port) {
 	memcpy(&addr.sin6_addr, &in6addr_any, sizeof(in6addr_any));
 	addr.sin6_port = htons(port);
 
-	rc = bind(listen_sd, (struct sockaddr *)&addr, sizeof(addr));
-	if (rc < 0) {
+	if ((bind(sock, (struct sockaddr *)&addr, sizeof(addr))) < 0) {
 		perror("bind() failed");
-		close(listen_sd);
-		exit(-1);
+		close(sock);
+		exit(EXIT_FAILURE);
 	}
 
-	rc = listen(listen_sd, 32);
-	if (rc < 0) {
+	if ((listen(sock, 32)) < 0) {
 		perror("listen() failed");
-		close(listen_sd);
-		exit(-1);
+		close(sock);
+		exit(EXIT_FAILURE);
 	}
-	return listen_sd;
+
+	return sock;
 }
 
-void Server::start() {
-	int		rc;
-	int		timeout;
-
-	timeout = (3 * 60 * 1000);
-
-	//create server sockets
-	for (auto & _server : _servers) {
-		struct pollfd pollfd = {};
-
-		pollfd.fd = createSocket(_server.first);
-		pollfd.events = POLLIN;
-
-		_poll_fds.push_back(pollfd);
-		_server_fds.push_back(pollfd);
-		std::cout << "started server on port " << _server.first << std::endl;
-	}
-
-	// start
-	while (true) {
-		std::cout << "waiting poll()" << std::endl;
-		rc = poll(_poll_fds.data(), _poll_fds.size(), -1);
-		if (rc < 0) {
-			perror("poll() failed");
-			break;
-		} else if (rc == 0) {
-			printf("poll() timed out\n");
-			break;
-		} else {
-			process();
+void Server::closeSockets() {
+	for (auto & _poll_fd : _poll_fds) {
+		if (_poll_fd.fd >= 0) {
+			close(_poll_fd.fd);
 		}
 	}
-
-	//close fds
-	for (int i = 0; i < _poll_fds.size(); i++) {
-		if (_poll_fds[i].fd >= 0) {
-			close(_poll_fds[i].fd);
-		}
-	}
-}
-
-void Server::process() {
-	for (int id = 0; id < _poll_fds.size(); id++) {
-		const int fd = _poll_fds[id].fd;
-
-		if (fd < 0 || _poll_fds[id].revents & POLLNVAL) {
-			continue;
-		}
-
-		if (isServerFD(id)) {
-			if (_poll_fds[id].revents & POLLIN) {
-				connect(_poll_fds[id].fd);
-			}
-		} else {
-			if (_poll_fds[id].revents & POLLIN) {
-				pollin(id);
-			}
-//			else if (_poll_fds[id].revents & POLLOUT) {
-//				std::cout << "pollout" << std::endl;
-//				pollout(id);
-//			}
-		}
-	}
-}
-
-bool Server::isServerFD(int id) {
-	if (id < _server_fds.size()) {
-		return true;
-	}
-	return false;
-}
-
-void Server::connect(int fd) {
-	int new_sd;
-
-	printf("Listening socket is readable %d\n", fd);
-
-	new_sd = accept(fd, nullptr, nullptr);
-	if (new_sd < 0) {
-		perror("connect() failed");
-	}
-
-	printf("New incoming connection - %d\n", new_sd);
-	struct pollfd pollfd = {0, 0, 0};
-	pollfd.fd = new_sd;
-	pollfd.events = POLLIN;
-	_poll_fds.push_back(pollfd);
-}
-
-void Server::pollin(int id) {
-	int		rc;
-	char	buffer[1000];
-
-	printf("Descriptor %d is readable\n", _poll_fds[id].fd);
-
-	// get request
-	rc = recv(_poll_fds[id].fd, buffer, sizeof(buffer), 0);
-	if (rc < 0) {
-		perror("recv() failed");
-	}
-
-	if (rc == 0) {
-		printf("Connection closed\n");
-		close(_poll_fds[id].fd);
-		_poll_fds[id].fd = -1;
-		_poll_fds.erase(_poll_fds.begin() + id);
-		return;
-	}
-
-	printf("%d bytes received\n", rc);
-
-	// send response
-	rc = send(_poll_fds[id].fd,
-			  "HTTP/1.1 200 OK\r\nConnection: keep-alive\r\nContent-Length: 20\r\n\r\nhello from webserver", 91,
-			  0);
-	if (rc < 0) {
-		perror("send() failed");
-		close(_poll_fds[id].fd);
-		_poll_fds[id].fd = -1;
-		_poll_fds.erase(_poll_fds.begin() + id);
-	}
-}
-
-void Server::pollout(int id) {
-
 }

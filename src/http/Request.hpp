@@ -22,7 +22,7 @@ enum State {
 	FORMED
 };
 
-class Client;
+class Connection;
 
 class Request {
 private:
@@ -39,10 +39,10 @@ private:
 
 	ServerConfig*					_serverConfig;
 	LocationConfig*					_locationConfig;
-	Client*							_client;
+	Connection*						_client;
 
 public:
-	Request(Client* client);
+	Request(Connection* client);
 	Request(const Request& other);
 	Request& operator=(const Request& other);
 	~Request();
@@ -81,6 +81,7 @@ public:
 	void	parseChunkSize(const std::string& line);
 	void	parseChunkData(const std::string& line);
 	void	parseTrailerPart(const std::string& line);
+
 	void	checkHeaderFields();
 	void	matchServerConfig();
 	void	matchLocationConfig();
@@ -117,6 +118,6 @@ friend std::ostream& operator<<(std::ostream& out, Request& re) {
 };
 
 
-#include "../core/Client.hpp"
+#include "../core/Connection.hpp"
 
 #endif //REQUEST_HPP

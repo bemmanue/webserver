@@ -109,7 +109,7 @@ std::string	getReasonPhrase(Status code) {
 		case UNAVAILABLE_FOR_LEGAL_REASONS:
 			return "Unavailable For Legal Reasons";
 		case CLIENT_CLOSED_REQUEST:
-			return "Client Closed Request";
+			return "Connection Closed Request";
 		case INTERNAL_SERVER_ERROR:
 			return "Internal Server Error";
 		case NOT_IMPLEMENTED:

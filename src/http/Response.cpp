@@ -224,11 +224,12 @@ std::string Response::toString() {
 	} else {
 		size_t chunkSize;
 		size_t size = 1000;
-		for (size_t i = 0; i <= _body.size(); i += size) {
+		for (size_t i = 0; i < _body.size(); i += size) {
 			_body.size() - i >= size ? chunkSize = size : chunkSize = _body.size() - i;
-			output += std::to_string(chunkSize) + CRLF;
+			output += toHexString((int)chunkSize) + CRLF;
 			output += _body.substr(i, size) + CRLF;
 		}
+		output += "0" CRLF;
 		output += CRLF;
 	}
 	return output;

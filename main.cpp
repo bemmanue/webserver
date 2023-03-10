@@ -1,6 +1,6 @@
 #include "src/http/Response.hpp"
 #include "src/config/Config.hpp"
-#include "src/core/Client.hpp"
+#include "src/core/Connection.hpp"
 #include "src/core/Server.hpp"
 
 int main(int argc, char **argv) {
@@ -34,7 +34,7 @@ int main(int argc, char **argv) {
 //	t.seekg(0);
 //	t.read(&buffer[0], size);
 //
-//	Client client(config);
+//	Connection client(config);
 //	client.setRequest(buffer);
 //	client.handleRequest();
 

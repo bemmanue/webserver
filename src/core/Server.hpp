@@ -13,7 +13,7 @@
 #include <cstring>
 
 #include "../config/ServerConfig.hpp"
-#include "Client.hpp"
+#include "Connection.hpp"
 
 
 class Server {
@@ -31,13 +31,14 @@ public:
 
 	void	setConfig(const ServerConfig& config);
 
+	int 	createServerSocket(int port);
+	void 	createServerPollFDs();
+	void 	closeSockets();
+
 	void	start();
 	void	process();
-	void	connect(int fd);
+	void	acceptClient(int fd);
 	void	pollin(int id);
-	void	pollout(int id);
-
-	bool 	isServerFD(int fd);
 };
 
 

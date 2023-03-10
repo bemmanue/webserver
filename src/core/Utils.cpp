@@ -16,6 +16,12 @@ std::string	capitalize(const std::string& str) {
 	return ret;
 }
 
+std::string toHexString(int num) {
+	std::stringstream stream;
+	stream << std::hex << num;
+	return stream.str();
+}
+
 bool	resourceExists(const std::string& filename) {
 	struct stat state{};
 

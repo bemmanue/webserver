@@ -1,1 +1,1 @@
-I'm trying to read a binary file and store it in a buffer. The problem is, that in the binary file are multiple null-terminated characters, but they are not at the end, instead they are before other binary text, so if I store the text after the '\0' it just deletes it in the buffer.
+hello from webserver

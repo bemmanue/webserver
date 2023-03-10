@@ -1,6 +1,6 @@
 #include "Request.hpp"
 
-Request::Request(Client* client):
+Request::Request(Connection* client):
 	_majorVersion(0),
 	_minorVersion(0),
 	_status(OK),

@@ -10,7 +10,6 @@
 #include "../core/Utils.hpp"
 #include "Request.hpp"
 
-
 class Response {
 private:
 	std::string							_target;
@@ -54,5 +53,6 @@ private:
 	std::string timeToString(std::filesystem::file_time_type point);
 };
 
-
 #endif //RESPONSE_HPP
+
+
