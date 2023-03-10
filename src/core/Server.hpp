@@ -34,8 +34,10 @@ public:
 	void	start();
 	void	process();
 	void	connect(int fd);
+	void	pollin(int id);
+	void	pollout(int id);
 
-	bool isServerFD(int fd);
+	bool 	isServerFD(int fd);
 };
 
 

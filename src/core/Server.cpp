@@ -92,7 +92,8 @@ void Server::start() {
 
 	// start
 	while (true) {
-		rc = poll(_poll_fds.data(), _poll_fds.size(), timeout);
+		std::cout << "waiting poll()" << std::endl;
+		rc = poll(_poll_fds.data(), _poll_fds.size(), -1);
 		if (rc < 0) {
 			perror("poll() failed");
 			break;
@@ -113,10 +114,6 @@ void Server::start() {
 }
 
 void Server::process() {
-	int		listen_fd, rc;
-	char	buffer[1000];
-	int		new_sd;
-
 	for (int id = 0; id < _poll_fds.size(); id++) {
 		const int fd = _poll_fds[id].fd;
 
@@ -124,50 +121,25 @@ void Server::process() {
 			continue;
 		}
 
-		if (isServerFD(_poll_fds[id].fd)) {
+		if (isServerFD(id)) {
 			if (_poll_fds[id].revents & POLLIN) {
 				connect(_poll_fds[id].fd);
 			}
-		}
-
-		else {
-			printf("Descriptor %d is readable\n", _poll_fds[id].fd);
-
-			// get request
-			rc = recv(_poll_fds[id].fd, buffer, sizeof(buffer), 0);
-			if (rc < 0) {
-				perror("recv() failed");
+		} else {
+			if (_poll_fds[id].revents & POLLIN) {
+				pollin(id);
 			}
-
-			if (rc == 0) {
-				printf("Connection closed\n");
-				close(_poll_fds[id].fd);
-				_poll_fds[id].fd = -1;
-				_poll_fds.erase(_poll_fds.begin() + id);
-				break;
-			}
-
-			printf("%d bytes received\n", rc);
-
-			// send response
-			rc = send(_poll_fds[id].fd,
-					  "HTTP/1.1 200 OK\r\nConnection: keep-alive\r\nContent-Length: 20\r\n\r\nhello from webserver", 91,
-					  0);
-			if (rc < 0) {
-				perror("send() failed");
-				close(_poll_fds[id].fd);
-				_poll_fds[id].fd = -1;
-				_poll_fds.erase(_poll_fds.begin() + id);
-			}
+//			else if (_poll_fds[id].revents & POLLOUT) {
+//				std::cout << "pollout" << std::endl;
+//				pollout(id);
+//			}
 		}
 	}
 }
 
-bool Server::isServerFD(int fd) {
-	for (int i = 0; i < _server_fds.size(); i++) {
-		if (_server_fds[i].fd == fd) {
-			return true;
-		}
+bool Server::isServerFD(int id) {
+	if (id < _server_fds.size()) {
+		return true;
 	}
 	return false;
 }
@@ -189,5 +161,40 @@ void Server::connect(int fd) {
 	_poll_fds.push_back(pollfd);
 }
 
+void Server::pollin(int id) {
+	int		rc;
+	char	buffer[1000];
 
+	printf("Descriptor %d is readable\n", _poll_fds[id].fd);
 
+	// get request
+	rc = recv(_poll_fds[id].fd, buffer, sizeof(buffer), 0);
+	if (rc < 0) {
+		perror("recv() failed");
+	}
+
+	if (rc == 0) {
+		printf("Connection closed\n");
+		close(_poll_fds[id].fd);
+		_poll_fds[id].fd = -1;
+		_poll_fds.erase(_poll_fds.begin() + id);
+		return;
+	}
+
+	printf("%d bytes received\n", rc);
+
+	// send response
+	rc = send(_poll_fds[id].fd,
+			  "HTTP/1.1 200 OK\r\nConnection: keep-alive\r\nContent-Length: 20\r\n\r\nhello from webserver", 91,
+			  0);
+	if (rc < 0) {
+		perror("send() failed");
+		close(_poll_fds[id].fd);
+		_poll_fds[id].fd = -1;
+		_poll_fds.erase(_poll_fds.begin() + id);
+	}
+}
+
+void Server::pollout(int id) {
+
+}
