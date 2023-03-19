@@ -235,6 +235,7 @@ std::string Response::getResponse() {
 
 void Response::makeResponseForListing() {
 	std::string path = _locationConfig->getRoot() + _target;
+	std::string body;
 
 	static char  title[] =
 			"<html>" CRLF
@@ -252,36 +253,62 @@ void Response::makeResponseForListing() {
 			"</html>" CRLF
 			;
 
-	_body = title + _target + header + _target;
-	_body += "</h1><hr><pre><a href=\"../\">../</a>" CRLF;
+	body = title + _target + header + _target;
+	body += "</h1><hr><pre><a href=\"../\">../</a>" CRLF;
+
+
 	for (const auto & entry : std::filesystem::directory_iterator(path)) {
-		_body += "<a href=\"" + (std::string)entry.path().filename() + "\">";
-		std::string show = entry.path().filename();
-		if (show.size() > 50) {
-			show = show.substr(0, 47) + "..&gt;";
+		std::string ref = (std::string)entry.path().filename();
+
+		std::string name = ref;
+		if (name.size() > 50) {
+			name = name.substr(0, 47) + "..&gt;";
 		}
-		_body += show;
-		_body += "</a>";
-		std::string empty(51, ' ');
-		if (show.size() <= 50) {
-			_body += empty.substr(0, 51 - show.size());
-		} else {
-			_body += empty.substr(0, 1);
-		}
-		_body += timeToString(last_write_time(entry.path()));
+
+		std::string space(51 - name.size(), ' ');
+
+		std::string time = timeToString(last_write_time(entry.path()));
+
 		std::string size;
 		if (entry.is_directory()) {
 			size = "-";
 		} else {
 			size = std::to_string(entry.file_size());
 		}
-		empty = "                    ";
-		_body += empty.substr(0, 20 - size.size());
-		_body += size;
-		_body += CRLF;
+
+		std::string space2(20 - size.size(), ' ');
+
+		body += "<a href=\"" + ref + "\">" + name + "</a>" + space + time + space2 + size + CRLF;
+
+//		body += "<a href=\"" + (std::string)entry.path().filename() + "\">";
+//		std::string show = entry.path().filename();
+//		if (show.size() > 50) {
+//			show = show.substr(0, 47) + "..&gt;";
+//		}
+//		body += show;
+//		body += "</a>";
+//		std::string empty(51, ' ');
+//		if (show.size() <= 50) {
+//			body += empty.substr(0, 51 - show.size());
+//		} else {
+//			body += empty.substr(0, 1);
+//		}
+//		body += timeToString(last_write_time(entry.path()));
+//		std::string size;
+//		if (entry.is_directory()) {
+//			size = "-";
+//		} else {
+//			size = std::to_string(entry.file_size());
+//		}
+//		empty = "                    ";
+//		body += empty.substr(0, 20 - size.size());
+//		body += size;
+//		body += CRLF;
 	}
-	_body += "</pre><hr>";
-	_body += tail;
+	body += "</pre><hr>";
+	body += tail;
+
+	setBody(body);
 }
 
 
