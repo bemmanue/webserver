@@ -30,6 +30,7 @@ public:
 	~Response();
 
 	void	setStatus(Status status);
+	void	setBody(const std::string& body);
 
 	std::string		getResponse();
 	Status			getStatus();
@@ -52,8 +53,6 @@ private:
 
 	bool	setIndexFile();
 	bool	setIndexDirectory();
-
-	std::string timeToString(std::filesystem::file_time_type point);
 };
 
 #endif //RESPONSE_HPP

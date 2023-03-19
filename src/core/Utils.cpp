@@ -45,3 +45,20 @@ bool	isDirectory(const std::string& dirname) {
 	}
 	return S_ISDIR(state.st_mode);
 }
+
+template <typename TP>
+std::time_t to_time_t(TP tp) {
+	auto time = tp - TP::clock::now() + std::chrono::system_clock::now();
+	auto sctp = std::chrono::time_point_cast<std::chrono::system_clock::duration>(time);
+
+	return std::chrono::system_clock::to_time_t(sctp);
+}
+
+std::string timeToString(std::filesystem::file_time_type point) {
+	std::time_t			tt = to_time_t(point);
+	std::tm				*gmt = std::gmtime(&tt);
+	std::stringstream	buffer;
+
+	buffer << std::put_time(gmt, "%d-%b-%Y %H:%M");
+	return buffer.str();
+}

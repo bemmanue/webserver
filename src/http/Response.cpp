@@ -77,89 +77,68 @@ void	Response::Get() {
 	}
 }
 
-void	Response::makeResponseForDir() {
-	if (setIndexFile()) {
-		makeResponseForFile();
-	} else if (setIndexDirectory()) {
-		makeResponseForDir();
-	} else {
-		if (_locationConfig->getAutoindex()) {
-			makeResponseForListing();
-		} else {
-			_status = FORBIDDEN;
-			makeResponseForError();
-		}
-	}
-}
-
-bool	Response::setIndexFile() {
-	std::vector<std::string> indices = _locationConfig->getIndices();
-
-	for (std::size_t i = 0; i < indices.size(); ++i) {
-		std::string target = _target + indices[i];
-		std::string resolvedTarget = _locationConfig->getRoot() + target;
-
-		if (isFile(resolvedTarget)) {
-			_target = target;
-			_locationConfig = _serverConfig->matchLocationConfig(_target);
-			return true;
-		}
-	}
-	return false;
-}
-
-bool	Response::setIndexDirectory() {
-	std::vector<std::string> indices = _locationConfig->getIndices();
-
-	for (std::size_t i = 0; i < indices.size(); ++i) {
-		std::string target = _target + indices[i];
-		std::string resolvedTarget = _locationConfig->getRoot() + target;
-
-		if (isDirectory(resolvedTarget)) {
-			_target = target;
-			_locationConfig = _serverConfig->matchLocationConfig(_target);
-			return true;
-		}
-	}
-	return false;
-}
-
 void	Response::Post() {
 	if (!_locationConfig->isMethodAllowed(POST)) {
-		_status = METHOD_NOT_ALLOWED;
-		makeResponseForError();
+		setStatus(METHOD_NOT_ALLOWED);
 		return;
 	}
 
 	std::string target = _locationConfig->getRoot() + _target;
 
 	if (isDirectory(target)) {
-		_status = FORBIDDEN;
-		makeResponseForError();
-		return;
+		// create file
+		// set Location Header
+		setStatus(CREATED);
+	} else {
+		setStatus(BAD_REQUEST);
 	}
-
-	if (isFile(target)) {
-		_status = SEE_OTHER;
-		makeResponseForError();
-		return;
-	}
-
-	std::ofstream out(target.c_str(), std::ios_base::out | std::ios_base::trunc);
-	if (out.is_open() && out.good()) {
-		out << _request->getBody();
-	}
-
-	_headers["Location"] = target;
-	_status = CREATED;
 }
 
 void	Response::Delete() {
 	if (!_request->getLocationConfig()->isMethodAllowed(DELETE)) {
-		_status = METHOD_NOT_ALLOWED;
-		makeResponseForError();
+		setStatus(METHOD_NOT_ALLOWED);
+		return;
 	}
 
+	std::string target = _locationConfig->getRoot() + _target;
+
+	if (isFile(target)) {
+		// dalete file
+		setStatus(CREATED);
+	} else {
+		setStatus(BAD_REQUEST);
+	}
+}
+
+void	Response::makeResponseForFile() {
+	std::string			resolvedTarget;
+	std::ifstream		file;
+	std::stringstream	buffer;
+
+	resolvedTarget = _locationConfig->getRoot() + _target;
+
+	file.open(resolvedTarget, O_RDONLY);
+	if (!file.is_open()) {
+		setStatus(INTERNAL_SERVER_ERROR);
+		return;
+	}
+
+	buffer << file.rdbuf();
+	file.close();
+
+	setBody(buffer.str());
+}
+
+void	Response::makeResponseForDir() {
+	if (setIndexFile()) {
+		makeResponseForFile();
+	} else if (setIndexDirectory()) {
+		makeResponseForDir();
+	} else if (_locationConfig->getAutoindex()) {
+		makeResponseForListing();
+	} else {
+		setStatus(NOT_FOUND);
+	}
 }
 
 void	Response::makeResponseForError() {
@@ -172,21 +151,42 @@ void	Response::makeResponseForError() {
 	}
 }
 
-void	Response::makeResponseForFile() {
-	std::string resolvedTarget = _locationConfig->getRoot() + _target;
+bool	Response::setIndexFile() {
+	std::vector<std::string>	indices;
+	std::string					target;
+	std::string					resolvedTarget;
 
-	std::ifstream file(resolvedTarget, O_RDONLY);
-	if (!file.is_open()) {
-		_status = INTERNAL_SERVER_ERROR;
-		makeResponseForError();
-		return;
+	indices = _locationConfig->getIndices();
+	for (auto & index : indices) {
+		target = _target + index;
+		resolvedTarget = _locationConfig->getRoot() + target;
+
+		if (isFile(resolvedTarget)) {
+			_target = target;
+			_locationConfig = _serverConfig->matchLocationConfig(_target);
+			return true;
+		}
 	}
+	return false;
+}
 
-	std::stringstream	buffer;
-	buffer << file.rdbuf();
-	file.close();
+bool	Response::setIndexDirectory() {
+	std::vector<std::string>	indices;
+	std::string					target;
+	std::string					resolvedTarget;
 
-	_body = buffer.str();
+	indices = _locationConfig->getIndices();
+	for (auto & index : indices) {
+		target = _target + index;
+		resolvedTarget = _locationConfig->getRoot() + target;
+
+		if (isDirectory(resolvedTarget)) {
+			_target = target;
+			_locationConfig = _serverConfig->matchLocationConfig(_target);
+			return true;
+		}
+	}
+	return false;
 }
 
 std::string Response::getStatusLine() {
@@ -284,28 +284,16 @@ void Response::makeResponseForListing() {
 	_body += tail;
 }
 
-template <typename TP>
-std::time_t to_time_t(TP tp) {
-	auto time = tp - TP::clock::now() + std::chrono::system_clock::now();
-	auto sctp = std::chrono::time_point_cast<std::chrono::system_clock::duration>(time);
 
-	return std::chrono::system_clock::to_time_t(sctp);
-}
-
-std::string Response::timeToString(std::filesystem::file_time_type point) {
-	std::time_t			tt = to_time_t(point);
-	std::tm				*gmt = std::gmtime(&tt);
-	std::stringstream	buffer;
-
-	buffer << std::put_time(gmt, "%d-%b-%Y %H:%M");
-	return buffer.str();
-}
 
 void Response::setStatus(Status status) {
 	_status = status;
 }
 
+void Response::setBody(const std::string &body) {
+	_body = body;
+}
+
 Status Response::getStatus() {
 	return _status;
 }
-
