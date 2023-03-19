@@ -31,41 +31,40 @@ Response& Response::operator=(const Response &other) {
 Response::~Response() = default;
 
 void	Response::handleRequest() {
-	if (_status == OK) {
-		makeResponseForMethod();
-	} else {
+	if (getStatus() < BAD_REQUEST) {
+		handleMethod();
+	}
+
+	if (getStatus() >= BAD_REQUEST) {
 		makeResponseForError();
 	}
 }
 
-void	Response::makeResponseForMethod() {
+void	Response::handleMethod() {
 	std::string method = _request->getMethod();
 
 	if (method == GET) {
-		makeResponseForMethodGet();
+		Get();
 	} else if (method == POST) {
-		makeResponseForMethodPost();
+		Post();
 	} else if (method == DELETE) {
-		makeResponseForMethodDelete();
+		Delete();
 	} else {
-		_status = NOT_IMPLEMENTED;
-		makeResponseForError();
+		setStatus(NOT_IMPLEMENTED);
 	}
 }
 
-void	Response::makeResponseForMethodGet() {
+void	Response::Get() {
 	std::string resolvedTarget;
 
 	if (!_locationConfig->isMethodAllowed(GET)) {
-		_status = METHOD_NOT_ALLOWED;
-		makeResponseForError();
+		setStatus(METHOD_NOT_ALLOWED);
 		return;
 	}
 
 	resolvedTarget = _locationConfig->getRoot() + _target;
 	if (!resourceExists(resolvedTarget)) {
-		_status = NOT_FOUND;
-		makeResponseForError();
+		setStatus(NOT_FOUND);
 		return;
 	}
 
@@ -74,8 +73,7 @@ void	Response::makeResponseForMethodGet() {
 	} else if (isFile(resolvedTarget)) {
 		makeResponseForFile();
 	} else {
-		_status = FORBIDDEN;
-		makeResponseForError();
+		setStatus(NOT_FOUND);
 	}
 }
 
@@ -126,7 +124,7 @@ bool	Response::setIndexDirectory() {
 	return false;
 }
 
-void	Response::makeResponseForMethodPost() {
+void	Response::Post() {
 	if (!_locationConfig->isMethodAllowed(POST)) {
 		_status = METHOD_NOT_ALLOWED;
 		makeResponseForError();
@@ -156,7 +154,7 @@ void	Response::makeResponseForMethodPost() {
 	_status = CREATED;
 }
 
-void	Response::makeResponseForMethodDelete() {
+void	Response::Delete() {
 	if (!_request->getLocationConfig()->isMethodAllowed(DELETE)) {
 		_status = METHOD_NOT_ALLOWED;
 		makeResponseForError();
@@ -168,7 +166,7 @@ void	Response::makeResponseForError() {
 	if (_serverConfig && _serverConfig->hasErrorPage(_status) && _target != _serverConfig->getErrorPage(_status)) {
 		_target = _serverConfig->getErrorPage(_status);
 		_locationConfig = _serverConfig->matchLocationConfig(_target);
-		makeResponseForMethodGet();
+		Get();
 	} else {
 		_body = getPageForStatus(_status) + http_error_tail;
 	}
@@ -203,7 +201,7 @@ std::string Response::getBody() {
 	return _body;
 }
 
-std::string Response::toString() {
+std::string Response::getResponse() {
 	std::string output;
 
 	output += getStatusLine();
@@ -301,5 +299,13 @@ std::string Response::timeToString(std::filesystem::file_time_type point) {
 
 	buffer << std::put_time(gmt, "%d-%b-%Y %H:%M");
 	return buffer.str();
+}
+
+void Response::setStatus(Status status) {
+	_status = status;
+}
+
+Status Response::getStatus() {
+	return _status;
 }
 

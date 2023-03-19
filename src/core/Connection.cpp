@@ -74,7 +74,7 @@ void	Connection::handleRequest() {
 	std::cout << _request << std::endl;
 
 	_response = new Response(_request);
-	std::cout << _response->toString() << std::endl;
+	std::cout << _response->getResponse() << std::endl;
 }
 
 size_t Connection::getPort() {
@@ -113,7 +113,7 @@ int Connection::sendResponse() {
 		return 0;
 	}
 
-	std::string response = _response->toString();
+	std::string response = _response->getResponse();
 
 	if ((send(_fd, response.c_str(), response.size(), 0)) < 0) {
 		return 0;
