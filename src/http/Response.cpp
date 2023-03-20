@@ -237,25 +237,12 @@ void Response::makeResponseForListing() {
 	std::string path = _locationConfig->getRoot() + _target;
 	std::string body;
 
-	static char  title[] =
-			"<html>" CRLF
-			"<head><title>Index of "
-			;
-
-	static char  header[] =
-			"</title></head>" CRLF
-			"<body>" CRLF
-			"<h1>Index of "
-			;
-
-	static char  tail[] =
-			"</body>" CRLF
-			"</html>" CRLF
-			;
-
-	body = title + _target + header + _target;
-	body += "</h1><hr><pre><a href=\"../\">../</a>" CRLF;
-
+	body =	HTML_BEG CRLF
+			HEAD_BEG TITLE_BEG "Index of " + path + TITLE_END HEAD_END
+			BODY_BEG CRLF
+			H1_BEG "Index of " + path + H1_END CRLF
+			HR_BEG PRE_BEG CRLF
+			HREF_BEG + "../" + HREF_END "../" A_END CRLF;
 
 	for (const auto & entry : std::filesystem::directory_iterator(path)) {
 		std::string ref = (std::string)entry.path().filename();
@@ -265,7 +252,7 @@ void Response::makeResponseForListing() {
 			name = name.substr(0, 47) + "..&gt;";
 		}
 
-		std::string space(51 - name.size(), ' ');
+		std::string space(51 - name.substr(0, 50).size(), ' ');
 
 		std::string time = timeToString(last_write_time(entry.path()));
 
@@ -278,35 +265,13 @@ void Response::makeResponseForListing() {
 
 		std::string space2(20 - size.size(), ' ');
 
-		body += "<a href=\"" + ref + "\">" + name + "</a>" + space + time + space2 + size + CRLF;
+		body += HREF_BEG + ref + HREF_END + name + A_END + space + time + space2 + size + CRLF;
 
-//		body += "<a href=\"" + (std::string)entry.path().filename() + "\">";
-//		std::string show = entry.path().filename();
-//		if (show.size() > 50) {
-//			show = show.substr(0, 47) + "..&gt;";
-//		}
-//		body += show;
-//		body += "</a>";
-//		std::string empty(51, ' ');
-//		if (show.size() <= 50) {
-//			body += empty.substr(0, 51 - show.size());
-//		} else {
-//			body += empty.substr(0, 1);
-//		}
-//		body += timeToString(last_write_time(entry.path()));
-//		std::string size;
-//		if (entry.is_directory()) {
-//			size = "-";
-//		} else {
-//			size = std::to_string(entry.file_size());
-//		}
-//		empty = "                    ";
-//		body += empty.substr(0, 20 - size.size());
-//		body += size;
-//		body += CRLF;
 	}
-	body += "</pre><hr>";
-	body += tail;
+
+	body +=	PRE_END HR_END CRLF
+			BODY_END CRLF
+			HTML_END CRLF;
 
 	setBody(body);
 }
