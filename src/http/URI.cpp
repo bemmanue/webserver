@@ -339,7 +339,7 @@ std::string URI::normalize(std::string input) {
 	if (!input.empty()) {
 		output.push_back(input[0]);
 	}
-	for (int i = 1; i < input.size(); ++i) {
+	for (size_t i = 1; i < input.size(); ++i) {
 		if (input[i] == '/' && input[i-1] == '/') {
 			continue;
 		}

@@ -53,20 +53,20 @@ public:
 		out << "\t\t" << "path: " << l.getPath() << std::endl;
 		out << "\t\t" << "autoindex: " << std::boolalpha << l.getAutoindex() << std::endl;
 		std::map<std::string, std::string> cgi = l.getCGIs();
-		for (std::map<std::string, std::string>::iterator i = cgi.begin(); i != cgi.end(); i++) {
-			out << "\t\t" << "cgi: " << (*i).first << " " << (*i).second << std::endl;
+		for (auto & i : cgi) {
+			out << "\t\t" << "cgi: " << i.first << " " << i.second << std::endl;
 		}
 		std::vector<std::string> indices = l.getIndices();
-		for (int i = 0; i < indices.size(); i++) {
-			out << "\t\t" << "index: " << indices[i] << std::endl;
+		for (auto & indice : indices) {
+			out << "\t\t" << "index: " << indice << std::endl;
 		}
 		std::set<std::string> allowed = l.getMethodsAllowed();
-		for (std::set<std::string>::iterator i = allowed.begin(); i != allowed.end(); i++) {
-			out << "\t\t" << "method_allowed: " << *i << std::endl;
+		for (const auto & i : allowed) {
+			out << "\t\t" << "method_allowed: " << i << std::endl;
 		}
 		std::map<int, std::string> redir = l.getRedirect();
-		for (std::map<int, std::string>::iterator i = redir.begin(); i != redir.end(); i++) {
-			out << "\t\t" << "error_page: " << (*i).first << " " << (*i).second << std::endl;
+		for (auto & i : redir) {
+			out << "\t\t" << "error_page: " << i.first << " " << i.second << std::endl;
 		}
 		out << "\t\t" << "root: " << l.getRoot() << std::endl;
 		return out;

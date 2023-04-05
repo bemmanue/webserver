@@ -6,9 +6,9 @@ Request::Request(Connection* client):
 	_status(OK),
 	_expectedBodySize(0),
 	_state(PARSING_REQUEST_LINE),
-	_client(client),
 	_serverConfig(nullptr),
-	_locationConfig(nullptr) {
+	_locationConfig(nullptr),
+	_client(client) {
 	if (_client == nullptr) {
 		_status = INTERNAL_SERVER_ERROR;
 		_state = FORMED;

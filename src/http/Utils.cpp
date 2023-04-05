@@ -506,7 +506,7 @@ bool	isQuotedText(char a) {
 
 bool	isQuotedPair(const std::string& str) {
 //	quoted-pair = "\" ( HTAB / SP / VCHAR / obs-text )
-	if (str.size() == 2 && str[0] == '\\' && (str[1] == '\t' || str[1] == ' ' || isVchar(str[1])) || isObsText(str[1])) {
+	if (str.size() == 2 && str[0] == '\\' && (str[1] == '\t' || str[1] == ' ' || isVchar(str[1]) || isObsText(str[1]))) {
 		return true;
 	}
 	return false;

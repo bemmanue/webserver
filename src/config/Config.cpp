@@ -1,6 +1,6 @@
 #include "Config.hpp"
 
-static int	g_index, g_line;
+static size_t	g_index, g_line;
 
 const char* validMainDirectives[] =	{
 		KW_SERVER, NULL
@@ -182,7 +182,7 @@ void	setIndex(LocationConfig& location, const std::vector<std::string>& params) 
 }
 
 void	setMethodsAllowed(LocationConfig& location, const std::vector<std::string>& params) {
-	int j;
+	size_t j;
 
 	try {
 		for (j = 0; j < params.size(); j++) {
@@ -265,8 +265,8 @@ void	setErrorPages(ServerConfig& server, const std::vector<std::string>& params)
 }
 
 void	setServerNames(ServerConfig& server, const std::vector<std::string>& params) {
-	for (int j = 0; j < params.size(); j++) {
-		server.setServerName(params[j]);
+	for (const auto & param : params) {
+		server.setServerName(param);
 	}
 }
 

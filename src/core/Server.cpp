@@ -37,13 +37,12 @@ void Server::start() {
 }
 
 void Server::process() {
-
-	for (int id = 0; id < _poll_fds.size(); id++) {
+	for (size_t id = 0; id < _poll_fds.size(); id++) {
 		if (_poll_fds[id].revents & POLLIN) {
 			if (id < _server_fds.size()) {
-				acceptClient(id);
+				acceptClient((int)id);
 			} else {
-				pollin(id);
+				pollin((int)id);
 			}
 		}
 	}
@@ -84,27 +83,6 @@ void Server::pollin(int id) {
 		close(_poll_fds[id].fd);
 		_poll_fds.erase(_poll_fds.begin() + id);
 	}
-//	rc = recv(client_fd, buffer, sizeof(buffer), 0);
-//	if (rc < 0) {
-//		perror("recv() failed");
-//	}
-//
-//	if (rc == 0) {
-//		printf("Connection closed\n");
-//		close(client_fd);
-//		_poll_fds.erase(_poll_fds.begin() + id);
-//		return;
-//	}
-//
-//	printf("%d bytes received\n", rc);
-//
-//	// send response
-//	rc = send(client_fd, "HTTP/1.1 200 OK\r\nConnection: keep-alive\r\nContent-Length: 20\r\n\r\nhello from webserver", 91, 0);
-//	if (rc < 0) {
-//		perror("send() failed");
-//		close(client_fd);
-//		_poll_fds.erase(_poll_fds.begin() + id);
-//	}
 }
 
 void Server::createServerPollFDs() {

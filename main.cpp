@@ -2,7 +2,7 @@
 #include "src/config/Config.hpp"
 #include "src/core/Server.hpp"
 
-int main(int argc, char **argv) {
+int main() {
 	std::vector<ServerConfig>	configs;
 	Server						server;
 

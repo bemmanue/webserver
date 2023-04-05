@@ -8,9 +8,9 @@ Connection::Connection(const std::vector<ServerConfig>& serverConfigs) {
 Connection::~Connection() {}
 
 ServerConfig*	Connection::matchServerConfig(const std::string& host) {
-	for (int i = 0; i < _serverConfigs.size(); i++) {
-		if (_serverConfigs[i].hasName(host)) {
-			return &_serverConfigs[i];
+	for (auto & _serverConfig : _serverConfigs) {
+		if (_serverConfig.hasName(host)) {
+			return &_serverConfig;
 		}
 	}
 	return &_serverConfigs[0];
@@ -84,8 +84,8 @@ size_t Connection::getPort() {
 Connection::Connection():
 	_fd(0),
 	_port(0),
-	_request(nullptr),
-	_response(nullptr) {
+	_response(nullptr),
+	_request(nullptr) {
 }
 
 int	Connection::readRequest() {
