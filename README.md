@@ -1,6 +1,22 @@
 # Webserver
 
-## Configuration file
+This project is about writing own HTTP server in C++ 17 without using any external libraries.
+
+The server supports the protocol HTTP/1.1. It handles GET, POST and DELETE methods.
+
+## Compilation
+
+```bash
+# Compile server
+make
+
+# Recompile server
+make re
+```
+
+## Configuring
+
+Webserver takes config in nginx-like format.
 
 ### Directives
 
