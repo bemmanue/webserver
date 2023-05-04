@@ -86,8 +86,11 @@ void	Response::Post() {
 	std::string target = _locationConfig->getRoot() + _target;
 
 	if (isDirectory(target)) {
-		// create file
-		// set Location Header
+		const std::string& filename = "POST_" + std::to_string(std::rand());
+    	const std::string& fullpath = target + "/" + filename;
+		std::ofstream outfile(fullpath);
+		outfile << _request->getBody() << std::endl;
+		outfile.close();
 		setStatus(CREATED);
 	} else {
 		setStatus(BAD_REQUEST);
@@ -103,8 +106,8 @@ void	Response::Delete() {
 	std::string target = _locationConfig->getRoot() + _target;
 
 	if (isFile(target)) {
-		// dalete file
-		setStatus(CREATED);
+		std::remove(target);
+		setStatus(OK);
 	} else {
 		setStatus(BAD_REQUEST);
 	}
